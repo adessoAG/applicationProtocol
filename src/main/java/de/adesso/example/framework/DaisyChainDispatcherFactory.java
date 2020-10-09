@@ -1,0 +1,94 @@
+package de.adesso.example.framework;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import lombok.extern.log4j.Log4j2;
+
+/**
+ * The
+ * 
+ * @author Matthias
+ *
+ * @param <INTERFACE>
+ */
+@Log4j2
+public class DaisyChainDispatcherFactory {
+
+	private Map<String, MethodImplementation> emulateMethods = new HashMap<>();
+	private Class<?> implementationInterface;
+	private Map<String, Method> interfaceMethods = new HashMap<>();
+
+	//
+	// builder property methods
+	//
+
+	/**
+	 * The DispatcherBean will emulate some kind of interface. This is the call to
+	 * provide the type of interface to emulate.
+	 * 
+	 * @param implementationInterface the interface which will be emulated.
+	 * @throws ClassCastException if the given type is not an interface
+	 * @return the factory for chained construction
+	 */
+	public DaisyChainDispatcherFactory implementationInterface(
+			Class<?> implementationInterface) {
+		// validate the parameters
+		if (!implementationInterface.getClass().isInterface()) {
+			throw new ClassCastException(
+					"Implementation is required to be an interface: " + implementationInterface.getClass().getName());
+		}
+		// validate the state
+		if (emulateMethods.size() != 0) {
+			String message = "wrong ordering of calls, implementation is not empty";
+			log.atError().log(message);
+			throw new IllegalStateException(message);
+		}
+
+		// set the interface
+		this.implementationInterface = implementationInterface;
+		// save the contained methods of the interface
+		this.interfaceMethods = Arrays.asList(implementationInterface.getDeclaredMethods())
+				.stream()
+				.collect(Collectors.toMap(Method::getName, m -> m));
+		return this;
+	}
+
+	/**
+	 * With help of this method, the emulation of the interface method is declared.
+	 * The information will be used by the dispatcher to implement the functionality
+	 * 
+	 * @param implementation implementation description of a method
+	 * @return the factory itself for chained construction
+	 * @throws UnknownMethodException if the implementation describes a method which
+	 *                                is not part of the implementation interface
+	 */
+	public DaisyChainDispatcherFactory operation(MethodImplementation implementation) {
+		// validate the operation
+		if (!this.interfaceMethods.containsKey(implementation.getMethodIdentifier())) {
+			final String message = "cannot emulate methods not provided by the interface to be implemented";
+			log.atError().log(message);
+			throw new UnknownMethodException(message);
+		}
+		// provide the reflective method to the implementation
+		implementation.setMethod(this.interfaceMethods.get(implementation.getMethodIdentifier()));
+
+		// keep the implementation
+		emulateMethods.put(implementation.getMethodIdentifier(), implementation);
+		return this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T build() {
+		// create the dispatcher and feed collected information
+		DaisyChainDispatcher dispatcher = new DaisyChainDispatcher()
+				.setImplementationInterface(this.implementationInterface)
+				.setEmulateMethods(this.emulateMethods);
+
+		// during instantiation the INTERFACE was added to the dispatcher implementation
+		return (T) dispatcher;
+	}
+}
