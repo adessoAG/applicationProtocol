@@ -4,17 +4,17 @@ import java.util.UUID;
 
 import lombok.NonNull;
 
-public class ArgumentFromAppendix extends Argument {
+public class ArgumentSetFromAppendix extends Argument {
 	private final UUID requiredAttachment;
 
-	public ArgumentFromAppendix(@NonNull final Class<?> type, @NonNull final UUID requiredAttachment) {
+	public ArgumentSetFromAppendix(@NonNull final Class<?> type, @NonNull final UUID requiredAttachment) {
 		super(type);
 		this.requiredAttachment = requiredAttachment;
 	}
 
 	@Override
 	protected Object prepareArgument(final ApplicationProtocol<?> state, final Object[] args) {
-		final Object result = state.getAppendixOfType(this.requiredAttachment);
+		final Object result = state.getAllAppenixesOfTypeAsSet(this.requiredAttachment);
 
 		return result;
 	}
