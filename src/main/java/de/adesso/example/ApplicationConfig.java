@@ -21,8 +21,10 @@ import de.adesso.example.framework.BeanOperation;
 import de.adesso.example.framework.DaisyChainDispatcherFactory;
 import de.adesso.example.framework.FunctionSignatureArgument;
 import de.adesso.example.framework.MethodImplementation;
+import lombok.extern.log4j.Log4j2;
 
 @Configuration
+@Log4j2
 public class ApplicationConfig {
 
 	@Autowired
@@ -30,13 +32,20 @@ public class ApplicationConfig {
 
 	@Autowired
 	private EmployeeDiscountCalculator employeeDiscountCalculator;
-	
+
 	@Autowired
 	private VoucherDiscountCalculator voucherDiscountCalculator;
+
+
+	public ApplicationConfig() {
+		log.atDebug().log("intatiated the configuration");
+	}
 
 	@Bean
 	@Scope(scopeName = "singelton")
 	PriceCalculatorInterface priceCalculator() {
+		log.atDebug().log("start with initilization of PriceCalculator");
+
 		return new DaisyChainDispatcherFactory()
 				.implementationInterface(PriceCalculatorInterface.class)
 				.operation(MethodImplementation.builder()
@@ -44,20 +53,20 @@ public class ApplicationConfig {
 						.returnValueType(BigDecimal.class)
 						// first call BasePriceCalculator
 						.beanOperation(BeanOperation.builder()
-								.implementation(basePriceCalculator)
+								.implementation(this.basePriceCalculator)
 								.methodIdentifier("calculatePrice")
 								.argument(new FunctionSignatureArgument (Article.class, 0))
 								.build())
 						// second call EmployeeDiscountCalculator
 						.beanOperation(BeanOperation.builder()
-								.implementation(employeeDiscountCalculator)
+								.implementation(this.employeeDiscountCalculator)
 								.methodIdentifier("calculatePrice")
 								.argument(new FunctionSignatureArgument (Article.class, 0))
 								.argument(new ArgumentFromAppendix(Employee.class, Employment.employeeAppendixId))
 								.build())
 						// third call VoucherDiscountCalculator
 						.beanOperation(BeanOperation.builder()
-								.implementation(voucherDiscountCalculator)
+								.implementation(this.voucherDiscountCalculator)
 								.methodIdentifier("calculatePrice")
 								.argument(new FunctionSignatureArgument (Article.class, 0))
 								.argument(new ArgumentFromAppendix(Voucher.class, Marketing.voucherAppendixId))

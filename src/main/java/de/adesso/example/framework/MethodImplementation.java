@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.sun.istack.NotNull;
+import javax.validation.constraints.NotNull;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -41,31 +41,31 @@ public class MethodImplementation {
 	 */
 	private List<Parameter> parameterTypes = new ArrayList<>();
 
-	
+
 	@Builder
 	public MethodImplementation(
-			String methodIdentifier, 
-			Class<?> returnValueType, 
-			@Singular List<BeanOperation> beanOperations) {
+			final String methodIdentifier,
+			final Class<?> returnValueType,
+			@Singular final List<BeanOperation> beanOperations) {
 		this.methodIdentifier = methodIdentifier;
 		this.returnValueType = returnValueType;
 		this.beanOperations = beanOperations;
 	}
-	
-	public ApplicationProtocol<?> execute(Object proxy, ApplicationProtocol<?> state, Object[] args) {
+
+	public ApplicationProtocol<?> execute(final Object proxy, final ApplicationProtocol<?> state, final Object[] args) {
 
 		validateParameters(args);
 		ApplicationProtocol<?> intermediateState = state;
 
 		// call all bean methods defined
-		for (BeanOperation o : this.beanOperations) {
+		for (final BeanOperation o : this.beanOperations) {
 			intermediateState = o.execute(state, args);
 		}
 
 		return intermediateState;
 	}
 
-	private void validateParameters(Object[] args) throws ClassCastException {
+	private void validateParameters(final Object[] args) throws ClassCastException {
 
 		for (int i = 0; i < args.length; i++) {
 			if (!this.parameterTypes.get(i).getClass().isAssignableFrom(args[i].getClass())) {
@@ -78,9 +78,9 @@ public class MethodImplementation {
 	 * The method is derived from the interface. Within the interface the method is
 	 * selected by the configured method identifier. Therefore this information is
 	 * available later during construction of the calling syntax.
-	 * 
+	 *
 	 * @param method the implemented method
-	 * 
+	 *
 	 * @return itself for chained execution
 	 */
 	MethodImplementation setMethod(final Method method) {
