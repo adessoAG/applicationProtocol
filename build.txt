@@ -1,0 +1,16 @@
+> Task :generateLombokConfig UP-TO-DATE
+> Task :compileJava
+> Task :processResources UP-TO-DATE
+> Task :classes
+> Task :bootJar
+> Task :jar SKIPPED
+> Task :assemble
+> Task :compileTestJava
+> Task :processTestResources UP-TO-DATE
+> Task :testClasses
+> Task :test
+> Task :check
+> Task :build
+
+BUILD SUCCESSFUL in 3s
+7 actionable tasks: 4 executed, 3 up-to-date

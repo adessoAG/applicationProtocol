@@ -7,11 +7,13 @@
  */
 
 plugins {
-	id 'org.springframework.boot' version '2.3.2.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
-	id 'java'
+	id 'org.springframework.boot' version '2.3.4.RELEASE'
+//	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+//	id 'java'
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
+	//apply plugin: 'eclipse'
+	id "io.freefair.lombok" version "5.2.1"
 }
 
 group = 'de.adesso.applicationFW'
@@ -26,15 +28,15 @@ repositories {
 dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.12'
 	
-	compile group: 'org.javamoney', name: 'moneta', version: '1.4.2', ext: 'pom'
-	compile group: 'org.javamoney.moneta', name: 'moneta-core', version: '1.4.2'	
-	compile group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
+	implementation group: 'org.javamoney', name: 'moneta', version: '1.4.2', ext: 'pom'
+	implementation group: 'org.javamoney.moneta', name: 'moneta-core', version: '1.4.2'	
+	implementation group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
 
-	compile group: 'org.springframework.boot', name: 'spring-boot', version: '2.3.4.RELEASE'
-	compile group: 'org.springframework.boot', name: 'spring-boot-starter-tomcat', version: '2.3.4.RELEASE'
-	compile group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version: '2.3.4.RELEASE'
-	compile group: 'org.springframework.boot', name: 'spring-boot-autoconfigure', version: '2.3.4.RELEASE'
-	compile group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '2.3.4.RELEASE'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version: '2.3.4.RELEASE' 
+	implementation group: 'org.springframework.boot', name: 'spring-boot', version: '2.3.4.RELEASE' 
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-tomcat', version: '2.3.4.RELEASE'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-autoconfigure', version: '2.3.4.RELEASE'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '2.3.4.RELEASE'
 	
 	//compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.3.4.RELEASE'
 	//compile group: 'org.springframework', name: 'spring', version: '5.2.9.RELEASE', ext: 'pom'
@@ -46,5 +48,11 @@ dependencies {
     implementation 'com.google.guava:guava:29.0-jre'
 
     // Use JUnit test framework
+	testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.3.4.RELEASE'
     testImplementation 'junit:junit:4.13'
+    
+    configurations.all {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-log4j'
+    }
 }
