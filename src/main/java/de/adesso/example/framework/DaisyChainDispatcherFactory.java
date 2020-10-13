@@ -74,7 +74,7 @@ public class DaisyChainDispatcherFactory {
 			throw new UnknownMethodException(message);
 		}
 		// provide the reflective method to the implementation
-		implementation.setMethod(this.interfaceMethods.get(implementation.getMethodIdentifier()));
+		implementation.method(this.interfaceMethods.get(implementation.getMethodIdentifier()));
 
 		// keep the implementation
 		this.emulateMethods.put(implementation.getMethodIdentifier(), implementation);

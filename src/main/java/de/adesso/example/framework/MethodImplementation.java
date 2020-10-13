@@ -1,9 +1,6 @@
 package de.adesso.example.framework;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -12,12 +9,22 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
 
-@Getter
+/**
+ * This class describes an implementation for a method of a given interface. The
+ * implementation may be a list of beans to be invoked. Overloading of methods
+ * is not supported, because the implementation uses the method identifier to
+ * distinguish between methods. The method identifier is not sufficient if
+ * overloading is used.
+ *
+ * @author Matthias
+ *
+ */
 public class MethodImplementation {
 
 	/**
-	 * Identifier of the method to be implemented
+	 * Identifier of the method to be implemented.
 	 */
+	@Getter
 	@NotNull
 	private final String methodIdentifier;
 	/**
@@ -35,15 +42,9 @@ public class MethodImplementation {
 	 */
 	@NotNull
 	private Method method;
-	/**
-	 * The following information is derived from the method. Collection of the
-	 * formal parameters to be able to process the parameters during a call.
-	 */
-	private List<Parameter> parameterTypes = new ArrayList<>();
-
 
 	@Builder
-	public MethodImplementation(
+	private MethodImplementation(
 			final String methodIdentifier,
 			final Class<?> returnValueType,
 			@Singular final List<BeanOperation> beanOperations) {
@@ -52,26 +53,17 @@ public class MethodImplementation {
 		this.beanOperations = beanOperations;
 	}
 
-	public ApplicationProtocol<?> execute(final Object proxy, final ApplicationProtocol<?> state, final Object[] args) {
+	@SuppressWarnings("unchecked")
+	public <T> ApplicationProtocol<T> execute(final ApplicationProtocol<T> state, final Object[] args) {
 
-		validateParameters(args);
-		ApplicationProtocol<?> intermediateState = state;
+		ApplicationProtocol<T> intermediateState = state;
 
 		// call all bean methods defined
 		for (final BeanOperation o : this.beanOperations) {
-			intermediateState = o.execute(state, args);
+			intermediateState = (ApplicationProtocol<T>) o.execute(intermediateState, args);
 		}
 
 		return intermediateState;
-	}
-
-	private void validateParameters(final Object[] args) throws ClassCastException {
-
-		for (int i = 0; i < args.length; i++) {
-			if (!this.parameterTypes.get(i).getClass().isAssignableFrom(args[i].getClass())) {
-				throw new ClassCastException();
-			}
-		}
 	}
 
 	/**
@@ -83,11 +75,8 @@ public class MethodImplementation {
 	 *
 	 * @return itself for chained execution
 	 */
-	MethodImplementation setMethod(final Method method) {
+	MethodImplementation method(final Method method) {
 		this.method = method;
-
-		// extract a description of all arguments of the method
-		this.parameterTypes = Arrays.asList(method.getParameters());
 
 		return this;
 	}

@@ -21,8 +21,9 @@ public class BeanOperationTest {
 
 		final BeanOperation operation = BeanOperation.builder()
 				.implementation(implementation)
-				.method(declaredMethod)
 				.methodIdentifier(methodIdentifier)
+				.argument(new FunctionSignatureArgument(String.class, 0))
+				.argument(new FunctionSignatureArgument(int.class, 1))
 				.build();
 
 		assertThat(operation)
@@ -38,36 +39,18 @@ public class BeanOperationTest {
 
 	@Test(expected = NullPointerException.class)
 	public void testBuilderMissingMethodIdentifier() throws NoSuchMethodException, SecurityException {
-		final String methodIdentifier = "testMethod";
 		final TestImplementation implementation = new TestImplementation();
-		final Method declaredMethod = TestImplementation.class.getDeclaredMethod(methodIdentifier, String.class,
-				int.class);
 
 		BeanOperation.builder()
 				.implementation(implementation)
-				.method(declaredMethod)
 				.build();
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void testBuilderMissingImplementation() throws NoSuchMethodException, SecurityException {
 		final String methodIdentifier = "testMethod";
-		final Method declaredMethod = TestImplementation.class.getDeclaredMethod(methodIdentifier, String.class,
-				int.class);
 
 		BeanOperation.builder()
-				.method(declaredMethod)
-				.methodIdentifier(methodIdentifier)
-				.build();
-	}
-
-	@Test(expected = NullPointerException.class)
-	public void testBuilderMissingMethod() throws NoSuchMethodException, SecurityException {
-		final String methodIdentifier = "testMethod";
-		final TestImplementation implementation = new TestImplementation();
-
-		BeanOperation.builder()
-				.implementation(implementation)
 				.methodIdentifier(methodIdentifier)
 				.build();
 	}
@@ -76,12 +59,9 @@ public class BeanOperationTest {
 	public void testGetArguments() throws NoSuchMethodException, SecurityException {
 		final String methodIdentifier = "testMethod";
 		final TestImplementation implementation = new TestImplementation();
-		final Method declaredMethod = TestImplementation.class.getDeclaredMethod(methodIdentifier, String.class,
-				int.class);
 
 		final BeanOperation operation = BeanOperation.builder()
 				.implementation(implementation)
-				.method(declaredMethod)
 				.methodIdentifier(methodIdentifier)
 				.argument(new FunctionSignatureArgument(String.class, 0))
 				.argument(new FunctionSignatureArgument(int.class, 1))
@@ -112,12 +92,9 @@ public class BeanOperationTest {
 	public void testExecute() throws NoSuchMethodException, SecurityException {
 		final String methodIdentifier = "testMethod";
 		final TestImplementation implementation = new TestImplementation();
-		final Method declaredMethod = TestImplementation.class.getDeclaredMethod(methodIdentifier, String.class,
-				int.class);
 
 		final BeanOperation operation = BeanOperation.builder()
 				.implementation(implementation)
-				.method(declaredMethod)
 				.methodIdentifier(methodIdentifier)
 				.argument(new FunctionSignatureArgument(String.class, 0))
 				.argument(new FunctionSignatureArgument(int.class, 1))
@@ -125,15 +102,15 @@ public class BeanOperationTest {
 		final String testString = "Das ist ein netter kleiner Teststring : ";
 		final int testInt = 7;
 		final Object[] args = { testString, testInt };
-		final ApplicationProtocol<String> state =  new ApplicationProtocol<>();
-		final ApplicationProtocol<?> newState = operation.execute(state , args);
+		final ApplicationProtocol<String> state = new ApplicationProtocol<>();
+		final ApplicationProtocol<?> newState = operation.execute(state, args);
 
 		assertThat(newState)
-		.isNotNull();
+				.isNotNull();
 		assertThat(newState.getResult())
-		.isNotNull()
-		.isInstanceOf(String.class)
-		.isEqualTo(testString + testInt);
+				.isNotNull()
+				.isInstanceOf(String.class)
+				.isEqualTo(testString + testInt);
 	}
 
 	private class TestImplementation implements ApplicationFrameworkInvokable {

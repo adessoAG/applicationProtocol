@@ -11,10 +11,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication(exclude={DataSourceAutoConfiguration.class,HibernateJpaAutoConfiguration.class})
-public class TestProjectApplication {
+public class ProjectApplication {
 
 	public static void main(final String[] args) {
-		SpringApplication.run(TestProjectApplication.class, args);
+		SpringApplication.run(ProjectApplication.class, args);
 	}
 
 	@Bean

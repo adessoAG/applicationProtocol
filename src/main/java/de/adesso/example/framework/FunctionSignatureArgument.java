@@ -27,8 +27,8 @@ public class FunctionSignatureArgument extends Argument {
 	protected Object prepareArgument(final ApplicationProtocol<?> state, final Object[] args) {
 		if (this.position >= args.length) {
 			final String message = String.format(
-					"too less arguments provided. Required position %d but argument length is %d",
-					this.position, args.length);
+					"too less arguments provided. Required position %d but last possible position is %d",
+					this.position, args.length - 1);
 			log.atError().log(message);
 			throw new IndexOutOfBoundsException(message);
 		}

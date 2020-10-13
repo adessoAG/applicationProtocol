@@ -5,8 +5,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -23,8 +21,6 @@ import lombok.extern.log4j.Log4j2;
  * @author Matthias
  *
  */
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder
 @Getter
 @Log4j2
 public class BeanOperation {
@@ -39,14 +35,31 @@ public class BeanOperation {
 	@NonNull
 	private final Method method;
 	// parameters
-	@Singular
 	private final List<Argument> arguments;
 
+	@Builder
+	private BeanOperation(final String methodIdentifier, final ApplicationFrameworkInvokable implementation,
+			@Singular final List<Argument> arguments) {
+		this.methodIdentifier = methodIdentifier;
+		this.implementation = implementation;
+		this.arguments = arguments;
+
+		try {
+			log.atDebug().log("going to extract method %s::%s", implementation.getClass().getName(), methodIdentifier);
+			this.method = implementation.getClass().getDeclaredMethod(methodIdentifier, argumentTypes(arguments));
+		} catch (NoSuchMethodException | SecurityException e) {
+			final String message = "could not build bean operation";
+			log.atError().log(message, e);
+			throw new BuilderException(message, e);
+		}
+	}
+
 	/**
-	 * @param proxy
-	 * @param state
-	 * @param args
-	 * @return
+	 * execute the described method.
+	 *
+	 * @param state application protocol instance
+	 * @param args  arguments
+	 * @return the updated application protocol instance
 	 */
 	public ApplicationProtocol<?> execute(final ApplicationProtocol<?> state, final Object[] args) {
 
@@ -63,6 +76,13 @@ public class BeanOperation {
 		}
 
 		return result;
+	}
+
+	private Class<?>[] argumentTypes(final List<Argument> arguments) {
+		final List<Class<?>> resultTypes = arguments.stream()
+				.map(Argument::getType)
+				.collect(Collectors.toList());
+		return resultTypes.toArray(new Class<?>[resultTypes.size()]);
 	}
 
 	private Object[] prepareArguments(final ApplicationProtocol<?> state, final Object[] args) {

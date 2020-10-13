@@ -24,7 +24,7 @@ import lombok.extern.log4j.Log4j2;
  * <p>
  * The class implements the InvocationHandler (from reflection) to be able to
  * implement an interface provided during initialization.
- * 
+ *
  * @author Matthias
  *
  * @param <INTERFACE> represents the functional interface which should return
@@ -50,37 +50,37 @@ public class DaisyChainDispatcher implements InvocationHandler {
 	 * protocol structure also contains the calculation result.
 	 */
 	@Override
-	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		
+	public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+
 		// get the implementation
-		MethodImplementation implementation = emulateMethods.get(method.getName());
+		final MethodImplementation implementation = this.emulateMethods.get(method.getName());
 		if (implementation == null) {
 			// there is no implementation, therefore this method is not provided.
 			log.atWarn().log("no implementation for interface %s::method %s",
-					implementationInterface.getName(),
+					this.implementationInterface.getName(),
 					method.getName());
 			return null;
 		}
-		
+
 		// get the protocol
 		ApplicationProtocol<?> state = createOrExtractProtocolFrom(args);
-		
+
 		// execute the emulation
-		state = implementation.execute(proxy, state, args);
+		state = implementation.execute(state, args);
 
 		return state;
 	}
 
-	private ApplicationProtocol<?> createOrExtractProtocolFrom(Object[] args) {
-		Object lastArgument = lastArgument(args);
+	private ApplicationProtocol<?> createOrExtractProtocolFrom(final Object[] args) {
+		final Object lastArgument = lastArgument(args);
 		@SuppressWarnings("rawtypes")
-		ApplicationProtocol<?> state = lastArgument != null && lastArgument instanceof ApplicationProtocol
+		final ApplicationProtocol<?> state = lastArgument != null && lastArgument instanceof ApplicationProtocol
 				? (ApplicationProtocol) lastArgument
 				: new ApplicationProtocol();
 		return state;
 	}
 
-	private Object lastArgument(Object[] args) {
+	private Object lastArgument(final Object[] args) {
 		return args.length > 0 ? args[args.length - 1] : null;
 	}
 }
