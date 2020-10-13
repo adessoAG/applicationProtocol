@@ -8,7 +8,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class AppendixList {
+class AppendixList {
 
 	/**
 	 * List of all appendix values.

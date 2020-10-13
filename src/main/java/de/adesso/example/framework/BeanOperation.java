@@ -3,11 +3,13 @@ package de.adesso.example.framework;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import javax.validation.constraints.NotNull;
-
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Singular;
 import lombok.extern.log4j.Log4j2;
 
@@ -21,17 +23,20 @@ import lombok.extern.log4j.Log4j2;
  * @author Matthias
  *
  */
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
 @Log4j2
 public class BeanOperation {
 
 	// identifier of the operation
+	@NonNull
 	private final String methodIdentifier;
 	// object which provides the requested method
+	@NonNull
 	private final ApplicationFrameworkInvokable implementation;
 	// Operation list to be executed
-	@NotNull
+	@NonNull
 	private final Method method;
 	// parameters
 	@Singular
@@ -61,9 +66,10 @@ public class BeanOperation {
 	}
 
 	private Object[] prepareArguments(final ApplicationProtocol<?> state, final Object[] args) {
-		this.arguments.stream()
-		.map(a -> a.prepareArgument(state, args));
+		final Object[] result = this.arguments.stream()
+				.map(a -> a.prepareArgument(state, args))
+				.collect(Collectors.toList()).toArray();
 
-		return null;
+		return result;
 	}
 }
