@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
-
 @RunWith(SpringRunner.class)
 public class FunctionSignatureArgumentTest {
 
@@ -17,7 +16,6 @@ public class FunctionSignatureArgumentTest {
 		final FunctionSignatureArgument argumentProcessor = new FunctionSignatureArgument(String.class, 2);
 		Assert.notNull(argumentProcessor, "constructor has to create an object");
 	}
-
 
 	@Test
 	public void testConstructorPosition0() {
@@ -28,13 +26,11 @@ public class FunctionSignatureArgumentTest {
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void testConstructorPositionNegative() {
 		new FunctionSignatureArgument(String.class, -1);
-		fail("position argument may not be negative");
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void testConstructorTypeNull() {
 		new FunctionSignatureArgument(null, 0);
-		fail("type argument may not be null");
 	}
 
 	@Test
@@ -42,13 +38,13 @@ public class FunctionSignatureArgumentTest {
 		final FunctionSignatureArgument argumentProcessor = new FunctionSignatureArgument(String.class, 2);
 		final ApplicationProtocol<String> state = new ApplicationProtocol<>();
 		final String testString = "Der Hase hüpft um die Ecke";
-		final Object[] testArgs = { null, null, testString};
+		final Object[] testArgs = { null, null, testString };
 
 		final Object result = argumentProcessor.prepareArgument(state, testArgs);
 
 		assertThat(result)
-		.isInstanceOf(String.class)
-		.isEqualTo(testString);
+				.isInstanceOf(String.class)
+				.isEqualTo(testString);
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)
@@ -56,7 +52,7 @@ public class FunctionSignatureArgumentTest {
 		final FunctionSignatureArgument argumentProcessor = new FunctionSignatureArgument(String.class, 2);
 		final ApplicationProtocol<String> state = new ApplicationProtocol<>();
 		final String testString = "Der Hase hüpft um die Ecke";
-		final Object[] testArgs = { null, testString};
+		final Object[] testArgs = { null, testString };
 		argumentProcessor.prepareArgument(state, testArgs);
 		fail("should detect access of argument out of range");
 	}

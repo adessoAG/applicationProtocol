@@ -6,47 +6,31 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import lombok.Getter;
 
-@RunWith(SpringRunner.class)
-public class MethodImplementationTest {
+public class DaisyChainDispatcherFactoryTest {
 
 	@Test
-	public void testBuilder() throws NoSuchMethodException {
-		final MethodImplementation implementation = createImplementation();
+	public void testBuild() {
+		final EmulatedInterface emulated = createProxy();
 
-		assertThat(implementation)
-				.isNotNull()
-				.isInstanceOf(MethodImplementation.class);
-	}
-
-	@Test
-	public void testGetMethodIdentifier() throws NoSuchMethodException {
-		final MethodImplementation implementation = createImplementation();
-
-		assertThat(implementation.getMethodIdentifier())
-				.isEqualTo(EmulatedInterface.method_1);
-	}
-
-	@Test
-	public void testExecute() throws NoSuchMethodException, SecurityException {
-		final MethodImplementation implementation = createImplementation();
-
-		final ApplicationProtocol<String> state = new ApplicationProtocol<>();
-		final String testString = "Ein einfacher Teststring";
-		final int testInt = 5;
-		final Integer testInteger = 17;
-		final String anotherTestString = "Das ist der zweite String für einen Test";
-		final Object[] args = { testString, testInt, testInteger, anotherTestString };
-		final ApplicationProtocol<String> resultState = implementation.execute(state, args);
-
-		assertThat(resultState)
+		assertThat(emulated)
 				.isNotNull();
+	}
+
+	@Test
+	public void testOperationOnEmulatedInterface() {
+		final EmulatedInterface emulated = createProxy();
+
+		final String testString = "So sieht der String aus";
+		final Integer testInteger = 13;
+		final int testInt = 5;
+		final String anotherTestString = "Das ist ein Teststring";
+		final ApplicationProtocol<String> resultState = emulated.operation(testString, testInt, testInteger,
+				anotherTestString);
+
 		assertThat(resultState.getResult())
-				.isNotNull()
 				.isEqualTo(testString + anotherTestString);
 
 		final Object a1 = resultState.getAppendixOfType(Appendix_A1.APPENDIX_A1_ID);
@@ -76,32 +60,63 @@ public class MethodImplementationTest {
 				.isEqualTo(anotherTestString);
 	}
 
-	private MethodImplementation createImplementation() throws NoSuchMethodException {
-		final MethodImplementation implementation = MethodImplementation.builder()
-				.methodIdentifier(EmulatedInterface.method_1)
-				.returnValueType(String.class)
-				.beanOperation(BeanOperation.builder()
-						.implementation(new TestBean_1())
-						.methodIdentifier("doSomething")
-						.argument(new FunctionSignatureArgument(String.class, 0))
-						.argument(new FunctionSignatureArgument(int.class, 1))
-						.argument(new FunctionSignatureArgument(Integer.class, 2))
-						.build())
-				.beanOperation(BeanOperation.builder()
-						.implementation(new TestBean_2())
-						.methodIdentifier("anotherAction")
-						.argument(new FunctionSignatureArgument(String.class, 3))
-						.argument(new ApplicationProtocolArgument())
-						.build())
-				.build();
-		implementation
-				.method(EmulatedInterface.class.getDeclaredMethod(EmulatedInterface.method_1, String.class,
-						int.class,
-						Integer.class, String.class));
-		return implementation;
+	@Test(expected = ClassCastException.class)
+	public void testNotInterface() {
+		new DaisyChainDispatcherFactory()
+				.implementationInterface(Wrong.class);
+	}
+
+	@Test(expected = UnknownMethodException.class)
+	public void testWrongOrdering() {
+		new DaisyChainDispatcherFactory()
+				.operation(MethodImplementation.builder()
+						.methodIdentifier(EmulatedInterface.method_1)
+						.returnValueType(String.class)
+						.beanOperation(BeanOperation.builder()
+								.implementation(new TestBean_1())
+								.methodIdentifier("doSomething")
+								.argument(new FunctionSignatureArgument(String.class, 0))
+								.argument(new FunctionSignatureArgument(int.class, 1))
+								.argument(new FunctionSignatureArgument(Integer.class, 2))
+								.build())
+						.build());
 	}
 
 	// ------------------------------------------------------------------------//
+
+	private EmulatedInterface createProxy() {
+		final EmulatedInterface emulated = new DaisyChainDispatcherFactory()
+				.implementationInterface(EmulatedInterface.class)
+				.operation(MethodImplementation.builder()
+						.methodIdentifier(EmulatedInterface.method_1)
+						.returnValueType(String.class)
+						.beanOperation(BeanOperation.builder()
+								.implementation(new TestBean_1())
+								.methodIdentifier("doSomething")
+								.argument(new FunctionSignatureArgument(String.class, 0))
+								.argument(new FunctionSignatureArgument(int.class, 1))
+								.argument(new FunctionSignatureArgument(Integer.class, 2))
+								.build())
+						.beanOperation(BeanOperation.builder()
+								.implementation(new TestBean_2())
+								.methodIdentifier("anotherAction")
+								.argument(new FunctionSignatureArgument(String.class, 3))
+								.argument(new ApplicationProtocolArgument())
+								.build())
+						.build())
+				.operation(MethodImplementation.builder()
+						.methodIdentifier(EmulatedInterface.method_2)
+						.returnValueType(String.class)
+						.beanOperation(BeanOperation.builder()
+								.implementation(new TestBean_2())
+								.methodIdentifier("anotherAction")
+								.argument(new FunctionSignatureArgument(String.class, 3))
+								.argument(new ApplicationProtocolArgument())
+								.build())
+						.build())
+				.build();
+		return emulated;
+	}
 
 	private final static Owner_1 owner1 = new Owner_1();
 
@@ -136,7 +151,7 @@ public class MethodImplementationTest {
 		public ApplicationProtocol<String> doSomething(final String aString, final int anInt, final Integer anInteger) {
 			final ApplicationProtocol<String> state = new ApplicationProtocol<>();
 			state.setResult(aString);
-			state.addAppendix(MethodImplementationTest.owner1.createAppendix_A1(anInt, anInteger));
+			state.addAppendix(DaisyChainDispatcherFactoryTest.owner1.createAppendix_A1(anInt, anInteger));
 
 			return state;
 		}
@@ -189,11 +204,20 @@ public class MethodImplementationTest {
 		public ApplicationProtocol<String> anotherAction(final String anotherString,
 				final ApplicationProtocol<String> state) {
 			state.setResult(state.getResult() + anotherString);
-			state.addAppendix(MethodImplementationTest.owner2.createAppendix_A2(anotherString));
-			state.addAppendix(MethodImplementationTest.owner2.createAppendix_B2(anotherString));
-			state.addAppendix(MethodImplementationTest.owner2.createAppendix_B2(anotherString));
+			state.addAppendix(DaisyChainDispatcherFactoryTest.owner2.createAppendix_A2(anotherString));
+			state.addAppendix(DaisyChainDispatcherFactoryTest.owner2.createAppendix_B2(anotherString));
+			state.addAppendix(DaisyChainDispatcherFactoryTest.owner2.createAppendix_B2(anotherString));
 
 			return state;
 		}
 	}
+
+	@SuppressWarnings("unused")
+	private static class Wrong {
+
+		ApplicationProtocol<String> operation(final String aString) {
+			return null;
+		}
+	}
+
 }

@@ -16,7 +16,8 @@ import lombok.Setter;
  *
  */
 
-public class ApplicationProtocol <RESULT_TYPE>{
+public class ApplicationProtocol<RESULT_TYPE> {
+
 	private final AppendixList data = new AppendixList();
 
 	/**
@@ -38,45 +39,47 @@ public class ApplicationProtocol <RESULT_TYPE>{
 	 * @throws TooManyElementsException if the list of appendixes contains more than
 	 *                                  one element of type T
 	 */
-	public Object getAppendixOfType(final UUID appendixId) throws TooManyElementsException {
+	public ApplicationAppendix getAppendixOfType(final UUID appendixId) throws TooManyElementsException {
 		return this.data.getAppendixOfType(appendixId);
 	}
 
 	/**
-	 * Retrieves all appendixes of given type. The list may be empty if there is
-	 * no such element in the list.
+	 * Retrieves all appendixes of given type. The list may be empty if there is no
+	 * such element in the list.
 	 *
 	 * @param <T>
 	 * @param appendixId
 	 * @return
 	 */
-	public <T> List<T> getAllAppenixesOfTypeAsList(final UUID appendixId){
+	public List<ApplicationAppendix> getAllAppenixesOfTypeAsList(final UUID appendixId) {
 		return this.data.getAllAppenixesOfTypeAsList(appendixId);
 	}
 
 	/**
-	 * Retrieves all appendixes of given type. The list may be empty if there is
-	 * no such element in the list.
+	 * Retrieves all appendixes of given type. The list may be empty if there is no
+	 * such element in the list.
 	 *
 	 * @param <T>
 	 * @param appendixId
 	 * @return
 	 */
-	public <T> Set<T> getAllAppenixesOfTypeAsSet(final UUID appendixId){
+	public Set<ApplicationAppendix> getAllAppenixesOfTypeAsSet(final UUID appendixId) {
 		return this.data.getAllAppenixesOfTypeAsSet(appendixId);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> ApplicationProtocol<T> addAppendix(final ApplicationAppendix additionalAppendix) {
+	// modifier
+	// -----------------------------------------------------------------------//
+
+	public ApplicationProtocol<RESULT_TYPE> addAppendix(final ApplicationAppendix additionalAppendix) {
 		this.data.addAppendix(additionalAppendix);
 
-		return (ApplicationProtocol<T>) this;
+		return this;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> ApplicationProtocol<T> addAllAppendixes(final Collection<ApplicationAppendix> additionalAppendixes) {
+	public ApplicationProtocol<RESULT_TYPE> addAllAppendixes(
+			final Collection<ApplicationAppendix> additionalAppendixes) {
 		this.data.addAppendix(additionalAppendixes);
 
-		return (ApplicationProtocol<T>) this;
+		return this;
 	}
 }

@@ -11,7 +11,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
-
 @RunWith(SpringRunner.class)
 public class ArgumentListFromAppendixTest {
 
@@ -44,19 +43,19 @@ public class ArgumentListFromAppendixTest {
 	public void testPrepareArgumentToList() {
 		final UUID appendixId = UUID.randomUUID();
 		final UUID owner = UUID.randomUUID();
-		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<>()
+		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(new TestAppendix(appendixId, owner))
 				.addAppendix(new TestAppendix(appendixId, owner));
-		final Object[]args = {"einfacher Teststring", Integer.valueOf(5), state};
+		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentListFromAppendix argumentProcessor = new ArgumentListFromAppendix(String.class, appendixId);
 
 		@SuppressWarnings("unchecked")
 		final List<TestAppendix> result = (List<TestAppendix>) argumentProcessor.prepareArgument(state, args);
 
 		assertThat(result)
-		.isNotNull()
-		.hasOnlyElementsOfType(TestAppendix.class)
-		.hasSize(2);
+				.isNotNull()
+				.hasOnlyElementsOfType(TestAppendix.class)
+				.hasSize(2);
 	}
 
 	@Test
@@ -64,18 +63,18 @@ public class ArgumentListFromAppendixTest {
 		final UUID appendixId = UUID.randomUUID();
 		final UUID otherId = UUID.randomUUID();
 		final UUID owner = UUID.randomUUID();
-		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<>()
+		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(new TestAppendix(appendixId, owner))
 				.addAppendix(new TestAppendix(appendixId, owner));
-		final Object[]args = {"einfacher Teststring", Integer.valueOf(5), state};
+		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentListFromAppendix argumentProcessor = new ArgumentListFromAppendix(String.class, otherId);
 
 		@SuppressWarnings("unchecked")
 		final List<TestAppendix> result = (List<TestAppendix>) argumentProcessor.prepareArgument(state, args);
 
 		assertThat(result)
-		.isNotNull()
-		.hasSize(0);
+				.isNotNull()
+				.hasSize(0);
 	}
 
 	@Test
@@ -83,21 +82,21 @@ public class ArgumentListFromAppendixTest {
 		final UUID appendixId = UUID.randomUUID();
 		final UUID otherAppendixId = UUID.randomUUID();
 		final UUID owner = UUID.randomUUID();
-		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<>()
+		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(new TestOtherAppendix(otherAppendixId, owner))
 				.addAppendix(new TestAppendix(appendixId, owner))
 				.addAppendix(new TestAppendix(appendixId, owner))
 				.addAppendix(new TestOtherAppendix(otherAppendixId, owner));
-		final Object[]args = {"einfacher Teststring", Integer.valueOf(5), state};
+		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentListFromAppendix argumentProcessor = new ArgumentListFromAppendix(String.class, appendixId);
 
 		@SuppressWarnings("unchecked")
 		final List<TestAppendix> result = (List<TestAppendix>) argumentProcessor.prepareArgument(state, args);
 
 		assertThat(result)
-		.isNotNull()
-		.hasOnlyElementsOfType(TestAppendix.class)
-		.hasSize(2);
+				.isNotNull()
+				.hasOnlyElementsOfType(TestAppendix.class)
+				.hasSize(2);
 	}
 
 	private class TestAppendix extends ApplicationAppendix {

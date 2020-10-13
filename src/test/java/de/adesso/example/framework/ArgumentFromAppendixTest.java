@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
-
 @RunWith(SpringRunner.class)
 public class ArgumentFromAppendixTest {
 
@@ -44,16 +43,16 @@ public class ArgumentFromAppendixTest {
 		final UUID appendixId = UUID.randomUUID();
 		final UUID owner = UUID.randomUUID();
 		final ApplicationAppendix additionalAppendix = new TestAppendix(appendixId, owner);
-		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<>()
+		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(additionalAppendix);
-		final Object[]args = {"einfacher Teststring", Integer.valueOf(5), state};
+		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class, appendixId);
 
 		final TestAppendix result = (TestAppendix) argumentProcessor.prepareArgument(state, args);
 
 		assertThat(result)
-		.isNotNull()
-		.isSameAs(additionalAppendix);
+				.isNotNull()
+				.isSameAs(additionalAppendix);
 	}
 
 	@Test
@@ -62,25 +61,25 @@ public class ArgumentFromAppendixTest {
 		final UUID owner = UUID.randomUUID();
 		final UUID someOtherId = UUID.randomUUID();
 		final ApplicationAppendix additionalAppendix = new TestAppendix(someOtherId, owner);
-		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<>()
+		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(additionalAppendix);
-		final Object[]args = {"einfacher Teststring", Integer.valueOf(5), state};
+		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class, appendixId);
 
 		final TestAppendix result = (TestAppendix) argumentProcessor.prepareArgument(state, args);
 
 		assertThat(result)
-		.isNull();
+				.isNull();
 	}
 
 	@Test(expected = TooManyElementsException.class)
 	public void testPrepareArgumentTooManyArguments() {
 		final UUID appendixId = UUID.randomUUID();
 		final UUID owner = UUID.randomUUID();
-		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<>()
+		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(new TestAppendix(appendixId, owner))
 				.addAppendix(new TestAppendix(appendixId, owner));
-		final Object[]args = {"einfacher Teststring", Integer.valueOf(5), state};
+		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class, appendixId);
 
 		argumentProcessor.prepareArgument(state, args);
@@ -93,16 +92,16 @@ public class ArgumentFromAppendixTest {
 		final UUID appendixId = UUID.randomUUID();
 		final UUID owner = UUID.randomUUID();
 		final UUID someOtherId = UUID.randomUUID();
-		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<>()
+		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(new TestAppendix(someOtherId, owner))
 				.addAppendix(new TestAppendix(someOtherId, owner));
-		final Object[]args = {"einfacher Teststring", Integer.valueOf(5), state};
+		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class, appendixId);
 
 		final Object argument = argumentProcessor.prepareArgument(state, args);
 
 		assertThat(argument)
-		.isNull();
+				.isNull();
 	}
 
 	private class TestAppendix extends ApplicationAppendix {

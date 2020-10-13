@@ -30,7 +30,7 @@ class AppendixList {
 	 * @throws TooManyElementsException if the list of appendixes contains more than
 	 *                                  one element of type T
 	 */
-	public Object getAppendixOfType(final UUID appendixId) throws TooManyElementsException {
+	public ApplicationAppendix getAppendixOfType(final UUID appendixId) throws TooManyElementsException {
 		final List<ApplicationAppendix> allAppendixesOfTypeT = getAllAppendixesOfTypeT(appendixId)
 				.collect(Collectors.toList());
 		if (allAppendixesOfTypeT.size() > 1) {

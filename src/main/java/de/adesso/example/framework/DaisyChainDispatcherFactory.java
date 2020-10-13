@@ -1,6 +1,7 @@
 package de.adesso.example.framework;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class DaisyChainDispatcherFactory {
 	public DaisyChainDispatcherFactory implementationInterface(
 			final Class<?> implementationInterface) {
 		// validate the parameters
-		if (!implementationInterface.getClass().isInterface()) {
+		if (!implementationInterface.isInterface()) {
 			throw new ClassCastException(
 					"Implementation is required to be an interface: " + implementationInterface.getClass().getName());
 		}
@@ -88,7 +89,11 @@ public class DaisyChainDispatcherFactory {
 				.setImplementationInterface(this.implementationInterface)
 				.setEmulateMethods(this.emulateMethods);
 
-		// during instantiation the INTERFACE was added to the dispatcher implementation
-		return (T) dispatcher;
+		// create the proxy
+		final T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(),
+				new Class[] { this.implementationInterface },
+				dispatcher);
+
+		return proxy;
 	}
 }
