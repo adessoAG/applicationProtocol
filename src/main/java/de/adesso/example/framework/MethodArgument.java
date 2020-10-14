@@ -6,14 +6,14 @@ import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class FunctionSignatureArgument extends Argument {
+public class MethodArgument extends Argument {
 
 	/**
 	 * position of the argument on the initial call. Counts from 0.
 	 */
 	private final int position;
 
-	public FunctionSignatureArgument(final @NonNull Class<?> type, final @PositiveOrZero int position) {
+	public MethodArgument(final @NonNull Class<?> type, final @PositiveOrZero int position) {
 		super(type);
 		if (position < 0) {
 			final String message = "position may not be negative";

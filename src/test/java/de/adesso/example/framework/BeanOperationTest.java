@@ -22,8 +22,8 @@ public class BeanOperationTest {
 		final BeanOperation operation = BeanOperation.builder()
 				.implementation(implementation)
 				.methodIdentifier(methodIdentifier)
-				.argument(new FunctionSignatureArgument(String.class, 0))
-				.argument(new FunctionSignatureArgument(int.class, 1))
+				.argument(new MethodArgument(String.class, 0))
+				.argument(new MethodArgument(int.class, 1))
 				.build();
 
 		assertThat(operation)
@@ -63,8 +63,8 @@ public class BeanOperationTest {
 		final BeanOperation operation = BeanOperation.builder()
 				.implementation(implementation)
 				.methodIdentifier(methodIdentifier)
-				.argument(new FunctionSignatureArgument(String.class, 0))
-				.argument(new FunctionSignatureArgument(int.class, 1))
+				.argument(new MethodArgument(String.class, 0))
+				.argument(new MethodArgument(int.class, 1))
 				.build();
 
 		assertThat(operation)
@@ -76,13 +76,13 @@ public class BeanOperationTest {
 				.hasSize(2);
 		assertThat(arguments.get(0))
 				.isNotNull()
-				.isInstanceOf(FunctionSignatureArgument.class);
+				.isInstanceOf(MethodArgument.class);
 		final Argument firstArgument = arguments.get(0);
 		assertThat(firstArgument.getType())
 				.isEqualTo(String.class);
 		assertThat(arguments.get(1))
 				.isNotNull()
-				.isInstanceOf(FunctionSignatureArgument.class);
+				.isInstanceOf(MethodArgument.class);
 		final Argument secondArgument = arguments.get(1);
 		assertThat(secondArgument.getType())
 				.isEqualTo(int.class);
@@ -96,8 +96,8 @@ public class BeanOperationTest {
 		final BeanOperation operation = BeanOperation.builder()
 				.implementation(implementation)
 				.methodIdentifier(methodIdentifier)
-				.argument(new FunctionSignatureArgument(String.class, 0))
-				.argument(new FunctionSignatureArgument(int.class, 1))
+				.argument(new MethodArgument(String.class, 0))
+				.argument(new MethodArgument(int.class, 1))
 				.build();
 		final String testString = "Das ist ein netter kleiner Teststring : ";
 		final int testInt = 7;

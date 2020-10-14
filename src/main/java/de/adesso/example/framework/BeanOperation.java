@@ -15,7 +15,7 @@ import lombok.extern.log4j.Log4j2;
  * This class describes how a method of a class should be called within the
  * framework. The requirements of the framework are that the result type is
  * {@link ApplicationProtocol}. There may be some parameters which can be given
- * from the call by {@link FunctionSignatureArgument} or from the list of
+ * from the call by {@link MethodArgument} or from the list of
  * appendixes by the class {@link ArgumentFromAppendix}.
  *
  * @author Matthias
