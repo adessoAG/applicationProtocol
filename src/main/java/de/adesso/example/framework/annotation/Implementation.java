@@ -8,4 +8,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Implementation {
+
+	Class<?>[] implementations();
+
+	MatchingStrategy strategy() default MatchingStrategy.ByType;
 }

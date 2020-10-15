@@ -1,4 +1,4 @@
-package de.adesso.example.application;
+package de.adesso.example.application.stock;
 
 public class Article {
 	String articelId;
