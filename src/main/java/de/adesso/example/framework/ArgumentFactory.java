@@ -20,7 +20,8 @@ public class ArgumentFactory {
 	public Argument createArgumentByName(@NonNull final Method emulatedMethod, @NonNull final Method beanMethod,
 			@NonNull final String parameterIdentifier) {
 		// check possible pairs
-		final List<ParameterPosition> targetCandidates = findMatchingParametersByName(emulatedMethod, parameterIdentifier);
+		final List<ParameterPosition> targetCandidates = findMatchingParametersByName(emulatedMethod,
+				parameterIdentifier);
 		final List<ParameterPosition> sourceCandidates = findMatchingParametersByName(beanMethod, parameterIdentifier);
 
 		final MethodArgument argument = new MethodArgument(targetCandidates.get(0).getParameter().getType(),
@@ -30,7 +31,14 @@ public class ArgumentFactory {
 	}
 
 	public Argument createArgumentByType(final Method emulatedMethod, final Method beanMethod, final Class<?> type) {
-		return null;
+		// check possible pairs
+		final List<ParameterPosition> targetCandidates = findMatchingParametersByType(emulatedMethod, type);
+		final List<ParameterPosition> sourceCandidates = findMatchingParametersByType(beanMethod, type);
+
+		final MethodArgument argument = new MethodArgument(targetCandidates.get(0).getParameter().getType(),
+				sourceCandidates.get(0).getPosition());
+		argument.setTargetPosition(targetCandidates.get(0).getPosition());
+		return argument;
 	}
 
 	private List<ParameterPosition> findMatchingParametersByName(final Method emulatedMethod,
@@ -42,7 +50,24 @@ public class ArgumentFactory {
 				.collect(Collectors.toList());
 		if (relevantParameters.size() != 1) {
 			final String message = String.format(
-					"unambigious parameter matching required, there should be exactly one matching parameter. Found :",
+					"unambigious parameter matching required, there should be exactly one matching parameter. Found : %d",
+					relevantParameters.size());
+			log.atWarn().log(message);
+			throw new AbigiousParameterException(message);
+		}
+
+		return relevantParameters;
+	}
+
+	private List<ParameterPosition> findMatchingParametersByType(final Method emulatedMethod, final Class<?> type) {
+		final Parameter[] emulatedParams = emulatedMethod.getParameters();
+		final List<ParameterPosition> relevantParameters = IntStream.range(0, emulatedParams.length)
+				.mapToObj(i -> new ParameterPosition(i, emulatedParams[i]))
+				.filter(pp -> pp.getParameter().getType().equals(type))
+				.collect(Collectors.toList());
+		if (relevantParameters.size() != 1) {
+			final String message = String.format(
+					"unambigious parameter matching required, there should be exactly one matching parameter. Found : %d",
 					relevantParameters.size());
 			log.atWarn().log(message);
 			throw new AbigiousParameterException(message);

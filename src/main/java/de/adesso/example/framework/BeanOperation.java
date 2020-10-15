@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -15,8 +16,8 @@ import lombok.extern.log4j.Log4j2;
  * This class describes how a method of a class should be called within the
  * framework. The requirements of the framework are that the result type is
  * {@link ApplicationProtocol}. There may be some parameters which can be given
- * from the call by {@link MethodArgument} or from the list of
- * appendixes by the class {@link ArgumentFromAppendix}.
+ * from the call by {@link MethodArgument} or from the list of appendixes by the
+ * class {@link ArgumentFromAppendix}.
  *
  * @author Matthias
  *
@@ -43,6 +44,9 @@ public class BeanOperation {
 		this.methodIdentifier = methodIdentifier;
 		this.implementation = implementation;
 		this.arguments = arguments;
+
+		// provide the target position
+		IntStream.range(0, arguments.size()).forEach(i -> arguments.get(i).setTargetPosition(i));
 
 		try {
 			log.atDebug().log("going to extract method %s::%s", implementation.getClass().getName(), methodIdentifier);

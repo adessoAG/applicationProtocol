@@ -3,21 +3,24 @@ package de.adesso.example.application;
 import java.math.BigDecimal;
 
 import de.adesso.example.framework.ApplicationProtocol;
+import de.adesso.example.framework.annotation.Emulated;
+import de.adesso.example.framework.annotation.Implementation;
 
 /**
- * Functional interface which defines the price calculators which may be
- * combined to build the PriceCalculator
+ * This interface defines the functionality required for calculation of prices.
  *
  * @author Matthias
  *
  */
-@FunctionalInterface
-public interface PriceCalculatorInterface {
+@Emulated
+public interface PriceCalculator {
+
 	/**
 	 *
 	 * @param previousPrice
 	 * @param article
 	 * @return
 	 */
+	@Implementation()
 	ApplicationProtocol<BigDecimal> calculatePrice(Article article, ApplicationProtocol<BigDecimal> appendixes);
 }
