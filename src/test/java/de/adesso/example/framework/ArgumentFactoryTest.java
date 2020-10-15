@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +18,9 @@ public class ArgumentFactoryTest {
 
 	@Autowired
 	private ArgumentFactory factory;
+
+	@Autowired
+	AppendixRegistry registry;
 
 	@Test
 	public void testCreateArgumentByName() throws NoSuchMethodException, SecurityException {
@@ -89,6 +93,27 @@ public class ArgumentFactoryTest {
 				ApplicationProtocol.class);
 		final Method beanMethod = Bean_OtherParameterType.class.getMethod("doSomething", BigDecimal.class);
 		this.factory.createArgumentByType(emulatedMethod, beanMethod, String.class);
+	}
+
+	@Test
+	public void testCreateArgumentFromAppendix() throws NoSuchMethodException, SecurityException {
+		final Method emulatedMethod = ToBeEmulated.class.getMethod("operation", String.class, int.class,
+				ApplicationProtocol.class);
+		final UUID stringAppendix = UUID.randomUUID();
+		this.registry.register(stringAppendix, String.class);
+
+		final Argument argument = this.factory.createArgumentFromAppendix(emulatedMethod, String.class);
+
+		assertThat(argument)
+				.isNotNull()
+				.isInstanceOf(ArgumentFromAppendix.class);
+		final ArgumentFromAppendix appendixArgument = (ArgumentFromAppendix) argument;
+		assertThat(appendixArgument.getAppendixId())
+				.isEqualTo(stringAppendix);
+		assertThat(appendixArgument.getTargetPosition())
+				.isEqualTo(0);
+		assertThat(appendixArgument.getType())
+				.isEqualTo(String.class);
 	}
 
 	private interface ToBeEmulated {

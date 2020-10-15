@@ -29,6 +29,9 @@ public interface PriceCalculator {
 	@Implementation(implementations = {
 			BasePriceCalculator.class,
 			EmployeeDiscountCalculator.class,
-			VoucherDiscountCalculator.class }, strategy = MatchingStrategy.ByType)
+			VoucherDiscountCalculator.class
+	}, strategy = { MatchingStrategy.ByType,
+			MatchingStrategy.FromAppendix,
+			MatchingStrategy.ByName })
 	ApplicationProtocol<BigDecimal> calculatePrice(Article article, ApplicationProtocol<BigDecimal> appendixes);
 }

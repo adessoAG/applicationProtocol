@@ -3,9 +3,11 @@ package de.adesso.example.framework;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
@@ -17,31 +19,49 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ArgumentFactory {
 
+	private final AppendixRegistry appendixRegistry;
+
+	@Autowired
+	public ArgumentFactory(final AppendixRegistry appendixRegistry) {
+		this.appendixRegistry = appendixRegistry;
+	}
+
 	public Argument createArgumentByName(@NonNull final Method emulatedMethod, @NonNull final Method beanMethod,
 			@NonNull final String parameterIdentifier) {
 		// check possible pairs
-		final List<ParameterPosition> targetCandidates = findMatchingParametersByName(emulatedMethod,
+		final ParameterPosition targetCandidate = findMatchingParametersByName(emulatedMethod,
 				parameterIdentifier);
-		final List<ParameterPosition> sourceCandidates = findMatchingParametersByName(beanMethod, parameterIdentifier);
+		final ParameterPosition sourceCandidate = findMatchingParametersByName(beanMethod, parameterIdentifier);
 
-		final MethodArgument argument = new MethodArgument(targetCandidates.get(0).getParameter().getType(),
-				sourceCandidates.get(0).getPosition());
-		argument.setTargetPosition(targetCandidates.get(0).getPosition());
+		final MethodArgument argument = new MethodArgument(targetCandidate.getParameter().getType(),
+				sourceCandidate.getPosition());
+		argument.setTargetPosition(targetCandidate.getPosition());
 		return argument;
 	}
 
 	public Argument createArgumentByType(final Method emulatedMethod, final Method beanMethod, final Class<?> type) {
 		// check possible pairs
-		final List<ParameterPosition> targetCandidates = findMatchingParametersByType(emulatedMethod, type);
-		final List<ParameterPosition> sourceCandidates = findMatchingParametersByType(beanMethod, type);
+		final ParameterPosition targetCandidate = findMatchingParametersByType(emulatedMethod, type);
+		final ParameterPosition sourceCandidate = findMatchingParametersByType(beanMethod, type);
 
-		final MethodArgument argument = new MethodArgument(targetCandidates.get(0).getParameter().getType(),
-				sourceCandidates.get(0).getPosition());
-		argument.setTargetPosition(targetCandidates.get(0).getPosition());
+		final MethodArgument argument = new MethodArgument(targetCandidate.getParameter().getType(),
+				sourceCandidate.getPosition());
+		argument.setTargetPosition(targetCandidate.getPosition());
 		return argument;
 	}
 
-	private List<ParameterPosition> findMatchingParametersByName(final Method emulatedMethod,
+	public Argument createArgumentFromAppendix(@NonNull final Method emulatedMethod,
+			@NonNull final Class<?> parameterType) {
+		final ParameterPosition targetCandidate = findMatchingParametersByType(emulatedMethod, parameterType);
+		@NonNull final UUID appendixId = this.appendixRegistry.lookUp(parameterType);
+
+		final Argument argument = new ArgumentFromAppendix(parameterType, appendixId);
+		argument.setTargetPosition(targetCandidate.getPosition());
+
+		return argument;
+	}
+
+	private ParameterPosition findMatchingParametersByName(final Method emulatedMethod,
 			final String parameterIdentifier) {
 		final Parameter[] emulatedParams = emulatedMethod.getParameters();
 		final List<ParameterPosition> relevantParameters = IntStream.range(0, emulatedParams.length)
@@ -56,10 +76,10 @@ public class ArgumentFactory {
 			throw new AbigiousParameterException(message);
 		}
 
-		return relevantParameters;
+		return relevantParameters.get(0);
 	}
 
-	private List<ParameterPosition> findMatchingParametersByType(final Method emulatedMethod, final Class<?> type) {
+	private ParameterPosition findMatchingParametersByType(final Method emulatedMethod, final Class<?> type) {
 		final Parameter[] emulatedParams = emulatedMethod.getParameters();
 		final List<ParameterPosition> relevantParameters = IntStream.range(0, emulatedParams.length)
 				.mapToObj(i -> new ParameterPosition(i, emulatedParams[i]))
@@ -73,7 +93,7 @@ public class ArgumentFactory {
 			throw new AbigiousParameterException(message);
 		}
 
-		return relevantParameters;
+		return relevantParameters.get(0);
 	}
 
 	@AllArgsConstructor

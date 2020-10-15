@@ -11,5 +11,6 @@ public @interface Implementation {
 
 	Class<?>[] implementations();
 
-	MatchingStrategy strategy() default MatchingStrategy.ByType;
+	MatchingStrategy[] strategy() default { MatchingStrategy.ByType, MatchingStrategy.FromAppendix,
+			MatchingStrategy.ByName };
 }
