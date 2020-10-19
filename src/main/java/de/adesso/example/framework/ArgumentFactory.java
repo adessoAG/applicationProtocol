@@ -54,6 +54,11 @@ public class ArgumentFactory {
 			@NonNull final Class<?> parameterType) {
 		final ParameterPosition targetCandidate = findMatchingParametersByType(emulatedMethod, parameterType);
 		@NonNull final UUID appendixId = this.appendixRegistry.lookUp(parameterType);
+		if (appendixId == null) {
+			final String message = "no appropriate appendix registered. Cannot retrieve the required type";
+			log.atWarn().log(message);
+			throw new AppendixNotRegistered(message);
+		}
 
 		final Argument argument = new ArgumentFromAppendix(parameterType, appendixId);
 		argument.setTargetPosition(targetCandidate.getPosition());

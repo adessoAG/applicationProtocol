@@ -8,6 +8,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import lombok.ToString;
+
+@ToString
 class AppendixList {
 
 	/**
@@ -52,9 +55,9 @@ class AppendixList {
 	 * @return
 	 */
 	public <T> List<T> getAllAppenixesOfTypeAsList(final UUID appendixId) {
-		@SuppressWarnings("unchecked")
-		final List<T> allAppendixesOfTypeT = (List<T>) getAllAppendixesOfTypeT(appendixId)
-				.collect(Collectors.toList());
+		@SuppressWarnings("unchecked") final List<T> allAppendixesOfTypeT = (List<T>) getAllAppendixesOfTypeT(
+				appendixId)
+						.collect(Collectors.toList());
 
 		return allAppendixesOfTypeT;
 	}
@@ -68,8 +71,7 @@ class AppendixList {
 	 * @return
 	 */
 	public <T> Set<T> getAllAppenixesOfTypeAsSet(final UUID appendixId) {
-		@SuppressWarnings("unchecked")
-		final Set<T> allAppendixesOfTypeT = (Set<T>) getAllAppendixesOfTypeT(appendixId)
+		@SuppressWarnings("unchecked") final Set<T> allAppendixesOfTypeT = (Set<T>) getAllAppendixesOfTypeT(appendixId)
 				.collect(Collectors.toSet());
 
 		return allAppendixesOfTypeT;

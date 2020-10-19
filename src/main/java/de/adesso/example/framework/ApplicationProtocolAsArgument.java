@@ -1,8 +1,8 @@
 package de.adesso.example.framework;
 
-public class ApplicationProtocolArgument extends Argument {
+public class ApplicationProtocolAsArgument extends Argument {
 
-	public ApplicationProtocolArgument() {
+	public ApplicationProtocolAsArgument() {
 		super(ApplicationProtocol.class);
 	}
 

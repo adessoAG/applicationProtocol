@@ -1,7 +1,5 @@
 package de.adesso.example.framework;
 
-import javax.validation.constraints.PositiveOrZero;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -16,7 +14,7 @@ public class MethodArgument extends Argument {
 	@Getter(value = AccessLevel.PACKAGE)
 	private final int sourcePosition;
 
-	public MethodArgument(final @NonNull Class<?> type, final @PositiveOrZero int sourcePosition) {
+	public MethodArgument(final @NonNull Class<?> type, final int sourcePosition) {
 		super(type);
 		if (sourcePosition < 0) {
 			final String message = "position may not be negative";

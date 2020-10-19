@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Basic protocol element for the application protocol. Users should extend this
@@ -16,6 +17,7 @@ import lombok.Setter;
  *
  */
 
+@ToString
 public class ApplicationProtocol<RESULT_TYPE> {
 
 	private final AppendixList data = new AppendixList();

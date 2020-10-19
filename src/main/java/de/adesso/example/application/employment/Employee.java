@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class Employee {
 
-	private String name;
-	private String firstName;
+	private final String name;
+	private final String firstName;
+	private final int id;
 }

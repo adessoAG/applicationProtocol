@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 /**
  * Base type for the various appendixes. Every new type to be added to the
@@ -15,6 +16,7 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor
+@ToString
 public abstract class ApplicationAppendix {
 	/**
 	 * Identifier for the type of appendix

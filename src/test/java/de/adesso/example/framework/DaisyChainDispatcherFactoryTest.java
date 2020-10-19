@@ -101,7 +101,7 @@ public class DaisyChainDispatcherFactoryTest {
 								.implementation(new TestBean_2())
 								.methodIdentifier("anotherAction")
 								.argument(new MethodArgument(String.class, 3))
-								.argument(new ApplicationProtocolArgument())
+								.argument(new ApplicationProtocolAsArgument())
 								.build())
 						.build())
 				.operation(MethodImplementation.builder()
@@ -111,7 +111,7 @@ public class DaisyChainDispatcherFactoryTest {
 								.implementation(new TestBean_2())
 								.methodIdentifier("anotherAction")
 								.argument(new MethodArgument(String.class, 3))
-								.argument(new ApplicationProtocolArgument())
+								.argument(new ApplicationProtocolAsArgument())
 								.build())
 						.build())
 				.build();
