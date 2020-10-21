@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import de.adesso.example.framework.exception.TooManyElementsException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

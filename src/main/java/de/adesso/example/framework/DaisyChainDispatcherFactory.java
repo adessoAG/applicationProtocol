@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 
+import de.adesso.example.framework.exception.UnknownMethodException;
 import lombok.extern.log4j.Log4j2;
 
 /**

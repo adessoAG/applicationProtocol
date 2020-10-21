@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import de.adesso.example.framework.exception.TooManyElementsException;
+
 @RunWith(SpringRunner.class)
 public class ArgumentFromAppendixTest {
 

@@ -20,6 +20,9 @@ import de.adesso.example.framework.MethodImplementation.MethodImplementationBuil
 import de.adesso.example.framework.annotation.Emulated;
 import de.adesso.example.framework.annotation.Implementation;
 import de.adesso.example.framework.annotation.MatchingStrategy;
+import de.adesso.example.framework.exception.GenericDeclarationException;
+import de.adesso.example.framework.exception.MissingAnnotationException;
+import de.adesso.example.framework.exception.UndefinedParameterException;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 

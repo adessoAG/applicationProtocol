@@ -1,4 +1,4 @@
-package de.adesso.example.framework;
+package de.adesso.example.framework.exception;
 
 public class BuilderException extends RuntimeException {
 

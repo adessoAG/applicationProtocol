@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import de.adesso.example.framework.exception.UndefinedParameterException;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ArgumentFactoryTest {

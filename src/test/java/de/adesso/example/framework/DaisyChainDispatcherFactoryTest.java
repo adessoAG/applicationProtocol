@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import de.adesso.example.framework.exception.UnknownMethodException;
 import lombok.Getter;
 
 public class DaisyChainDispatcherFactoryTest {

@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import de.adesso.example.framework.exception.UndefinedParameterException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;

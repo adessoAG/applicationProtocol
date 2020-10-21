@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import de.adesso.example.framework.exception.TooManyElementsException;
 import lombok.ToString;
 
 @ToString

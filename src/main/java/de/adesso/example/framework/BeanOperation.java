@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import de.adesso.example.framework.exception.BuilderException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
