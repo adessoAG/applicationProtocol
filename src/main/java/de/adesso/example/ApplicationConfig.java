@@ -2,14 +2,12 @@ package de.adesso.example;
 
 import java.math.BigDecimal;
 
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
 import de.adesso.example.application.PriceCalculator;
-import de.adesso.example.application.PriceCalculatorAnnotated;
 import de.adesso.example.application.employment.Employee;
 import de.adesso.example.application.employment.EmployeeDiscountCalculator;
 import de.adesso.example.application.employment.Employment;
@@ -18,7 +16,6 @@ import de.adesso.example.application.marketing.Voucher;
 import de.adesso.example.application.marketing.VoucherDiscountCalculator;
 import de.adesso.example.application.stock.Article;
 import de.adesso.example.application.stock.BasePriceCalculator;
-import de.adesso.example.framework.ApplicationFactory;
 import de.adesso.example.framework.ArgumentFromAppendix;
 import de.adesso.example.framework.BeanOperation;
 import de.adesso.example.framework.DaisyChainDispatcherFactory;
@@ -75,13 +72,5 @@ public class ApplicationConfig {
 								.build())
 						.build())
 				.build();
-	}
-
-	@Bean
-	public FactoryBean<PriceCalculatorAnnotated> PriceCalculatorFactory() {
-		final ApplicationFactory<PriceCalculatorAnnotated> applicationFactory = new ApplicationFactory<>(
-				PriceCalculatorAnnotated.class);
-
-		return applicationFactory;
 	}
 }

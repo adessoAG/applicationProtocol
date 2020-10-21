@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Implementation {
 
-	Class<?>[] implementations();
+	Class<Object>[] implementations();
 
 	MatchingStrategy[] strategy() default { MatchingStrategy.ByType, MatchingStrategy.FromAppendix,
 			MatchingStrategy.ByName };

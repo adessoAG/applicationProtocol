@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
+
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -17,11 +19,17 @@ import lombok.extern.log4j.Log4j2;
  * @param <INTERFACE>
  */
 @Log4j2
-public class DaisyChainDispatcherFactory {
+public class DaisyChainDispatcherFactory implements BeanClassLoaderAware {
 
 	private final Map<String, MethodImplementation> emulateMethods = new HashMap<>();
 	private Class<?> implementationInterface;
 	private Map<String, Method> interfaceMethods = new HashMap<>();
+	private ClassLoader classLoader;
+
+	@Override
+	public void setBeanClassLoader(final ClassLoader classLoader) {
+		this.classLoader = classLoader;
+	}
 
 	//
 	// builder property methods
@@ -59,8 +67,8 @@ public class DaisyChainDispatcherFactory {
 	}
 
 	/**
-	 * With help of this method, the emulation of the interface method is declared.
-	 * The information will be used by the dispatcher to implement the functionality
+	 * With help of this method, the emulation of the interface method is generated.
+	 * The information will be used by the dispatcher to emulate the functionality
 	 *
 	 * @param implementation implementation description of a method
 	 * @return the factory itself for chained construction
@@ -90,7 +98,7 @@ public class DaisyChainDispatcherFactory {
 				.setEmulateMethods(this.emulateMethods);
 
 		// create the proxy
-		final T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(),
+		final T proxy = (T) Proxy.newProxyInstance(this.classLoader,
 				new Class[] { this.implementationInterface },
 				dispatcher);
 

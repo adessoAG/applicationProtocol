@@ -41,7 +41,7 @@ public class ArgumentFactoryTest {
 				.isEqualTo(String.class);
 	}
 
-	@Test(expected = AbigiousParameterException.class)
+	@Test(expected = UndefinedParameterException.class)
 	public void testCreateArgumentByNameSourceOtherName() throws NoSuchMethodException, SecurityException {
 		final Method emulatedMethod = ToBeEmulated_OtherParameterName.class.getMethod("operation", String.class,
 				int.class,
@@ -50,7 +50,7 @@ public class ArgumentFactoryTest {
 		this.factory.createArgumentByName(emulatedMethod, beanMethod, "aString");
 	}
 
-	@Test(expected = AbigiousParameterException.class)
+	@Test(expected = UndefinedParameterException.class)
 	public void testCreateArgumentByNameTargetOtherName() throws NoSuchMethodException, SecurityException {
 		final Method emulatedMethod = ToBeEmulated.class.getMethod("operation", String.class,
 				int.class,
@@ -78,7 +78,7 @@ public class ArgumentFactoryTest {
 				.isEqualTo(String.class);
 	}
 
-	@Test(expected = AbigiousParameterException.class)
+	@Test(expected = UndefinedParameterException.class)
 	public void testCreateArgumentByTypeSourceOtherType() throws NoSuchMethodException, SecurityException {
 		final Method emulatedMethod = ToBeEmulated_OtherParameterType.class.getMethod("operation", BigDecimal.class,
 				int.class,
@@ -87,7 +87,7 @@ public class ArgumentFactoryTest {
 		this.factory.createArgumentByType(emulatedMethod, beanMethod, String.class);
 	}
 
-	@Test(expected = AbigiousParameterException.class)
+	@Test(expected = UndefinedParameterException.class)
 	public void testCreateArgumentByTypeTargetOtherType() throws NoSuchMethodException, SecurityException {
 		final Method emulatedMethod = ToBeEmulated.class.getMethod("operation", String.class, int.class,
 				ApplicationProtocol.class);

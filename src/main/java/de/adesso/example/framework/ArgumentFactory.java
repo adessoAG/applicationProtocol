@@ -78,7 +78,7 @@ public class ArgumentFactory {
 					"unambigious parameter matching required, there should be exactly one matching parameter. Found : %d",
 					relevantParameters.size());
 			log.atWarn().log(message);
-			throw new AbigiousParameterException(message);
+			throw new UndefinedParameterException(message);
 		}
 
 		return relevantParameters.get(0);
@@ -95,7 +95,7 @@ public class ArgumentFactory {
 					"unambigious parameter matching required, there should be exactly one matching parameter. Found : %d",
 					relevantParameters.size());
 			log.atWarn().log(message);
-			throw new AbigiousParameterException(message);
+			throw new UndefinedParameterException(message);
 		}
 
 		return relevantParameters.get(0);

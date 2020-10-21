@@ -10,11 +10,14 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
+import de.adesso.example.framework.ApplicationFrameworkBanner;
+
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class })
 public class ProjectApplication {
 
 	public static void main(final String[] args) {
 		new SpringApplicationBuilder(ProjectApplication.class)
+				.banner(new ApplicationFrameworkBanner())
 				.build()
 				.run(args);
 	}

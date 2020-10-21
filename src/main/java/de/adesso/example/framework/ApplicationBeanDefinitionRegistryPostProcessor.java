@@ -2,6 +2,7 @@ package de.adesso.example.framework;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.annotation.Configuration;
@@ -13,14 +14,11 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 
 	@Override
 	public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) throws BeansException {
-		// TODO Auto-generated method stub
-
+		final BeanDefinitionBuilder bd;
 	}
 
 	@Override
