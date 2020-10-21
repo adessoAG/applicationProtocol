@@ -101,12 +101,12 @@ public class ApplicationProxyFactory
 		// will be called consecutively
 		final Implementation implAnnotation = interfaceMethod.getAnnotation(Implementation.class);
 		final MatchingStrategy[] strategies = buildStrategy(implAnnotation.strategy());
-		for (final Class<Object> implClass : implAnnotation.implementations()) {
-			final Object implBean = this.beanFactory.getBean(implClass);
+		for (final String implClassName : implAnnotation.implementations()) {
+			final Object implBean = this.beanFactory.getBean(implClassName);
 			BeanOperation.builder()
 					.implementation((ApplicationFrameworkInvokable) implBean)
 					.methodIdentifier(methodName);
-			final Method beanMethod = extractCorrespondingBeanMethod(methodName, implClass);
+			final Method beanMethod = extractCorrespondingBeanMethod(methodName, implBean.getClass());
 			if (beanMethod == null) {
 				// basic requirement: the implementation bean provides at least one method with
 				// the same identifier
@@ -149,7 +149,7 @@ public class ApplicationProxyFactory
 				if (argument == null) {
 					// could not find any content for the argument
 					final String message = String.format("could not provide bean %s with argument % of type %s",
-							implClass.getName(), p.getName(), p.getType());
+							implBean.getClass().getName(), p.getName(), p.getType());
 					log.atFatal().log(message);
 					throw new UndefinedParameterException(message);
 				}
@@ -163,10 +163,10 @@ public class ApplicationProxyFactory
 		for (final Method implMethod : implClass.getMethods()) {
 			if (methodName.equals(implMethod.getName())) {
 				beanMethod = implMethod;
-				break;
+				return beanMethod;
 			}
 		}
-		return beanMethod;
+		return null;
 	}
 
 	private MatchingStrategy[] buildStrategy(final MatchingStrategy[] strategy) {
