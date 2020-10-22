@@ -2,7 +2,6 @@ package de.adesso.example.framework;
 
 import java.util.UUID;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -15,7 +14,6 @@ import lombok.ToString;
  *
  */
 @Getter
-@AllArgsConstructor
 @ToString
 public abstract class ApplicationAppendix {
 	/**
@@ -26,4 +24,9 @@ public abstract class ApplicationAppendix {
 	 * UUID of the owner which created this appendix. 
 	 */
 	private UUID owner;
+	
+	public ApplicationAppendix(UUID ownerId, UUID applicationAppendixId) {
+		this.applicationAppendixId = applicationAppendixId;
+		this.owner = ownerId;
+	}
 }

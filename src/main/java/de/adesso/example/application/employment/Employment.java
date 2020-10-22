@@ -7,12 +7,12 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import de.adesso.example.framework.AppendixOwner;
+import de.adesso.example.framework.ApplicationOwner;
 import de.adesso.example.framework.AppendixRegistry;
 import de.adesso.example.framework.TApplicationAppendix;
 
 @Service
-public class Employment extends AppendixOwner {
+public class Employment extends ApplicationOwner {
 
 	public final static UUID ownUuid = UUID.randomUUID();
 	public static UUID employeeAppendixId = UUID.randomUUID();

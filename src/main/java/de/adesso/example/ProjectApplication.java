@@ -3,6 +3,7 @@ package de.adesso.example;
 import java.util.Arrays;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import de.adesso.example.framework.ApplicationFrameworkBanner;
 
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class })
+@EnableAutoConfiguration
 public class ProjectApplication {
 
 	public static void main(final String[] args) {

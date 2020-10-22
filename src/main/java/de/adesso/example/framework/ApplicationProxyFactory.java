@@ -7,13 +7,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
 
 import de.adesso.example.framework.MethodImplementation.MethodImplementationBuilder;
@@ -26,24 +28,48 @@ import de.adesso.example.framework.exception.UndefinedParameterException;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * This class creates the factory for a proxy implementing an application
+ * framework supported interface. It is not possible to provide this class as
+ * Spring service, because it has to be instantiated early during the
+ * initialization process which makes things a little more complicated. The
+ * class cannot trust on injection of dependencies. All has to be provided
+ * during instantiation.
+ *
+ * @author Matthias
+ *
+ */
 @Log4j2
-@Service
-@Scope("prototype")
 public class ApplicationProxyFactory
-		implements BeanFactoryAware, FactoryBean<Object>, SmartInitializingSingleton {
+		implements ApplicationContextAware, BeanClassLoaderAware, FactoryBean<Object>, DisposableBean {
 
-	private BeanFactory beanFactory;
+	private final String emulatedInterfaceName;
 	private Class<Object> emulatedInterface;
+	private ApplicationContext applicationContext;
+	private ClassLoader classLoader;
 	private Object generatedEmulation;
 
+	@Autowired
 	private ArgumentFactory argumentFactory;
 
-	public ApplicationProxyFactory() {
+	public ApplicationProxyFactory(final String emulatedInterfaceName) {
+		this.emulatedInterfaceName = emulatedInterfaceName;
 	}
 
 	@Override
-	public void setBeanFactory(final BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
+	public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
+
+	@Override
+	public void setBeanClassLoader(final ClassLoader classLoader) {
+		this.classLoader = classLoader;
+	}
+
+	@PostConstruct
+	@SuppressWarnings("unchecked")
+	public void init() throws ClassNotFoundException {
+		this.emulatedInterface = (Class<Object>) this.classLoader.loadClass(this.emulatedInterfaceName);
 	}
 
 	@Override
@@ -60,18 +86,12 @@ public class ApplicationProxyFactory
 	}
 
 	@Override
-	public void afterSingletonsInstantiated() {
-		// find the types to be emulated
-
-		// register the types with the corresponding factory
+	public void destroy() {
+		log.atTrace().log("going to destroy factory for class " + this.emulatedInterfaceName);
 	}
 
 	private Object emulateInterface(@NonNull final Class<Object> interfaceType) {
-		if (this.argumentFactory == null) {
-			initializeArgumentFactory();
-		}
 		validateClassAnnotations(interfaceType);
-		this.emulatedInterface = interfaceType;
 
 		// initialize the factory to build the proxy
 		final DaisyChainDispatcherFactory factory = new DaisyChainDispatcherFactory()
@@ -82,11 +102,6 @@ public class ApplicationProxyFactory
 				.forEach(m -> factory.operation(m));
 
 		return factory.build();
-	}
-
-	private void initializeArgumentFactory() {
-		final AppendixRegistry registry = this.beanFactory.getBean(AppendixRegistry.class);
-		this.argumentFactory = this.beanFactory.getBean(ArgumentFactory.class, registry);
 	}
 
 	private MethodImplementation buildMethodEmulation(final Method interfaceMethod) {
@@ -102,7 +117,7 @@ public class ApplicationProxyFactory
 		final Implementation implAnnotation = interfaceMethod.getAnnotation(Implementation.class);
 		final MatchingStrategy[] strategies = buildStrategy(implAnnotation.strategy());
 		for (final String implClassName : implAnnotation.implementations()) {
-			final Object implBean = this.beanFactory.getBean(implClassName);
+			final Object implBean = this.applicationContext.getBean(implClassName);
 			BeanOperation.builder()
 					.implementation((ApplicationFrameworkInvokable) implBean)
 					.methodIdentifier(methodName);

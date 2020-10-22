@@ -13,4 +13,8 @@ public class TApplicationAppendix<T> extends ApplicationAppendix {
 		super(applicationAppendixId, owner);
 		this.content = content;
 	}
+
+	public Class<?> getType() {
+		return this.content.getClass();
+	}
 }

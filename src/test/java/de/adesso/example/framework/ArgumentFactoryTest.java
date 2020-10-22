@@ -101,8 +101,8 @@ public class ArgumentFactoryTest {
 	public void testCreateArgumentFromAppendix() throws NoSuchMethodException, SecurityException {
 		final Method emulatedMethod = ToBeEmulated.class.getMethod("operation", String.class, int.class,
 				ApplicationProtocol.class);
-		final UUID stringAppendix = UUID.randomUUID();
-		this.registry.register(stringAppendix, String.class);
+		final UUID stringAppendixId = UUID.randomUUID();
+		this.registry.register(stringAppendixId, String.class);
 
 		final Argument argument = this.factory.createArgumentFromAppendix(emulatedMethod, String.class);
 
@@ -111,7 +111,7 @@ public class ArgumentFactoryTest {
 				.isInstanceOf(ArgumentFromAppendix.class);
 		final ArgumentFromAppendix appendixArgument = (ArgumentFromAppendix) argument;
 		assertThat(appendixArgument.getAppendixId())
-				.isEqualTo(stringAppendix);
+				.isEqualTo(stringAppendixId);
 		assertThat(appendixArgument.getTargetPosition())
 				.isEqualTo(0);
 		assertThat(appendixArgument.getType())

@@ -6,13 +6,13 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import de.adesso.example.application.stock.Article;
-import de.adesso.example.framework.AppendixOwner;
+import de.adesso.example.framework.ApplicationOwner;
 import de.adesso.example.framework.ApplicationFrameworkInvokable;
 import de.adesso.example.framework.ApplicationProtocol;
 
 @Service
 public class VoucherDiscountCalculator 
-	extends AppendixOwner
+	extends ApplicationOwner
 	implements ApplicationFrameworkInvokable {
 
 	public VoucherDiscountCalculator() {

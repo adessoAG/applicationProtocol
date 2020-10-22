@@ -1,17 +1,40 @@
 package de.adesso.example.framework;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Service;
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import lombok.NonNull;
 
-@Service
-public class AppendixRegistryImpl implements AppendixRegistry {
+public class AppendixRegistryImpl implements AppendixRegistry, ApplicationContextAware {
 
-	private final Map<Class<?>, UUID> map = new HashMap<>();
+	private Map<Class<?>, UUID> map;
+	private final List<String> appendixClassNames;
+	private ApplicationContext applicationContext;
+
+	public AppendixRegistryImpl(final List<String> appendixClassNames) {
+		this.appendixClassNames = appendixClassNames;
+	}
+
+	@Override
+	public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
+
+	@PostConstruct
+	public void init() {
+		this.appendixClassNames.stream()
+				.map(name -> (TApplicationAppendix<?>) this.applicationContext.getBean(name))
+				.collect(Collectors.toMap(TApplicationAppendix::getType,
+						TApplicationAppendix::getApplicationAppendixId));
+	}
 
 	@Override
 	public UUID lookUp(@NonNull final Class<?> parameterType) {

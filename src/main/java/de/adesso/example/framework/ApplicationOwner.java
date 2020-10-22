@@ -4,12 +4,12 @@ import java.util.UUID;
 
 import lombok.Getter;
 
-public abstract class AppendixOwner {
+public abstract class ApplicationOwner {
 
 	@Getter
 	private final UUID ownUuid;
 
-	public AppendixOwner(final UUID ownUuid) {
+	public ApplicationOwner(final UUID ownUuid) {
 		this.ownUuid = ownUuid;
 	}
 }

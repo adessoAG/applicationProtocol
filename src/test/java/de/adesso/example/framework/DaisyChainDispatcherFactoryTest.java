@@ -121,7 +121,7 @@ public class DaisyChainDispatcherFactoryTest {
 
 	private final static Owner_1 owner1 = new Owner_1();
 
-	private static class Owner_1 extends AppendixOwner {
+	private static class Owner_1 extends ApplicationOwner {
 
 		public Owner_1() {
 			super(UUID.randomUUID());
@@ -160,7 +160,7 @@ public class DaisyChainDispatcherFactoryTest {
 
 	private final static Owner_2 owner2 = new Owner_2();
 
-	private static class Owner_2 extends AppendixOwner {
+	private static class Owner_2 extends ApplicationOwner {
 
 		public Owner_2() {
 			super(UUID.randomUUID());

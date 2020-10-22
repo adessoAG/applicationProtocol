@@ -5,12 +5,12 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import de.adesso.example.framework.AppendixOwner;
+import de.adesso.example.framework.ApplicationOwner;
 import de.adesso.example.framework.ApplicationFrameworkInvokable;
 import de.adesso.example.framework.ApplicationProtocol;
 
 @Service
-public class BasePriceCalculator extends AppendixOwner implements ApplicationFrameworkInvokable{
+public class BasePriceCalculator extends ApplicationOwner implements ApplicationFrameworkInvokable{
 	
 	public BasePriceCalculator() {
 		super(retrieveOwnUuid());
