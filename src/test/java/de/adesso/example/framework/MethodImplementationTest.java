@@ -3,6 +3,7 @@ package de.adesso.example.framework;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -49,19 +50,19 @@ public class MethodImplementationTest {
 				.isNotNull()
 				.isEqualTo(testString + anotherTestString);
 
-		final Object a1 = resultState.getAppendixOfType(Appendix_A1.APPENDIX_A1_ID);
+		final Optional<ApplicationAppendix<?>> a1 = resultState.getAppendixOfType(Appendix_A1.APPENDIX_A1_ID);
 		assertThat(a1)
-				.isNotNull()
-				.isInstanceOf(Appendix_A1.class);
-		final Appendix_A1 appendix_A1 = (Appendix_A1) a1;
+				.isNotEmpty();
+		final Appendix_A1 appendix_A1 = (Appendix_A1) a1.get();
 		assertThat(appendix_A1.getContent())
 				.isEqualTo(5);
 
-		final Object a2 = resultState.getAppendixOfType(Appendix_A2.APPENDIX_A2_ID);
+		final Optional<ApplicationAppendix<?>> a2 = resultState.getAppendixOfType(Appendix_A2.APPENDIX_A2_ID);
 		assertThat(a2)
-				.isNotNull()
+				.isNotEmpty();
+		assertThat(a2.get())
 				.isInstanceOf(Appendix_A2.class);
-		final Appendix_A2 appendix_A2 = (Appendix_A2) a2;
+		final Appendix_A2 appendix_A2 = (Appendix_A2) a2.get();
 		assertThat(appendix_A2.getContent())
 				.isEqualTo(anotherTestString);
 

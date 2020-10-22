@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -24,7 +25,7 @@ public class ArgumentFromAppendixTest {
 		assertThat(result).isNotNull();
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorTypeIsNull() {
 		final UUID attachmentId = UUID.randomUUID();
 
@@ -33,7 +34,7 @@ public class ArgumentFromAppendixTest {
 		fail("should detect null value for type");
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorAttachmentIsNull() {
 		new ArgumentFromAppendix(String.class, null);
 
@@ -45,14 +46,18 @@ public class ArgumentFromAppendixTest {
 		final TestAppendix additionalAppendix = new TestAppendix("some string");
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(additionalAppendix);
-		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
+		final Object[] args = { "einfacher Teststring", Integer.valueOf(5),
+				state };
 		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class,
 				TestAppendix.testAppendixId);
 
-		final TestAppendix result = (TestAppendix) argumentProcessor.prepareArgument(state, args);
+		@SuppressWarnings("unchecked")
+		final Optional<TestAppendix> result = (Optional<TestAppendix>) argumentProcessor
+				.prepareArgument(state, args);
 
 		assertThat(result)
-				.isNotNull()
+				.isNotEmpty();
+		assertThat(result.get())
 				.isSameAs(additionalAppendix);
 	}
 
@@ -62,13 +67,16 @@ public class ArgumentFromAppendixTest {
 		final TestAppendix additionalAppendix = new TestAppendix("some string");
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(additionalAppendix);
-		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
-		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class, someOtherId);
+		final Object[] args = { "einfacher Teststring", Integer.valueOf(5),
+				state };
+		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class,
+				someOtherId);
 
-		final TestAppendix result = (TestAppendix) argumentProcessor.prepareArgument(state, args);
+		@SuppressWarnings("unchecked")
+		final Optional<TestAppendix> result = (Optional<TestAppendix>) argumentProcessor.prepareArgument(state, args);
 
 		assertThat(result)
-				.isNull();
+				.isEmpty();
 	}
 
 	@Test(expected = TooManyElementsException.class)
@@ -76,7 +84,8 @@ public class ArgumentFromAppendixTest {
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(new TestAppendix("some string"))
 				.addAppendix(new TestAppendix("other string"));
-		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
+		final Object[] args = { "einfacher Teststring", Integer.valueOf(5),
+				state };
 		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class,
 				TestAppendix.testAppendixId);
 
@@ -91,13 +100,16 @@ public class ArgumentFromAppendixTest {
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(new TestAppendix("some string"))
 				.addAppendix(new TestAppendix("other string"));
-		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
-		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class, someOtherId);
+		final Object[] args = { "einfacher Teststring", Integer.valueOf(5),
+				state };
+		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class,
+				someOtherId);
 
-		final Object argument = argumentProcessor.prepareArgument(state, args);
+		@SuppressWarnings("unchecked")
+		final Optional<TestAppendix> argument = (Optional<TestAppendix>) argumentProcessor.prepareArgument(state, args);
 
 		assertThat(argument)
-				.isNull();
+				.isEmpty();
 	}
 
 	private static class TestAppendix extends ApplicationAppendix<String> {

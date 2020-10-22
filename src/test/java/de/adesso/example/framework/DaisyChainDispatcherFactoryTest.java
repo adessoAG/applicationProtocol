@@ -194,7 +194,7 @@ public class DaisyChainDispatcherFactoryTest {
 	}
 
 	@Getter
-	private static class Appendix_B2 extends ApplicationAppendix<String> {
+	public static class Appendix_B2 extends ApplicationAppendix<String> {
 
 		private final static UUID APPENDIX_B2_ID = UUID.randomUUID();
 
@@ -213,7 +213,7 @@ public class DaisyChainDispatcherFactoryTest {
 		}
 	}
 
-	private class TestBean_2 implements ApplicationFrameworkInvokable {
+	public class TestBean_2 implements ApplicationFrameworkInvokable {
 
 		@SuppressWarnings("unused")
 		public ApplicationProtocol<String> anotherAction(final String anotherString,

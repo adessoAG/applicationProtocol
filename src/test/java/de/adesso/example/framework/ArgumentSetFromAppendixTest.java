@@ -23,7 +23,7 @@ public class ArgumentSetFromAppendixTest {
 		assertThat(result).isNotNull();
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorTypeIsNull() {
 		final UUID attachmentId = UUID.randomUUID();
 
@@ -32,7 +32,7 @@ public class ArgumentSetFromAppendixTest {
 		fail("should detect null value for type");
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorAttachmentIsNull() {
 		new ArgumentSetFromAppendix(String.class, null);
 
@@ -46,14 +46,15 @@ public class ArgumentSetFromAppendixTest {
 				.addAppendix(new OtherAppendix("the last string"));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class,
-				TestAppendix.testAppendixId);
+				OtherAppendix.testAppendixId);
 
-		@SuppressWarnings("unchecked") final Set<TestAppendix> result = (Set<TestAppendix>) argumentProcessor
+		@SuppressWarnings("unchecked")
+		final Set<TestAppendix> result = (Set<TestAppendix>) argumentProcessor
 				.prepareArgument(state, args);
 
 		assertThat(result)
 				.isNotNull()
-				.hasOnlyElementsOfType(TestAppendix.class)
+				.hasOnlyElementsOfType(OtherAppendix.class)
 				.hasSize(2);
 	}
 
@@ -66,7 +67,8 @@ public class ArgumentSetFromAppendixTest {
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class, otherId);
 
-		@SuppressWarnings("unchecked") final Set<TestAppendix> result = (Set<TestAppendix>) argumentProcessor
+		@SuppressWarnings("unchecked")
+		final Set<TestAppendix> result = (Set<TestAppendix>) argumentProcessor
 				.prepareArgument(state, args);
 
 		assertThat(result)
@@ -85,7 +87,8 @@ public class ArgumentSetFromAppendixTest {
 		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class,
 				TestAppendix.testAppendixId);
 
-		@SuppressWarnings("unchecked") final Set<TestAppendix> result = (Set<TestAppendix>) argumentProcessor
+		@SuppressWarnings("unchecked")
+		final Set<TestAppendix> result = (Set<TestAppendix>) argumentProcessor
 				.prepareArgument(state, args);
 
 		assertThat(result)

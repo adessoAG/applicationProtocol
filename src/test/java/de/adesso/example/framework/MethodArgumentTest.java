@@ -28,7 +28,7 @@ public class MethodArgumentTest {
 		new MethodArgument(String.class, -1);
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorTypeNull() {
 		new MethodArgument(null, 0);
 	}

@@ -23,7 +23,7 @@ public class ArgumentListFromAppendixTest {
 		assertThat(result).isNotNull();
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorTypeIsNull() {
 		final UUID attachmentId = UUID.randomUUID();
 
@@ -32,7 +32,7 @@ public class ArgumentListFromAppendixTest {
 		fail("should detect null value for type");
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorAttachmentIsNull() {
 		new ArgumentListFromAppendix(String.class, null);
 
