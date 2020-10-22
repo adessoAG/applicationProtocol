@@ -8,12 +8,19 @@ import lombok.Getter;
 
 @Getter
 @Appendix
-public class EmployeeAppendix extends ApplicationAppendix {
+public class EmployeeAppendix extends ApplicationAppendix<Employee> {
 
-	private final Employee employee;
+	EmployeeAppendix(final Employee employee) {
+		super(employee);
+	}
 
-	EmployeeAppendix(final UUID applicationAppendixId, final UUID owner, final Employee employee) {
-		super(applicationAppendixId, owner);
-		this.employee = employee;
+	@Override
+	public UUID getOwner() {
+		return Employment.ownUuid;
+	}
+
+	@Override
+	public UUID getAppendixId() {
+		return Employment.employeeAppendixId;
 	}
 }

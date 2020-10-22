@@ -3,6 +3,7 @@ package de.adesso.example.framework;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ class AppendixList {
 	/**
 	 * List of all appendix values.
 	 */
-	public List<ApplicationAppendix> appendixes = new ArrayList<>();
+	public List<ApplicationAppendix<?>> appendixes = new ArrayList<>();
 
 	public AppendixList() {
 	}
@@ -34,17 +35,17 @@ class AppendixList {
 	 * @throws TooManyElementsException if the list of appendixes contains more than
 	 *                                  one element of type T
 	 */
-	public ApplicationAppendix getAppendixOfType(final UUID appendixId) throws TooManyElementsException {
-		final List<ApplicationAppendix> allAppendixesOfTypeT = getAllAppendixesOfTypeT(appendixId)
+	public Optional<ApplicationAppendix<?>> getAppendixOfType(final UUID appendixId) throws TooManyElementsException {
+		final List<? extends ApplicationAppendix<?>> allAppendixesOfTypeT = getAllAppendixesOfTypeT(appendixId)
 				.collect(Collectors.toList());
 		if (allAppendixesOfTypeT.size() > 1) {
 			throw new TooManyElementsException("more than one element");
 		}
 		if (allAppendixesOfTypeT.isEmpty()) {
-			return null;
+			return Optional.empty();
 		}
 
-		return allAppendixesOfTypeT.get(0);
+		return Optional.of(allAppendixesOfTypeT.get(0));
 	}
 
 	/**
@@ -78,18 +79,18 @@ class AppendixList {
 		return allAppendixesOfTypeT;
 	}
 
-	private Stream<ApplicationAppendix> getAllAppendixesOfTypeT(final UUID appendixId) {
-		final Stream<ApplicationAppendix> stream = this.appendixes
+	private Stream<ApplicationAppendix<?>> getAllAppendixesOfTypeT(final UUID appendixId) {
+		final Stream<ApplicationAppendix<?>> stream = this.appendixes
 				.stream()
-				.filter(a -> a.getApplicationAppendixId() == appendixId);
+				.filter(a -> a.getAppendixId() == appendixId);
 		return stream;
 	}
 
-	public void addAppendix(final ApplicationAppendix additionalAppendix) {
+	public void addAppendix(final ApplicationAppendix<?> additionalAppendix) {
 		this.appendixes.add(additionalAppendix);
 	}
 
-	public void addAppendix(final Collection<ApplicationAppendix> additionalAppendixes) {
+	public void addAppendix(final Collection<ApplicationAppendix<?>> additionalAppendixes) {
 		this.appendixes.addAll(additionalAppendixes);
 	}
 }

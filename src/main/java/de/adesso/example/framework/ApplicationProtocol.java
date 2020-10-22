@@ -2,6 +2,7 @@ package de.adesso.example.framework;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,7 +43,7 @@ public class ApplicationProtocol<RESULT_TYPE> {
 	 * @throws TooManyElementsException if the list of appendixes contains more than
 	 *                                  one element of type T
 	 */
-	public ApplicationAppendix getAppendixOfType(final UUID appendixId) throws TooManyElementsException {
+	public Optional<ApplicationAppendix<?>> getAppendixOfType(final UUID appendixId) throws TooManyElementsException {
 		return this.data.getAppendixOfType(appendixId);
 	}
 
@@ -54,7 +55,7 @@ public class ApplicationProtocol<RESULT_TYPE> {
 	 * @param appendixId
 	 * @return
 	 */
-	public List<ApplicationAppendix> getAllAppenixesOfTypeAsList(final UUID appendixId) {
+	public List<ApplicationAppendix<?>> getAllAppenixesOfTypeAsList(final UUID appendixId) {
 		return this.data.getAllAppenixesOfTypeAsList(appendixId);
 	}
 
@@ -66,21 +67,21 @@ public class ApplicationProtocol<RESULT_TYPE> {
 	 * @param appendixId
 	 * @return
 	 */
-	public Set<ApplicationAppendix> getAllAppenixesOfTypeAsSet(final UUID appendixId) {
+	public Set<ApplicationAppendix<?>> getAllAppenixesOfTypeAsSet(final UUID appendixId) {
 		return this.data.getAllAppenixesOfTypeAsSet(appendixId);
 	}
 
 	// modifier
 	// -----------------------------------------------------------------------//
 
-	public ApplicationProtocol<RESULT_TYPE> addAppendix(final ApplicationAppendix additionalAppendix) {
+	public ApplicationProtocol<RESULT_TYPE> addAppendix(final ApplicationAppendix<?> additionalAppendix) {
 		this.data.addAppendix(additionalAppendix);
 
 		return this;
 	}
 
 	public ApplicationProtocol<RESULT_TYPE> addAllAppendixes(
-			final Collection<ApplicationAppendix> additionalAppendixes) {
+			final Collection<ApplicationAppendix<?>> additionalAppendixes) {
 		this.data.addAppendix(additionalAppendixes);
 
 		return this;

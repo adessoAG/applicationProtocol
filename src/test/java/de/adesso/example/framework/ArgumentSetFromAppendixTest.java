@@ -41,16 +41,15 @@ public class ArgumentSetFromAppendixTest {
 
 	@Test
 	public void testPrepareArgumentToSet() {
-		final UUID appendixId = UUID.randomUUID();
-		final UUID owner = UUID.randomUUID();
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new TestAppendix(appendixId, owner))
-				.addAppendix(new TestAppendix(appendixId, owner));
+				.addAppendix(new OtherAppendix("some string"))
+				.addAppendix(new OtherAppendix("the last string"));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
-		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class, appendixId);
+		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class,
+				TestAppendix.testAppendixId);
 
-		@SuppressWarnings("unchecked")
-		final Set<TestAppendix> result = (Set<TestAppendix>) argumentProcessor.prepareArgument(state, args);
+		@SuppressWarnings("unchecked") final Set<TestAppendix> result = (Set<TestAppendix>) argumentProcessor
+				.prepareArgument(state, args);
 
 		assertThat(result)
 				.isNotNull()
@@ -60,17 +59,15 @@ public class ArgumentSetFromAppendixTest {
 
 	@Test
 	public void testPrepareArgumentToSetEmpty() {
-		final UUID appendixId = UUID.randomUUID();
 		final UUID otherId = UUID.randomUUID();
-		final UUID owner = UUID.randomUUID();
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new TestAppendix(appendixId, owner))
-				.addAppendix(new TestAppendix(appendixId, owner));
+				.addAppendix(new OtherAppendix("some string"))
+				.addAppendix(new OtherAppendix("the last string"));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class, otherId);
 
-		@SuppressWarnings("unchecked")
-		final Set<TestAppendix> result = (Set<TestAppendix>) argumentProcessor.prepareArgument(state, args);
+		@SuppressWarnings("unchecked") final Set<TestAppendix> result = (Set<TestAppendix>) argumentProcessor
+				.prepareArgument(state, args);
 
 		assertThat(result)
 				.isNotNull()
@@ -79,20 +76,17 @@ public class ArgumentSetFromAppendixTest {
 
 	@Test
 	public void testPrepareArgumentToSetDifferentAppendixes() {
-		final UUID appendixId = UUID.randomUUID();
-		final UUID otherAppendixId = UUID.randomUUID();
-		final UUID owner = UUID.randomUUID();
-		final UUID otherOwner = UUID.randomUUID();
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new TestOtherAppendix(otherAppendixId, owner))
-				.addAppendix(new TestAppendix(appendixId, owner))
-				.addAppendix(new TestAppendix(appendixId, otherOwner))
-				.addAppendix(new TestOtherAppendix(otherAppendixId, owner));
+				.addAppendix(new OtherAppendix("some string"))
+				.addAppendix(new TestAppendix("another string"))
+				.addAppendix(new TestAppendix("thrid string"))
+				.addAppendix(new OtherAppendix("the last string"));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
-		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class, appendixId);
+		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class,
+				TestAppendix.testAppendixId);
 
-		@SuppressWarnings("unchecked")
-		final Set<TestAppendix> result = (Set<TestAppendix>) argumentProcessor.prepareArgument(state, args);
+		@SuppressWarnings("unchecked") final Set<TestAppendix> result = (Set<TestAppendix>) argumentProcessor
+				.prepareArgument(state, args);
 
 		assertThat(result)
 				.isNotNull()
@@ -100,17 +94,43 @@ public class ArgumentSetFromAppendixTest {
 				.hasSize(2);
 	}
 
-	private class TestAppendix extends ApplicationAppendix {
+	private static class TestAppendix extends ApplicationAppendix<String> {
 
-		public TestAppendix(final UUID applicationAppendixId, final UUID owner) {
-			super(applicationAppendixId, owner);
+		public static final UUID ownerId = UUID.randomUUID();
+		public static final UUID testAppendixId = UUID.randomUUID();
+
+		public TestAppendix(final String content) {
+			super(content);
+		}
+
+		@Override
+		public UUID getOwner() {
+			return TestAppendix.ownerId;
+		}
+
+		@Override
+		public UUID getAppendixId() {
+			return TestAppendix.testAppendixId;
 		}
 	}
 
-	private class TestOtherAppendix extends ApplicationAppendix {
+	private static class OtherAppendix extends ApplicationAppendix<String> {
 
-		public TestOtherAppendix(final UUID applicationAppendixId, final UUID owner) {
-			super(applicationAppendixId, owner);
+		public static final UUID ownerId = UUID.randomUUID();
+		public static final UUID testAppendixId = UUID.randomUUID();
+
+		public OtherAppendix(final String content) {
+			super(content);
+		}
+
+		@Override
+		public UUID getOwner() {
+			return OtherAppendix.ownerId;
+		}
+
+		@Override
+		public UUID getAppendixId() {
+			return OtherAppendix.testAppendixId;
 		}
 	}
 }

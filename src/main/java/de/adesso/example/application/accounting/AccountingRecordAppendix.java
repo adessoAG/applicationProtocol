@@ -2,28 +2,25 @@ package de.adesso.example.application.accounting;
 
 import java.util.UUID;
 
-import org.javamoney.moneta.Money;
-
 import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.annotation.Appendix;
-import lombok.Builder;
-import lombok.Getter;
 
-@Getter
-@Builder
 @Appendix()
-public class AccountingRecordAppendix extends ApplicationAppendix {
+public class AccountingRecordAppendix extends ApplicationAppendix<AccountingRecord> {
 
 	private static UUID accountingRecordUUID = UUID.randomUUID();
 
-	private final Account debitor;
-	private final Account creditor;
-	private final Money value;
+	public AccountingRecordAppendix(final AccountingRecord accountingRecord) {
+		super(accountingRecord);
+	}
 
-	public AccountingRecordAppendix(final Account debitor, final Account creditor, final Money value) {
-		super(accountingRecordUUID, Accounting.getId());
-		this.debitor = debitor;
-		this.creditor = creditor;
-		this.value = value;
+	@Override
+	public UUID getOwner() {
+		return Accounting.id;
+	}
+
+	@Override
+	public UUID getAppendixId() {
+		return accountingRecordUUID;
 	}
 }

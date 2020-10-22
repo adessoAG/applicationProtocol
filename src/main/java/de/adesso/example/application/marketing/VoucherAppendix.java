@@ -4,16 +4,24 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import de.adesso.example.framework.TApplicationAppendix;
+import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.annotation.Appendix;
 
 @Appendix
-public class VoucherAppendix extends TApplicationAppendix<Voucher> {
-
-	public static final UUID voucherAppendixId = UUID.randomUUID();
+public class VoucherAppendix extends ApplicationAppendix<Voucher> {
 
 	@Autowired
-	public VoucherAppendix(final UUID owner, final Voucher voucher) {
-		super(voucherAppendixId, owner, voucher);
+	public VoucherAppendix(final Voucher voucher) {
+		super(voucher);
+	}
+
+	@Override
+	public UUID getOwner() {
+		return Marketing.marketingOwner;
+	}
+
+	@Override
+	public UUID getAppendixId() {
+		return Marketing.voucherAppendixId;
 	}
 }

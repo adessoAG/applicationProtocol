@@ -42,13 +42,12 @@ public class ArgumentFromAppendixTest {
 
 	@Test
 	public void testPrepareArgument() {
-		final UUID appendixId = UUID.randomUUID();
-		final UUID owner = UUID.randomUUID();
-		final ApplicationAppendix additionalAppendix = new TestAppendix(appendixId, owner);
+		final TestAppendix additionalAppendix = new TestAppendix("some string");
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(additionalAppendix);
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
-		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class, appendixId);
+		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class,
+				TestAppendix.testAppendixId);
 
 		final TestAppendix result = (TestAppendix) argumentProcessor.prepareArgument(state, args);
 
@@ -59,14 +58,12 @@ public class ArgumentFromAppendixTest {
 
 	@Test
 	public void testPrepareArgumentMissingArgument() {
-		final UUID appendixId = UUID.randomUUID();
-		final UUID owner = UUID.randomUUID();
 		final UUID someOtherId = UUID.randomUUID();
-		final ApplicationAppendix additionalAppendix = new TestAppendix(someOtherId, owner);
+		final TestAppendix additionalAppendix = new TestAppendix("some string");
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(additionalAppendix);
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
-		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class, appendixId);
+		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class, someOtherId);
 
 		final TestAppendix result = (TestAppendix) argumentProcessor.prepareArgument(state, args);
 
@@ -76,13 +73,12 @@ public class ArgumentFromAppendixTest {
 
 	@Test(expected = TooManyElementsException.class)
 	public void testPrepareArgumentTooManyArguments() {
-		final UUID appendixId = UUID.randomUUID();
-		final UUID owner = UUID.randomUUID();
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new TestAppendix(appendixId, owner))
-				.addAppendix(new TestAppendix(appendixId, owner));
+				.addAppendix(new TestAppendix("some string"))
+				.addAppendix(new TestAppendix("other string"));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
-		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class, appendixId);
+		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class,
+				TestAppendix.testAppendixId);
 
 		argumentProcessor.prepareArgument(state, args);
 
@@ -91,14 +87,12 @@ public class ArgumentFromAppendixTest {
 
 	@Test
 	public void testPrepareArgumentNoMatches() {
-		final UUID appendixId = UUID.randomUUID();
-		final UUID owner = UUID.randomUUID();
 		final UUID someOtherId = UUID.randomUUID();
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new TestAppendix(someOtherId, owner))
-				.addAppendix(new TestAppendix(someOtherId, owner));
+				.addAppendix(new TestAppendix("some string"))
+				.addAppendix(new TestAppendix("other string"));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
-		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class, appendixId);
+		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class, someOtherId);
 
 		final Object argument = argumentProcessor.prepareArgument(state, args);
 
@@ -106,10 +100,23 @@ public class ArgumentFromAppendixTest {
 				.isNull();
 	}
 
-	private class TestAppendix extends ApplicationAppendix {
+	private static class TestAppendix extends ApplicationAppendix<String> {
 
-		public TestAppendix(final UUID applicationAppendixId, final UUID owner) {
-			super(applicationAppendixId, owner);
+		public static final UUID ownerId = UUID.randomUUID();
+		public static final UUID testAppendixId = UUID.randomUUID();
+
+		public TestAppendix(final String content) {
+			super(content);
+		}
+
+		@Override
+		public UUID getOwner() {
+			return TestAppendix.ownerId;
+		}
+
+		@Override
+		public UUID getAppendixId() {
+			return TestAppendix.testAppendixId;
 		}
 	}
 }

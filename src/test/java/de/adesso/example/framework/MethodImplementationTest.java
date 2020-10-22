@@ -54,25 +54,23 @@ public class MethodImplementationTest {
 				.isNotNull()
 				.isInstanceOf(Appendix_A1.class);
 		final Appendix_A1 appendix_A1 = (Appendix_A1) a1;
-		assertThat(appendix_A1.getAnInt())
-				.isEqualTo(testInt);
-		assertThat(appendix_A1.getAnInteger())
-				.isEqualTo(testInteger);
+		assertThat(appendix_A1.getContent())
+				.isEqualTo(5);
 
 		final Object a2 = resultState.getAppendixOfType(Appendix_A2.APPENDIX_A2_ID);
 		assertThat(a2)
 				.isNotNull()
 				.isInstanceOf(Appendix_A2.class);
 		final Appendix_A2 appendix_A2 = (Appendix_A2) a2;
-		assertThat(appendix_A2.getAString())
+		assertThat(appendix_A2.getContent())
 				.isEqualTo(anotherTestString);
 
-		final List<ApplicationAppendix> b2List = resultState.getAllAppenixesOfTypeAsList(Appendix_B2.APPENDIX_B2_ID);
+		final List<ApplicationAppendix<?>> b2List = resultState.getAllAppenixesOfTypeAsList(Appendix_B2.APPENDIX_B2_ID);
 		assertThat(b2List)
 				.isNotNull()
 				.hasSize(2);
 		final Appendix_B2 appendix_B2 = (Appendix_B2) b2List.get(0);
-		assertThat(appendix_B2.getAString())
+		assertThat(appendix_B2.getContent())
 				.isEqualTo(anotherTestString);
 	}
 
@@ -107,26 +105,31 @@ public class MethodImplementationTest {
 
 	private static class Owner_1 extends ApplicationOwner {
 
-		public Owner_1() {
-			super(UUID.randomUUID());
-		}
+		public static final UUID ownerId = UUID.randomUUID();
 
-		public Appendix_A1 createAppendix_A1(final int anInt, final Integer anInteger) {
-			return new Appendix_A1(getOwnUuid(), anInt, anInteger);
+		@Override
+		protected UUID getOwner() {
+			return ownerId;
 		}
 	}
 
 	@Getter
-	private static class Appendix_A1 extends ApplicationAppendix {
+	private static class Appendix_A1 extends ApplicationAppendix<Integer> {
 
-		private final int anInt;
-		private final Integer anInteger;
 		private final static UUID APPENDIX_A1_ID = UUID.randomUUID();
 
-		public Appendix_A1(final UUID owner, final int anInt, final Integer anInteger) {
-			super(APPENDIX_A1_ID, owner);
-			this.anInt = anInt;
-			this.anInteger = anInteger;
+		public Appendix_A1(final Integer content) {
+			super(content);
+		}
+
+		@Override
+		public UUID getOwner() {
+			return owner1.getOwner();
+		}
+
+		@Override
+		public UUID getAppendixId() {
+			return APPENDIX_A1_ID;
 		}
 	}
 
@@ -136,7 +139,7 @@ public class MethodImplementationTest {
 		public ApplicationProtocol<String> doSomething(final String aString, final int anInt, final Integer anInteger) {
 			final ApplicationProtocol<String> state = new ApplicationProtocol<>();
 			state.setResult(aString);
-			state.addAppendix(MethodImplementationTest.owner1.createAppendix_A1(anInt, anInteger));
+			state.addAppendix(new Appendix_A1(5));
 
 			return state;
 		}
@@ -146,40 +149,51 @@ public class MethodImplementationTest {
 
 	private static class Owner_2 extends ApplicationOwner {
 
-		public Owner_2() {
-			super(UUID.randomUUID());
-		}
+		public static final UUID ownerId = UUID.randomUUID();
 
-		public Appendix_A2 createAppendix_A2(final String aString) {
-			return new Appendix_A2(getOwnUuid(), aString);
-		}
-
-		public Appendix_B2 createAppendix_B2(final String aString) {
-			return new Appendix_B2(getOwnUuid(), aString);
+		@Override
+		protected UUID getOwner() {
+			return ownerId;
 		}
 	}
 
 	@Getter
-	private static class Appendix_A2 extends ApplicationAppendix {
+	private static class Appendix_A2 extends ApplicationAppendix<String> {
 
-		private final String aString;
 		private final static UUID APPENDIX_A2_ID = UUID.randomUUID();
 
-		public Appendix_A2(final UUID owner, final String aString) {
-			super(APPENDIX_A2_ID, owner);
-			this.aString = aString;
+		public Appendix_A2(final String content) {
+			super(content);
+		}
+
+		@Override
+		public UUID getOwner() {
+			return owner2.getOwner();
+		}
+
+		@Override
+		public UUID getAppendixId() {
+			return APPENDIX_A2_ID;
 		}
 	}
 
 	@Getter
-	private static class Appendix_B2 extends ApplicationAppendix {
+	private static class Appendix_B2 extends ApplicationAppendix<String> {
 
-		private final String aString;
 		private final static UUID APPENDIX_B2_ID = UUID.randomUUID();
 
-		public Appendix_B2(final UUID owner, final String aString) {
-			super(APPENDIX_B2_ID, owner);
-			this.aString = aString;
+		public Appendix_B2(final String content) {
+			super(content);
+		}
+
+		@Override
+		public UUID getOwner() {
+			return owner2.getOwner();
+		}
+
+		@Override
+		public UUID getAppendixId() {
+			return APPENDIX_B2_ID;
 		}
 	}
 
@@ -189,9 +203,9 @@ public class MethodImplementationTest {
 		public ApplicationProtocol<String> anotherAction(final String anotherString,
 				final ApplicationProtocol<String> state) {
 			state.setResult(state.getResult() + anotherString);
-			state.addAppendix(MethodImplementationTest.owner2.createAppendix_A2(anotherString));
-			state.addAppendix(MethodImplementationTest.owner2.createAppendix_B2(anotherString));
-			state.addAppendix(MethodImplementationTest.owner2.createAppendix_B2(anotherString));
+			state.addAppendix(new Appendix_A2(anotherString));
+			state.addAppendix(new Appendix_B2(anotherString));
+			state.addAppendix(new Appendix_B2(anotherString));
 
 			return state;
 		}

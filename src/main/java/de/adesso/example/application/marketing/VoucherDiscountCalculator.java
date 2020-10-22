@@ -1,30 +1,18 @@
 package de.adesso.example.application.marketing;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import de.adesso.example.application.stock.Article;
-import de.adesso.example.framework.ApplicationOwner;
 import de.adesso.example.framework.ApplicationFrameworkInvokable;
 import de.adesso.example.framework.ApplicationProtocol;
 
 @Service
-public class VoucherDiscountCalculator 
-	extends ApplicationOwner
-	implements ApplicationFrameworkInvokable {
+public class VoucherDiscountCalculator
+		implements ApplicationFrameworkInvokable {
 
-	public VoucherDiscountCalculator() {
-		super(retrieveOwnUuid());
-	}
-
-	private static UUID ownUuid = UUID.randomUUID();
-	private static UUID retrieveOwnUuid() {
-		return ownUuid;
-	}
-
-	public ApplicationProtocol<BigDecimal> calculatePrice(Article article, Voucher voucher) {
+	public ApplicationProtocol<BigDecimal> calculatePrice(final Article article, final Voucher voucher) {
 		return null;
 	}
 }

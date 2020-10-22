@@ -4,13 +4,14 @@ import java.util.Collection;
 
 public class BookKeeper {
 
-	public void process (final Collection<AccountingRecordAppendix> accountingRecords) throws BookKeepingException {
+	public void process(final Collection<AccountingRecordAppendix> accountingRecords) throws BookKeepingException {
 		accountingRecords
-		.stream()
-		.forEach (this::book);
+				.stream()
+				.forEach(this::book);
 	}
 
-	public void book(final AccountingRecordAppendix ar) {
+	public void book(final AccountingRecordAppendix ara) {
+		final AccountingRecord ar = ara.getContent();
 		ar.getCreditor().amount.subtract(ar.getValue());
 		ar.getDebitor().amount.add(ar.getValue());
 	}

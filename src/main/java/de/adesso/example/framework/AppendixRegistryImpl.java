@@ -31,9 +31,9 @@ public class AppendixRegistryImpl implements AppendixRegistry, ApplicationContex
 	@PostConstruct
 	public void init() {
 		this.appendixClassNames.stream()
-				.map(name -> (TApplicationAppendix<?>) this.applicationContext.getBean(name))
-				.collect(Collectors.toMap(TApplicationAppendix::getType,
-						TApplicationAppendix::getApplicationAppendixId));
+				.map(name -> (ApplicationAppendix<?>) this.applicationContext.getBean(name))
+				.collect(Collectors.toMap(ApplicationAppendix::getType,
+						ApplicationAppendix::getAppendixId));
 	}
 
 	@Override

@@ -19,8 +19,8 @@ public class ArgumentFromAppendix extends Argument {
 	@Override
 	protected Object prepareArgument(final ApplicationProtocol<?> state, final Object[] args) {
 		Object result = state.getAppendixOfType(this.appendixId);
-		if (result instanceof TApplicationAppendix<?>) {
-			result = ((TApplicationAppendix<?>) result).getContent();
+		if (result instanceof ApplicationAppendix<?>) {
+			result = ((ApplicationAppendix<?>) result).getContent();
 		}
 
 		return result;
