@@ -7,6 +7,7 @@ import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.Emulated;
 import de.adesso.example.framework.annotation.Implementation;
 import de.adesso.example.framework.annotation.MatchingStrategy;
+import de.adesso.example.framework.annotation.RequiredParameter;
 
 /**
  * This interface defines the functionality required for calculation of prices.
@@ -23,12 +24,16 @@ public interface PriceCalculatorAnnotated {
 	 * @param article
 	 * @return
 	 */
-	@Implementation(implementations = {
-			"BasePriceCalculator",
-			"EmployeeDiscountCalculator",
-			"VoucherDiscountCalculator"
-	}, strategy = { MatchingStrategy.ByType,
-			MatchingStrategy.FromAppendix,
-			MatchingStrategy.ByName })
-	ApplicationProtocol<BigDecimal> calculatePrice(Article article, ApplicationProtocol<BigDecimal> appendixes);
+	@Implementation(
+			implementations = {
+					"BasePriceCalculator",
+					"EmployeeDiscountCalculator",
+					"VoucherDiscountCalculator"
+			},
+			strategy = { MatchingStrategy.ByType,
+					MatchingStrategy.FromAppendix,
+					MatchingStrategy.ByName })
+	ApplicationProtocol<BigDecimal> calculatePrice(
+			@RequiredParameter Article article,
+			@RequiredParameter ApplicationProtocol<BigDecimal> appendixes);
 }

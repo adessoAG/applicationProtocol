@@ -23,12 +23,10 @@ public abstract class ApplicationAppendix<T> {
 	@Getter
 	private final T content;
 
+	private static Class<Object> contentType = null;
+
 	protected ApplicationAppendix(final T content) {
 		this.content = content;
-	}
-
-	public Class<?> getType() {
-		return this.content.getClass();
 	}
 
 	/**
@@ -40,4 +38,12 @@ public abstract class ApplicationAppendix<T> {
 	 * Identifier for the type of appendix
 	 */
 	public abstract UUID getAppendixId();
+
+	public static Class<Object> getType() {
+		return ApplicationAppendix.contentType;
+	}
+
+	static void setType(final Class<Object> type) {
+		ApplicationAppendix.contentType = type;
+	}
 }

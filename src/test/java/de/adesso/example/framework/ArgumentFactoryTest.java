@@ -102,7 +102,6 @@ public class ArgumentFactoryTest {
 		final Method emulatedMethod = ToBeEmulated.class.getMethod("operation", String.class, int.class,
 				ApplicationProtocol.class);
 		final UUID stringAppendixId = UUID.randomUUID();
-		this.registry.register(stringAppendixId, String.class);
 
 		final Argument argument = this.factory.createArgumentFromAppendix(emulatedMethod, String.class);
 

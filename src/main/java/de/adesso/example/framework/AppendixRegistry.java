@@ -13,12 +13,4 @@ public interface AppendixRegistry {
 	 * @return the UUID of the appendix providing this type
 	 */
 	UUID lookUp(@NonNull Class<?> parameterType);
-
-	/**
-	 * Register an uuid of an appendix which can provide the requested type.
-	 *
-	 * @param appendixId    id of the appendix
-	 * @param parameterType type of the requested parameter
-	 */
-	void register(UUID appendixId, Class<?> parameterType);
 }
