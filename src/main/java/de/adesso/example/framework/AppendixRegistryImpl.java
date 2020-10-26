@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
 
 import lombok.Getter;
@@ -16,14 +18,19 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AppendixRegistryImpl implements AppendixRegistry, BeanClassLoaderAware {
 
-	private final Map<Class<Object>, Class<? extends ApplicationAppendix<?>>> map;
+	private final List<String> appendixClassesNames;
+	private Map<Class<Object>, Class<? extends ApplicationAppendix<?>>> map;
 	private ClassLoader classLoader;
 
-	public AppendixRegistryImpl(final List<Class<?>> appendixClasses) {
-		this.map = null;
-		appendixClasses.stream()
-				.peek(c -> log.atInfo().log("found appendix %s", c.getName()))
-				.map(this::convertType)
+	public AppendixRegistryImpl(final List<String> appendixClassesNames) {
+		this.appendixClassesNames = appendixClassesNames;
+	}
+
+	@PostConstruct
+	public void init() {
+		this.map = this.appendixClassesNames.stream()
+				.peek(n -> log.atInfo().log("found appendix %s", n))
+				.map(this::getClassFromClassName)
 				.map(c -> new Mapping(getParameterType(c), c))
 				.peek(this::setTypeTo)
 				.collect(Collectors.toMap(Mapping::getKey, Mapping::getValue));
@@ -56,23 +63,11 @@ public class AppendixRegistryImpl implements AppendixRegistry, BeanClassLoaderAw
 		return parameterTypeClass;
 	}
 
-	/**
-	 * The cast is possible without any risk, because type was already checked by
-	 * the {@link ApplicationClassPathAppendixProvider}.
-	 *
-	 * @param c the class to be casted
-	 * @return the casted object
-	 */
-	@SuppressWarnings("unchecked")
-	private Class<? extends ApplicationAppendix<?>> convertType(final Class<?> c) {
-		return (Class<? extends ApplicationAppendix<?>>) c;
-	}
-
 	private Mapping setTypeTo(final Mapping mapping) {
 		Method m;
 		try {
-			m = mapping.value.getMethod("setType", Class.class);
-			m.invoke(null, this.map.get(mapping.key));
+			m = mapping.value.getSuperclass().getDeclaredMethod("setType", Class.class);
+			m.invoke(null, mapping.key);
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
 			final String message = "could not set the type to the appendix class";
@@ -93,5 +88,23 @@ public class AppendixRegistryImpl implements AppendixRegistry, BeanClassLoaderAw
 			this.key = key;
 			this.value = value;
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private Class<? extends ApplicationAppendix<?>> getClassFromClassName(final String className) {
+		Class<?> loadedClass;
+		try {
+			loadedClass = this.classLoader.loadClass(className);
+		} catch (final ClassNotFoundException e) {
+			final String message = String.format("could not load class %s", className);
+			log.atError().log(message);
+			throw new RuntimeException(message, e);
+		}
+		if (ApplicationAppendix.class.isAssignableFrom(loadedClass))
+			return (Class<? extends ApplicationAppendix<?>>) loadedClass;
+		final String message = String
+				.format("incompatible class encountered, should be subclass of ApplicationAppendix: %s", className);
+		log.atError().log(message);
+		throw new RuntimeException(message);
 	}
 }

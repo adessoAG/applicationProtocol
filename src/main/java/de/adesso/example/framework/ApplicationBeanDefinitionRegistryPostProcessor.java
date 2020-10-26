@@ -26,7 +26,7 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 
 	private final static String basePackage = "de.adesso.example";
 
-	private List<Class<?>> appendixClasses;
+	private List<String> appendixClassesNames;
 
 	@Override
 	public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
@@ -40,13 +40,13 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 
 	@Bean
 	public AppendixRegistry appendixRegistry() {
-		return new AppendixRegistryImpl(this.appendixClasses);
+		return new AppendixRegistryImpl(this.appendixClassesNames);
 	}
 
 	private void prepareAppendixes(final BeanDefinitionRegistry registry) {
 		/** register all appendixes to be able to initialize the AppendixRegistry */
-		this.appendixClasses = findAppendixClasses(basePackage).stream()
-				.map(BeanDefinition::getClass)
+		this.appendixClassesNames = findAppendixClasses(basePackage).stream()
+				.map(BeanDefinition::getBeanClassName)
 				.collect(Collectors.toList());
 	}
 
