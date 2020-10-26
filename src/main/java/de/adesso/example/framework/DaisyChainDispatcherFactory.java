@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import de.adesso.example.framework.exception.UnknownMethodException;
 import lombok.extern.log4j.Log4j2;
@@ -20,6 +22,7 @@ import lombok.extern.log4j.Log4j2;
  * @param <INTERFACE>
  */
 @Log4j2
+@Service
 public class DaisyChainDispatcherFactory implements BeanClassLoaderAware {
 
 	private final Map<String, MethodImplementation> emulateMethods = new HashMap<>();
@@ -93,6 +96,7 @@ public class DaisyChainDispatcherFactory implements BeanClassLoaderAware {
 
 	@SuppressWarnings("unchecked")
 	public <T> T build() {
+		Assert.notNull(this.classLoader, "classloader not defined, fix initialization");
 		// create the dispatcher and feed collected information
 		final DaisyChainDispatcher dispatcher = new DaisyChainDispatcher()
 				.setImplementationInterface(this.implementationInterface)

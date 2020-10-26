@@ -10,7 +10,6 @@ import de.adesso.example.framework.ApplicationOwner;
 public class Employment extends ApplicationOwner {
 
 	public final static UUID ownUuid = UUID.randomUUID();
-	public final static UUID employeeAppendixId = UUID.randomUUID();
 
 	// employee factory methods
 

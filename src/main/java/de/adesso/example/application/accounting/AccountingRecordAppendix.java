@@ -8,8 +8,6 @@ import de.adesso.example.framework.annotation.Appendix;
 @Appendix()
 public class AccountingRecordAppendix extends ApplicationAppendix<AccountingRecord> {
 
-	private static UUID accountingRecordUUID = UUID.randomUUID();
-
 	public AccountingRecordAppendix(final AccountingRecord accountingRecord) {
 		super(accountingRecord);
 	}
@@ -17,10 +15,5 @@ public class AccountingRecordAppendix extends ApplicationAppendix<AccountingReco
 	@Override
 	public UUID getOwner() {
 		return Accounting.id;
-	}
-
-	@Override
-	public UUID getAppendixId() {
-		return accountingRecordUUID;
 	}
 }

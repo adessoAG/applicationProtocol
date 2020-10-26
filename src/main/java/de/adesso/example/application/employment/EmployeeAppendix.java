@@ -18,9 +18,4 @@ public class EmployeeAppendix extends ApplicationAppendix<Employee> {
 	public UUID getOwner() {
 		return Employment.ownUuid;
 	}
-
-	@Override
-	public UUID getAppendixId() {
-		return Employment.employeeAppendixId;
-	}
 }

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,18 +17,14 @@ public class ArgumentFromAppendixTest {
 
 	@Test
 	public void testConstructor() {
-		final UUID attachmentId = UUID.randomUUID();
+		final ArgumentFromAppendix appendix = new ArgumentFromAppendix(String.class, StringTestAppendix.class);
 
-		final ArgumentFromAppendix result = new ArgumentFromAppendix(String.class, attachmentId);
-
-		assertThat(result).isNotNull();
+		assertThat(appendix).isNotNull();
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorTypeIsNull() {
-		final UUID attachmentId = UUID.randomUUID();
-
-		new ArgumentFromAppendix(null, attachmentId);
+		new ArgumentFromAppendix(null, StringTestAppendix.class);
 
 		fail("should detect null value for type");
 	}
@@ -43,16 +38,16 @@ public class ArgumentFromAppendixTest {
 
 	@Test
 	public void testPrepareArgument() {
-		final TestAppendix additionalAppendix = new TestAppendix("some string");
+		final StringTestAppendix additionalAppendix = new StringTestAppendix("some string");
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(additionalAppendix);
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5),
 				state };
 		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class,
-				TestAppendix.testAppendixId);
+				StringTestAppendix.class);
 
 		@SuppressWarnings("unchecked")
-		final Optional<TestAppendix> result = (Optional<TestAppendix>) argumentProcessor
+		final Optional<StringTestAppendix> result = (Optional<StringTestAppendix>) argumentProcessor
 				.prepareArgument(state, args);
 
 		assertThat(result)
@@ -63,17 +58,17 @@ public class ArgumentFromAppendixTest {
 
 	@Test
 	public void testPrepareArgumentMissingArgument() {
-		final UUID someOtherId = UUID.randomUUID();
-		final TestAppendix additionalAppendix = new TestAppendix("some string");
+		final StringTestAppendix additionalAppendix = new StringTestAppendix("some string");
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
 				.addAppendix(additionalAppendix);
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5),
 				state };
 		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class,
-				someOtherId);
+				IntegerTestAppendix.class);
 
 		@SuppressWarnings("unchecked")
-		final Optional<TestAppendix> result = (Optional<TestAppendix>) argumentProcessor.prepareArgument(state, args);
+		final Optional<StringTestAppendix> result = (Optional<StringTestAppendix>) argumentProcessor.prepareArgument(state,
+				args);
 
 		assertThat(result)
 				.isEmpty();
@@ -82,12 +77,12 @@ public class ArgumentFromAppendixTest {
 	@Test(expected = TooManyElementsException.class)
 	public void testPrepareArgumentTooManyArguments() {
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new TestAppendix("some string"))
-				.addAppendix(new TestAppendix("other string"));
+				.addAppendix(new StringTestAppendix("some string"))
+				.addAppendix(new StringTestAppendix("other string"));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5),
 				state };
 		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class,
-				TestAppendix.testAppendixId);
+				StringTestAppendix.class);
 
 		argumentProcessor.prepareArgument(state, args);
 
@@ -96,39 +91,19 @@ public class ArgumentFromAppendixTest {
 
 	@Test
 	public void testPrepareArgumentNoMatches() {
-		final UUID someOtherId = UUID.randomUUID();
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new TestAppendix("some string"))
-				.addAppendix(new TestAppendix("other string"));
+				.addAppendix(new StringTestAppendix("some string"))
+				.addAppendix(new StringTestAppendix("other string"));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5),
 				state };
 		final ArgumentFromAppendix argumentProcessor = new ArgumentFromAppendix(String.class,
-				someOtherId);
+				IntegerTestAppendix.class);
 
 		@SuppressWarnings("unchecked")
-		final Optional<TestAppendix> argument = (Optional<TestAppendix>) argumentProcessor.prepareArgument(state, args);
+		final Optional<StringTestAppendix> argument = (Optional<StringTestAppendix>) argumentProcessor.prepareArgument(state,
+				args);
 
 		assertThat(argument)
 				.isEmpty();
-	}
-
-	private static class TestAppendix extends ApplicationAppendix<String> {
-
-		public static final UUID ownerId = UUID.randomUUID();
-		public static final UUID testAppendixId = UUID.randomUUID();
-
-		public TestAppendix(final String content) {
-			super(content);
-		}
-
-		@Override
-		public UUID getOwner() {
-			return TestAppendix.ownerId;
-		}
-
-		@Override
-		public UUID getAppendixId() {
-			return TestAppendix.testAppendixId;
-		}
 	}
 }

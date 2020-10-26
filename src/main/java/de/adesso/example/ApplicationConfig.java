@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Scope;
 
 import de.adesso.example.application.PriceCalculator;
 import de.adesso.example.application.employment.Employee;
+import de.adesso.example.application.employment.EmployeeAppendix;
 import de.adesso.example.application.employment.EmployeeDiscountCalculator;
-import de.adesso.example.application.employment.Employment;
-import de.adesso.example.application.marketing.Marketing;
 import de.adesso.example.application.marketing.Voucher;
+import de.adesso.example.application.marketing.VoucherAppendix;
 import de.adesso.example.application.marketing.VoucherDiscountCalculator;
 import de.adesso.example.application.stock.Article;
 import de.adesso.example.application.stock.BasePriceCalculator;
@@ -61,14 +61,14 @@ public class ApplicationConfig {
 								.implementation(this.employeeDiscountCalculator)
 								.methodIdentifier("calculatePrice")
 								.argument(new MethodArgument(Article.class, 0))
-								.argument(new ArgumentFromAppendix(Employee.class, Employment.employeeAppendixId))
+								.argument(new ArgumentFromAppendix(Employee.class, EmployeeAppendix.class))
 								.build())
 						// third call VoucherDiscountCalculator
 						.beanOperation(BeanOperation.builder()
 								.implementation(this.voucherDiscountCalculator)
 								.methodIdentifier("calculatePrice")
 								.argument(new MethodArgument(Article.class, 0))
-								.argument(new ArgumentFromAppendix(Voucher.class, Marketing.voucherAppendixId))
+								.argument(new ArgumentFromAppendix(Voucher.class, VoucherAppendix.class))
 								.build())
 						.build())
 				.build();

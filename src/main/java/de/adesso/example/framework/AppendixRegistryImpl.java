@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -38,8 +37,8 @@ public class AppendixRegistryImpl implements AppendixRegistry, BeanClassLoaderAw
 	}
 
 	@Override
-	public UUID lookUp(@NonNull final Class<?> parameterType) {
-		return null;
+	public Class<? extends ApplicationAppendix<?>> lookUp(@NonNull final Class<?> parameterType) {
+		return this.map.get(parameterType);
 	}
 
 	@SuppressWarnings("unchecked")

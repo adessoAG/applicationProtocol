@@ -19,9 +19,4 @@ public class VoucherAppendix extends ApplicationAppendix<Voucher> {
 	public UUID getOwner() {
 		return Marketing.marketingOwner;
 	}
-
-	@Override
-	public UUID getAppendixId() {
-		return Marketing.voucherAppendixId;
-	}
 }

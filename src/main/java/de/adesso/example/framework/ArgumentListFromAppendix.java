@@ -1,20 +1,20 @@
 package de.adesso.example.framework;
 
-import java.util.UUID;
-
 import lombok.NonNull;
 
 public class ArgumentListFromAppendix extends Argument {
-	private final UUID requiredAttachment;
 
-	public ArgumentListFromAppendix(@NonNull final Class<?> type, @NonNull final UUID requiredAttachment) {
+	private final Class<? extends ApplicationAppendix<?>> appendixClass;
+
+	public ArgumentListFromAppendix(@NonNull final Class<?> type,
+			@NonNull final Class<? extends ApplicationAppendix<?>> appendixClass) {
 		super(type);
-		this.requiredAttachment = requiredAttachment;
+		this.appendixClass = appendixClass;
 	}
 
 	@Override
 	protected Object prepareArgument(final ApplicationProtocol<?> state, final Object[] args) {
-		final Object result = state.getAllAppenixesOfTypeAsList(this.requiredAttachment);
+		final Object result = state.getAllAppenixesOfTypeAsList(this.appendixClass);
 
 		return result;
 	}

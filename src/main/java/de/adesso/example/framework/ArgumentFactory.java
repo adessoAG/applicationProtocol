@@ -3,7 +3,6 @@ package de.adesso.example.framework;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -54,14 +53,15 @@ public class ArgumentFactory {
 	public Argument createArgumentFromAppendix(@NonNull final Method emulatedMethod,
 			@NonNull final Class<?> parameterType) {
 		final ParameterPosition targetCandidate = findMatchingParametersByType(emulatedMethod, parameterType);
-		@NonNull final UUID appendixId = this.appendixRegistry.lookUp(parameterType);
-		if (appendixId == null) {
+		@NonNull
+		final Class<? extends ApplicationAppendix<?>> appendixClass = this.appendixRegistry.lookUp(parameterType);
+		if (appendixClass == null) {
 			final String message = "no appropriate appendix registered. Cannot retrieve the required type";
 			log.atWarn().log(message);
 			throw new AppendixNotRegistered(message);
 		}
 
-		final Argument argument = new ArgumentFromAppendix(parameterType, appendixId);
+		final Argument argument = new ArgumentFromAppendix(parameterType, appendixClass);
 		argument.setTargetPosition(targetCandidate.getPosition());
 
 		return argument;

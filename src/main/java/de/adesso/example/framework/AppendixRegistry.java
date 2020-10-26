@@ -1,7 +1,5 @@
 package de.adesso.example.framework;
 
-import java.util.UUID;
-
 import lombok.NonNull;
 
 public interface AppendixRegistry {
@@ -12,5 +10,5 @@ public interface AppendixRegistry {
 	 * @param parameterType the required type
 	 * @return the UUID of the appendix providing this type
 	 */
-	UUID lookUp(@NonNull Class<?> parameterType);
+	Class<? extends ApplicationAppendix<?>> lookUp(@NonNull Class<?> parameterType);
 }

@@ -1,7 +1,5 @@
 package de.adesso.example.framework;
 
-import java.util.UUID;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -9,16 +7,17 @@ import lombok.NonNull;
 public class ArgumentFromAppendix extends Argument {
 
 	@Getter(value = AccessLevel.PACKAGE)
-	private final UUID appendixId;
+	private final Class<? extends ApplicationAppendix<?>> appendixClass;
 
-	public ArgumentFromAppendix(@NonNull final Class<?> type, @NonNull final UUID appendixId) {
+	public ArgumentFromAppendix(@NonNull final Class<?> type,
+			@NonNull final Class<? extends ApplicationAppendix<?>> appendixClass) {
 		super(type);
-		this.appendixId = appendixId;
+		this.appendixClass = appendixClass;
 	}
 
 	@Override
 	protected Object prepareArgument(final ApplicationProtocol<?> state, final Object[] args) {
-		Object result = state.getAppendixOfType(this.appendixId);
+		Object result = state.getAppendixOfClass(this.appendixClass);
 		if (result instanceof ApplicationAppendix<?>) {
 			result = ((ApplicationAppendix<?>) result).getContent();
 		}

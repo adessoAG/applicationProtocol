@@ -34,11 +34,6 @@ public abstract class ApplicationAppendix<T> {
 	 */
 	public abstract UUID getOwner();
 
-	/**
-	 * Identifier for the type of appendix
-	 */
-	public abstract UUID getAppendixId();
-
 	public static Class<Object> getType() {
 		return ApplicationAppendix.contentType;
 	}

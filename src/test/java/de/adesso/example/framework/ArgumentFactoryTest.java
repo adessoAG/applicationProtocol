@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -101,16 +100,14 @@ public class ArgumentFactoryTest {
 	public void testCreateArgumentFromAppendix() throws NoSuchMethodException, SecurityException {
 		final Method emulatedMethod = ToBeEmulated.class.getMethod("operation", String.class, int.class,
 				ApplicationProtocol.class);
-		final UUID stringAppendixId = UUID.randomUUID();
-
 		final Argument argument = this.factory.createArgumentFromAppendix(emulatedMethod, String.class);
 
 		assertThat(argument)
 				.isNotNull()
 				.isInstanceOf(ArgumentFromAppendix.class);
 		final ArgumentFromAppendix appendixArgument = (ArgumentFromAppendix) argument;
-		assertThat(appendixArgument.getAppendixId())
-				.isEqualTo(stringAppendixId);
+		assertThat(appendixArgument.getAppendixClass())
+				.isInstanceOf(StringTestAppendix.class);
 		assertThat(appendixArgument.getTargetPosition())
 				.isEqualTo(0);
 		assertThat(appendixArgument.getType())

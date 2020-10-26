@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,13 +29,14 @@ class AppendixList {
 	 * {@link ClassCastException}.
 	 *
 	 * @param <T>
-	 * @param appendixId
+	 * @param appendixClass
 	 * @return
 	 * @throws TooManyElementsException if the list of appendixes contains more than
 	 *                                  one element of type T
 	 */
-	public Optional<ApplicationAppendix<?>> getAppendixOfType(final UUID appendixId) throws TooManyElementsException {
-		final List<? extends ApplicationAppendix<?>> allAppendixesOfTypeT = getAllAppendixesOfTypeT(appendixId)
+	public Optional<ApplicationAppendix<?>> getAppendixOfType(
+			final Class<? extends ApplicationAppendix<?>> appendixClass) throws TooManyElementsException {
+		final List<? extends ApplicationAppendix<?>> allAppendixesOfTypeT = getAllAppendixesOfClass(appendixClass)
 				.collect(Collectors.toList());
 		if (allAppendixesOfTypeT.size() > 1) {
 			throw new TooManyElementsException("more than one element");
@@ -56,10 +56,10 @@ class AppendixList {
 	 * @param appendixId
 	 * @return
 	 */
-	public <T> List<T> getAllAppenixesOfTypeAsList(final UUID appendixId) {
-		@SuppressWarnings("unchecked") final List<T> allAppendixesOfTypeT = (List<T>) getAllAppendixesOfTypeT(
-				appendixId)
-						.collect(Collectors.toList());
+	public <T> List<T> getAllAppenixesOfTypeAsList(final Class<? extends ApplicationAppendix<?>> appendixClass) {
+		@SuppressWarnings("unchecked")
+		final List<T> allAppendixesOfTypeT = (List<T>) getAllAppendixesOfClass(appendixClass)
+				.collect(Collectors.toList());
 
 		return allAppendixesOfTypeT;
 	}
@@ -72,17 +72,18 @@ class AppendixList {
 	 * @param appendixId
 	 * @return
 	 */
-	public <T> Set<T> getAllAppenixesOfTypeAsSet(final UUID appendixId) {
-		@SuppressWarnings("unchecked") final Set<T> allAppendixesOfTypeT = (Set<T>) getAllAppendixesOfTypeT(appendixId)
+	public <T> Set<T> getAllAppenixesOfTypeAsSet(final Class<? extends ApplicationAppendix<?>> appendixClass) {
+		@SuppressWarnings("unchecked")
+		final Set<T> allAppendixesOfTypeT = (Set<T>) getAllAppendixesOfClass(appendixClass)
 				.collect(Collectors.toSet());
 
 		return allAppendixesOfTypeT;
 	}
 
-	private Stream<ApplicationAppendix<?>> getAllAppendixesOfTypeT(final UUID appendixId) {
-		final Stream<ApplicationAppendix<?>> stream = this.appendixes
-				.stream()
-				.filter(a -> a.getAppendixId() == appendixId);
+	private Stream<ApplicationAppendix<?>> getAllAppendixesOfClass(
+			final Class<? extends ApplicationAppendix<?>> appendixClass) {
+		final Stream<ApplicationAppendix<?>> stream = this.appendixes.stream()
+				.filter(a -> a.getClass() == appendixClass);
 		return stream;
 	}
 

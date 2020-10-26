@@ -6,10 +6,18 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import de.adesso.example.ApplicationConfig;
 import de.adesso.example.framework.exception.UnknownMethodException;
 import lombok.Getter;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@ContextConfiguration(classes = { ApplicationConfig.class })
 public class DaisyChainDispatcherFactoryTest {
 
 	@Test
@@ -34,7 +42,7 @@ public class DaisyChainDispatcherFactoryTest {
 		assertThat(resultState.getResult())
 				.isEqualTo(testString + anotherTestString);
 
-		final Object a1 = resultState.getAppendixOfType(Appendix_A1.APPENDIX_A1_ID);
+		final Object a1 = resultState.getAppendixOfClass(Appendix_A1.class);
 		assertThat(a1)
 				.isNotNull()
 				.isInstanceOf(Appendix_A1.class);
@@ -42,7 +50,7 @@ public class DaisyChainDispatcherFactoryTest {
 		assertThat(appendix_A1.getContent())
 				.isEqualTo(5);
 
-		final Object a2 = resultState.getAppendixOfType(Appendix_A2.APPENDIX_A2_ID);
+		final Object a2 = resultState.getAppendixOfClass(Appendix_A2.class);
 		assertThat(a2)
 				.isNotNull()
 				.isInstanceOf(Appendix_A2.class);
@@ -50,7 +58,7 @@ public class DaisyChainDispatcherFactoryTest {
 		assertThat(appendix_A2.getContent())
 				.isEqualTo(anotherTestString);
 
-		final List<ApplicationAppendix<?>> b2List = resultState.getAllAppenixesOfTypeAsList(Appendix_B2.APPENDIX_B2_ID);
+		final List<ApplicationAppendix<?>> b2List = resultState.getAllAppenixesOfTypeAsList(Appendix_B2.class);
 		assertThat(b2List)
 				.isNotNull()
 				.hasSize(2);
@@ -132,8 +140,6 @@ public class DaisyChainDispatcherFactoryTest {
 	@Getter
 	private static class Appendix_A1 extends ApplicationAppendix<Integer> {
 
-		private final static UUID APPENDIX_A1_ID = UUID.randomUUID();
-
 		public Appendix_A1(final Integer content) {
 			super(content);
 		}
@@ -141,11 +147,6 @@ public class DaisyChainDispatcherFactoryTest {
 		@Override
 		public UUID getOwner() {
 			return owner1.getOwner();
-		}
-
-		@Override
-		public UUID getAppendixId() {
-			return APPENDIX_A1_ID;
 		}
 	}
 
@@ -176,8 +177,6 @@ public class DaisyChainDispatcherFactoryTest {
 	@Getter
 	private static class Appendix_A2 extends ApplicationAppendix<String> {
 
-		private final static UUID APPENDIX_A2_ID = UUID.randomUUID();
-
 		public Appendix_A2(final String content) {
 			super(content);
 		}
@@ -186,17 +185,10 @@ public class DaisyChainDispatcherFactoryTest {
 		public UUID getOwner() {
 			return owner2.getOwner();
 		}
-
-		@Override
-		public UUID getAppendixId() {
-			return APPENDIX_A2_ID;
-		}
 	}
 
 	@Getter
 	public static class Appendix_B2 extends ApplicationAppendix<String> {
-
-		private final static UUID APPENDIX_B2_ID = UUID.randomUUID();
 
 		public Appendix_B2(final String content) {
 			super(content);
@@ -205,11 +197,6 @@ public class DaisyChainDispatcherFactoryTest {
 		@Override
 		public UUID getOwner() {
 			return owner2.getOwner();
-		}
-
-		@Override
-		public UUID getAppendixId() {
-			return APPENDIX_B2_ID;
 		}
 	}
 

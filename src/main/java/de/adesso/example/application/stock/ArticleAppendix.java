@@ -6,20 +6,12 @@ import de.adesso.example.framework.ApplicationAppendix;
 
 public class ArticleAppendix extends ApplicationAppendix<Article> {
 
-	protected ArticleAppendix(Article content) {
+	protected ArticleAppendix(final Article content) {
 		super(content);
 	}
-
-	final static UUID articelAppendixId = UUID.randomUUID();
 
 	@Override
 	public UUID getOwner() {
 		return Warehousing.ownerId;
 	}
-
-	@Override
-	public UUID getAppendixId() {
-		return articelAppendixId;
-	}
-
 }

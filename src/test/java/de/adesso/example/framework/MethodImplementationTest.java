@@ -50,14 +50,14 @@ public class MethodImplementationTest {
 				.isNotNull()
 				.isEqualTo(testString + anotherTestString);
 
-		final Optional<ApplicationAppendix<?>> a1 = resultState.getAppendixOfType(Appendix_A1.APPENDIX_A1_ID);
+		final Optional<ApplicationAppendix<?>> a1 = resultState.getAppendixOfClass(Appendix_A1.class);
 		assertThat(a1)
 				.isNotEmpty();
 		final Appendix_A1 appendix_A1 = (Appendix_A1) a1.get();
 		assertThat(appendix_A1.getContent())
 				.isEqualTo(5);
 
-		final Optional<ApplicationAppendix<?>> a2 = resultState.getAppendixOfType(Appendix_A2.APPENDIX_A2_ID);
+		final Optional<ApplicationAppendix<?>> a2 = resultState.getAppendixOfClass(Appendix_A2.class);
 		assertThat(a2)
 				.isNotEmpty();
 		assertThat(a2.get())
@@ -66,7 +66,7 @@ public class MethodImplementationTest {
 		assertThat(appendix_A2.getContent())
 				.isEqualTo(anotherTestString);
 
-		final List<ApplicationAppendix<?>> b2List = resultState.getAllAppenixesOfTypeAsList(Appendix_B2.APPENDIX_B2_ID);
+		final List<ApplicationAppendix<?>> b2List = resultState.getAllAppenixesOfTypeAsList(Appendix_B2.class);
 		assertThat(b2List)
 				.isNotNull()
 				.hasSize(2);
@@ -117,8 +117,6 @@ public class MethodImplementationTest {
 	@Getter
 	private static class Appendix_A1 extends ApplicationAppendix<Integer> {
 
-		private final static UUID APPENDIX_A1_ID = UUID.randomUUID();
-
 		public Appendix_A1(final Integer content) {
 			super(content);
 		}
@@ -126,11 +124,6 @@ public class MethodImplementationTest {
 		@Override
 		public UUID getOwner() {
 			return owner1.getOwner();
-		}
-
-		@Override
-		public UUID getAppendixId() {
-			return APPENDIX_A1_ID;
 		}
 	}
 
@@ -161,8 +154,6 @@ public class MethodImplementationTest {
 	@Getter
 	private static class Appendix_A2 extends ApplicationAppendix<String> {
 
-		private final static UUID APPENDIX_A2_ID = UUID.randomUUID();
-
 		public Appendix_A2(final String content) {
 			super(content);
 		}
@@ -171,17 +162,10 @@ public class MethodImplementationTest {
 		public UUID getOwner() {
 			return owner2.getOwner();
 		}
-
-		@Override
-		public UUID getAppendixId() {
-			return APPENDIX_A2_ID;
-		}
 	}
 
 	@Getter
 	private static class Appendix_B2 extends ApplicationAppendix<String> {
-
-		private final static UUID APPENDIX_B2_ID = UUID.randomUUID();
 
 		public Appendix_B2(final String content) {
 			super(content);
@@ -190,11 +174,6 @@ public class MethodImplementationTest {
 		@Override
 		public UUID getOwner() {
 			return owner2.getOwner();
-		}
-
-		@Override
-		public UUID getAppendixId() {
-			return APPENDIX_B2_ID;
 		}
 	}
 

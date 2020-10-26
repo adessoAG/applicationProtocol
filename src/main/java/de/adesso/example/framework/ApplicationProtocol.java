@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import de.adesso.example.framework.exception.TooManyElementsException;
 import lombok.Getter;
@@ -43,8 +42,9 @@ public class ApplicationProtocol<RESULT_TYPE> {
 	 * @throws TooManyElementsException if the list of appendixes contains more than
 	 *                                  one element of type T
 	 */
-	public Optional<ApplicationAppendix<?>> getAppendixOfType(final UUID appendixId) throws TooManyElementsException {
-		return this.data.getAppendixOfType(appendixId);
+	public Optional<ApplicationAppendix<?>> getAppendixOfClass(
+			final Class<? extends ApplicationAppendix<?>> appendixClass) throws TooManyElementsException {
+		return this.data.getAppendixOfType(appendixClass);
 	}
 
 	/**
@@ -55,8 +55,9 @@ public class ApplicationProtocol<RESULT_TYPE> {
 	 * @param appendixId
 	 * @return
 	 */
-	public List<ApplicationAppendix<?>> getAllAppenixesOfTypeAsList(final UUID appendixId) {
-		return this.data.getAllAppenixesOfTypeAsList(appendixId);
+	public List<ApplicationAppendix<?>> getAllAppenixesOfTypeAsList(
+			final Class<? extends ApplicationAppendix<?>> appendixClass) {
+		return this.data.getAllAppenixesOfTypeAsList(appendixClass);
 	}
 
 	/**
@@ -67,8 +68,9 @@ public class ApplicationProtocol<RESULT_TYPE> {
 	 * @param appendixId
 	 * @return
 	 */
-	public Set<ApplicationAppendix<?>> getAllAppenixesOfTypeAsSet(final UUID appendixId) {
-		return this.data.getAllAppenixesOfTypeAsSet(appendixId);
+	public Set<ApplicationAppendix<?>> getAllAppenixesOfTypeAsSet(
+			final Class<? extends ApplicationAppendix<?>> appendixClass) {
+		return this.data.getAllAppenixesOfTypeAsSet(appendixClass);
 	}
 
 	// modifier
