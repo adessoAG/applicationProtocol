@@ -61,7 +61,7 @@ public class ArgumentListFromAppendixTest {
 				.addAppendix(new StringTestAppendix("other string"));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentListFromAppendix argumentProcessor = new ArgumentListFromAppendix(String.class,
-				OtherStringTestAppendix.class);
+				OtherTestAppendix.class);
 
 		@SuppressWarnings("unchecked")
 		final List<StringTestAppendix> result = (List<StringTestAppendix>) argumentProcessor
@@ -75,10 +75,10 @@ public class ArgumentListFromAppendixTest {
 	@Test
 	public void testPrepareArgumentToListDifferentAppendixes() {
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new OtherStringTestAppendix("some string"))
+				.addAppendix(new OtherTestAppendix(new Other("some string", 5)))
 				.addAppendix(new StringTestAppendix("another string"))
 				.addAppendix(new StringTestAppendix("thrid string"))
-				.addAppendix(new OtherStringTestAppendix("the last string"));
+				.addAppendix(new OtherTestAppendix(new Other("the last string", 7)));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentListFromAppendix argumentProcessor = new ArgumentListFromAppendix(String.class,
 				StringTestAppendix.class);

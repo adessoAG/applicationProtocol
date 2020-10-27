@@ -3,22 +3,26 @@ package de.adesso.example.framework;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import de.adesso.example.ApplicationConfig;
 import de.adesso.example.framework.exception.UnknownMethodException;
 import lombok.Getter;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ContextConfiguration(classes = { ApplicationConfig.class })
+@ContextConfiguration(classes = { TestConfig.class })
 public class DaisyChainDispatcherFactoryTest {
+
+	@Autowired
+	private DaisyChainDispatcherFactory factory;
 
 	@Test
 	public void testBuild() {
@@ -32,7 +36,7 @@ public class DaisyChainDispatcherFactoryTest {
 	public void testOperationOnEmulatedInterface() {
 		final EmulatedInterface emulated = createProxy();
 
-		final String testString = "So sieht der String aus";
+		final String testString = "So sieht der String aus. ";
 		final Integer testInteger = 13;
 		final int testInt = 5;
 		final String anotherTestString = "Das ist ein Teststring";
@@ -42,17 +46,23 @@ public class DaisyChainDispatcherFactoryTest {
 		assertThat(resultState.getResult())
 				.isEqualTo(testString + anotherTestString);
 
-		final Object a1 = resultState.getAppendixOfClass(Appendix_A1.class);
-		assertThat(a1)
+		final Optional<ApplicationAppendix<?>> optionalA1 = resultState.getAppendixOfClass(Appendix_A1.class);
+		assertThat(optionalA1)
 				.isNotNull()
+				.isNotEmpty();
+		final ApplicationAppendix<?> a1 = optionalA1.get();
+		assertThat(a1)
 				.isInstanceOf(Appendix_A1.class);
 		final Appendix_A1 appendix_A1 = (Appendix_A1) a1;
 		assertThat(appendix_A1.getContent())
 				.isEqualTo(5);
 
-		final Object a2 = resultState.getAppendixOfClass(Appendix_A2.class);
-		assertThat(a2)
+		final Optional<ApplicationAppendix<?>> optionalA2 = resultState.getAppendixOfClass(Appendix_A2.class);
+		assertThat(optionalA2)
 				.isNotNull()
+				.isNotEmpty();
+		final ApplicationAppendix<?> a2 = optionalA2.get();
+		assertThat(a2)
 				.isInstanceOf(Appendix_A2.class);
 		final Appendix_A2 appendix_A2 = (Appendix_A2) a2;
 		assertThat(appendix_A2.getContent())
@@ -69,30 +79,28 @@ public class DaisyChainDispatcherFactoryTest {
 
 	@Test(expected = ClassCastException.class)
 	public void testNotInterface() {
-		new DaisyChainDispatcherFactory()
-				.implementationInterface(Wrong.class);
+		this.factory.implementationInterface(Wrong.class);
 	}
 
 	@Test(expected = UnknownMethodException.class)
 	public void testWrongOrdering() {
-		new DaisyChainDispatcherFactory()
-				.operation(MethodImplementation.builder()
-						.methodIdentifier(EmulatedInterface.method_1)
-						.returnValueType(String.class)
-						.beanOperation(BeanOperation.builder()
-								.implementation(new TestBean_1())
-								.methodIdentifier("doSomething")
-								.argument(new MethodArgument(String.class, 0))
-								.argument(new MethodArgument(int.class, 1))
-								.argument(new MethodArgument(Integer.class, 2))
-								.build())
-						.build());
+		this.factory.operation(MethodImplementation.builder()
+				.methodIdentifier(EmulatedInterface.method_1)
+				.returnValueType(String.class)
+				.beanOperation(BeanOperation.builder()
+						.implementation(new TestBean_1())
+						.methodIdentifier("doSomething")
+						.argument(new MethodArgument(String.class, 0))
+						.argument(new MethodArgument(int.class, 1))
+						.argument(new MethodArgument(Integer.class, 2))
+						.build())
+				.build());
 	}
 
 	// ------------------------------------------------------------------------//
 
 	private EmulatedInterface createProxy() {
-		final EmulatedInterface emulated = new DaisyChainDispatcherFactory()
+		final EmulatedInterface emulated = this.factory
 				.implementationInterface(EmulatedInterface.class)
 				.operation(MethodImplementation.builder()
 						.methodIdentifier(EmulatedInterface.method_1)
@@ -202,7 +210,6 @@ public class DaisyChainDispatcherFactoryTest {
 
 	public class TestBean_2 implements ApplicationFrameworkInvokable {
 
-		@SuppressWarnings("unused")
 		public ApplicationProtocol<String> anotherAction(final String anotherString,
 				final ApplicationProtocol<String> state) {
 			state.setResult(state.getResult() + anotherString);

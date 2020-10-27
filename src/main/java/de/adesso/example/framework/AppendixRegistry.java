@@ -2,6 +2,13 @@ package de.adesso.example.framework;
 
 import lombok.NonNull;
 
+/**
+ * The class maintains an overview over all appendixes. Since the appendixes are
+ * looked up by the type they contain, only one appendix per type is allowed.
+ *
+ * @author Matthias
+ *
+ */
 public interface AppendixRegistry {
 
 	/**

@@ -5,9 +5,9 @@ import java.util.UUID;
 import de.adesso.example.framework.annotation.Appendix;
 
 @Appendix
-public class OtherStringTestAppendix extends ApplicationAppendix<String> {
+public class OtherTestAppendix extends ApplicationAppendix<Other> {
 
-	protected OtherStringTestAppendix(final String content) {
+	protected OtherTestAppendix(final Other content) {
 		super(content);
 	}
 

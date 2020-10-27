@@ -58,7 +58,7 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 			final String beanName = beanNameBuilder.toString();
 			beanDefintion.setScope("singelton");
 			beanDefintion.setFactoryBeanName(ApplicationProxyFactory.class.getName());
-			log.atDebug().log("going to register bean: %s", beanDefintion.toString());
+			log.atDebug().log("going to register bean: {}", beanDefintion.toString());
 			registry.registerBeanDefinition(beanName, beanDefintion);
 
 			// register the factory bean

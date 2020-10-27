@@ -107,7 +107,7 @@ public class ArgumentFactoryTest {
 				.isInstanceOf(ArgumentFromAppendix.class);
 		final ArgumentFromAppendix appendixArgument = (ArgumentFromAppendix) argument;
 		assertThat(appendixArgument.getAppendixClass())
-				.isInstanceOf(StringTestAppendix.class);
+				.isEqualTo(StringTestAppendix.class);
 		assertThat(appendixArgument.getTargetPosition())
 				.isEqualTo(0);
 		assertThat(appendixArgument.getType())

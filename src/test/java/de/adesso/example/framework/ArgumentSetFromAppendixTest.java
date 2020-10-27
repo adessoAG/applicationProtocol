@@ -39,11 +39,11 @@ public class ArgumentSetFromAppendixTest {
 	@Test
 	public void testPrepareArgumentToSet() {
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new OtherStringTestAppendix("some string"))
-				.addAppendix(new OtherStringTestAppendix("the last string"));
+				.addAppendix(new OtherTestAppendix(new Other("some string", 5)))
+				.addAppendix(new OtherTestAppendix(new Other("the last string", 7)));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class,
-				OtherStringTestAppendix.class);
+				OtherTestAppendix.class);
 
 		@SuppressWarnings("unchecked")
 		final Set<StringTestAppendix> result = (Set<StringTestAppendix>) argumentProcessor
@@ -51,18 +51,18 @@ public class ArgumentSetFromAppendixTest {
 
 		assertThat(result)
 				.isNotNull()
-				.hasOnlyElementsOfType(OtherStringTestAppendix.class)
+				.hasOnlyElementsOfType(OtherTestAppendix.class)
 				.hasSize(2);
 	}
 
 	@Test
 	public void testPrepareArgumentToSetEmpty() {
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new OtherStringTestAppendix("some string"))
-				.addAppendix(new OtherStringTestAppendix("the last string"));
+				.addAppendix(new OtherTestAppendix(new Other("some string", 3)))
+				.addAppendix(new OtherTestAppendix(new Other("the last string", 11)));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class,
-				OtherStringTestAppendix.class);
+				StringTestAppendix.class);
 
 		@SuppressWarnings("unchecked")
 		final Set<StringTestAppendix> result = (Set<StringTestAppendix>) argumentProcessor
@@ -76,10 +76,10 @@ public class ArgumentSetFromAppendixTest {
 	@Test
 	public void testPrepareArgumentToSetDifferentAppendixes() {
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new OtherStringTestAppendix("some string"))
+				.addAppendix(new OtherTestAppendix(new Other("some string", 7)))
 				.addAppendix(new StringTestAppendix("another string"))
 				.addAppendix(new StringTestAppendix("thrid string"))
-				.addAppendix(new OtherStringTestAppendix("the last string"));
+				.addAppendix(new OtherTestAppendix(new Other("the last string", 5)));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
 		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class,
 				StringTestAppendix.class);

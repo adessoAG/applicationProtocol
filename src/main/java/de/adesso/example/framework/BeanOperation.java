@@ -50,7 +50,7 @@ public class BeanOperation {
 		IntStream.range(0, arguments.size()).forEach(i -> arguments.get(i).setTargetPosition(i));
 
 		try {
-			log.atDebug().log("going to extract method %s::%s", implementation.getClass().getName(), methodIdentifier);
+			log.atDebug().log("going to extract method {}::{}", implementation.getClass().getName(), methodIdentifier);
 			this.method = implementation.getClass().getDeclaredMethod(methodIdentifier, argumentTypes(arguments));
 		} catch (NoSuchMethodException | SecurityException e) {
 			final String message = "could not build bean operation";

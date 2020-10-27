@@ -29,10 +29,12 @@ public class AppendixRegistryImpl implements AppendixRegistry, BeanClassLoaderAw
 	@PostConstruct
 	public void init() {
 		this.map = this.appendixClassesNames.stream()
-				.peek(n -> log.atInfo().log("found appendix %s", n))
+				.peek(n -> log.atInfo().log("found appendix {}", n))
 				.map(this::getClassFromClassName)
 				.map(c -> new Mapping(getParameterType(c), c))
 				.peek(this::setTypeTo)
+				// TODO The collector toMap generates maps with unique keys. Duplicate keys are
+				// not allowed.
 				.collect(Collectors.toMap(Mapping::getKey, Mapping::getValue));
 		log.atInfo().log(
 				"prepared all appendixes, if one is missing check @Appendix annotation, the class has to extend ApplicationAppendix and has to be independent");

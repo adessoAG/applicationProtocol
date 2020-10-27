@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -23,6 +24,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Service
+@Scope("prototype")
 public class DaisyChainDispatcherFactory implements BeanClassLoaderAware {
 
 	private final Map<String, MethodImplementation> emulateMethods = new HashMap<>();
