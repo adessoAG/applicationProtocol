@@ -3,6 +3,8 @@ package de.adesso.example;
 import java.math.BigDecimal;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -28,6 +30,9 @@ import lombok.extern.log4j.Log4j2;
 public class ApplicationConfig {
 
 	@Autowired
+	private ApplicationContext context;
+
+	@Autowired
 	private BasePriceCalculator basePriceCalculator;
 
 	@Autowired
@@ -41,11 +46,11 @@ public class ApplicationConfig {
 	}
 
 	@Bean
-	@Scope(scopeName = "singelton")
+	@Scope(scopeName = ConfigurableBeanFactory.SCOPE_SINGLETON)
 	PriceCalculator priceCalculator() {
 		log.atDebug().log("start with initilization of PriceCalculator");
 
-		return new DaisyChainDispatcherFactory()
+		final PriceCalculator priceCalculator = new DaisyChainDispatcherFactory(this.context.getClassLoader())
 				.implementationInterface(PriceCalculator.class)
 				.operation(MethodImplementation.builder()
 						.methodIdentifier("calculatePrice")
@@ -72,5 +77,8 @@ public class ApplicationConfig {
 								.build())
 						.build())
 				.build();
+		log.atDebug().log("done with initializationof PriceCalculator");
+
+		return priceCalculator;
 	}
 }

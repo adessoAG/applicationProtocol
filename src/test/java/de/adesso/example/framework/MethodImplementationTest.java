@@ -97,6 +97,7 @@ public class MethodImplementationTest {
 				.method(EmulatedInterface.class.getDeclaredMethod(EmulatedInterface.method_1, String.class,
 						int.class,
 						Integer.class, String.class));
+		implementation.init(null);
 		return implementation;
 	}
 
@@ -127,7 +128,7 @@ public class MethodImplementationTest {
 		}
 	}
 
-	private static class TestBean_1 implements ApplicationFrameworkInvokable {
+	private static class TestBean_1 {
 
 		@SuppressWarnings("unused")
 		public ApplicationProtocol<String> doSomething(final String aString, final int anInt, final Integer anInteger) {
@@ -177,7 +178,7 @@ public class MethodImplementationTest {
 		}
 	}
 
-	private class TestBean_2 implements ApplicationFrameworkInvokable {
+	private class TestBean_2 {
 
 		@SuppressWarnings("unused")
 		public ApplicationProtocol<String> anotherAction(final String anotherString,

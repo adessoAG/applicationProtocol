@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.util.Assert;
+
 import de.adesso.example.framework.exception.BuilderException;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Singular;
 import lombok.extern.log4j.Log4j2;
 
@@ -19,6 +21,11 @@ import lombok.extern.log4j.Log4j2;
  * {@link ApplicationProtocol}. There may be some parameters which can be given
  * from the call by {@link MethodArgument} or from the list of appendixes by the
  * class {@link ArgumentFromAppendix}.
+ * <p>
+ * Since the class variable needs to be evaluated, it is not possible to work
+ * just with the bean name. The operation is established in a very early phase
+ * of the system initialization. During this time it is not possible to load
+ * beans from the application context.
  *
  * @author Matthias
  *
@@ -27,36 +34,74 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BeanOperation {
 
-	// identifier of the operation
-	@NonNull
+	/** identifier of the operation */
 	private final String methodIdentifier;
-	// object which provides the requested method
-	@NonNull
-	private final ApplicationFrameworkInvokable implementation;
-	// Operation list to be executed
-	@NonNull
-	private final Method method;
-	// parameters
+
+	/**
+	 * Interface of the bean to be used during execution. The class will look up the
+	 * bean from the application context.
+	 */
+	private final Class<?> anInterface;
+
+	/**
+	 * Class variable of the bean. This can be used, if the bean does not implement
+	 * an appropriate interface. Implementing an interface is the better solution.
+	 * The bean is accessed via the application context. This procedure enables
+	 * Spring to instrument the bean which would not be possible if the
+	 * corresponding object would be used.
+	 */
+	private final Class<Object> beanType;
+
+	/**
+	 * The implementation is an object which will be used during execution of the
+	 * described operation.
+	 */
+	private Object implementation;
+
+	/** The given method is the operation which will be used during execution. */
+	private Method method;
+
+	/**
+	 * List of the arguments of the operation.
+	 */
 	private final List<Argument> arguments;
 
+	private Class<?> clazz;
+
 	@Builder
-	private BeanOperation(final String methodIdentifier, final ApplicationFrameworkInvokable implementation,
-			@Singular final List<Argument> arguments) {
+	private BeanOperation(final String methodIdentifier, final Class<?> anInterface, final Class<Object> beanType,
+			final Object implementation, @Singular final List<Argument> arguments) {
 		this.methodIdentifier = methodIdentifier;
+		this.anInterface = anInterface;
+		this.beanType = beanType;
 		this.implementation = implementation;
+		this.method = null;
 		this.arguments = arguments;
 
-		// provide the target position
-		IntStream.range(0, arguments.size()).forEach(i -> arguments.get(i).setTargetPosition(i));
+		Assert.notNull(methodIdentifier, "method identifier is required to instantiate");
 
-		try {
-			log.atDebug().log("going to extract method {}::{}", implementation.getClass().getName(), methodIdentifier);
-			this.method = implementation.getClass().getDeclaredMethod(methodIdentifier, argumentTypes(arguments));
-		} catch (NoSuchMethodException | SecurityException e) {
-			final String message = "could not build bean operation";
-			log.atError().log(message, e);
-			throw new BuilderException(message, e);
+		// provide the target position to the arguments
+		IntStream.range(0, arguments.size()).forEach(i -> arguments.get(i).setTargetPosition(i));
+	}
+
+	/**
+	 * Since it is allowed to use an interface during the instantiation, it is
+	 * necessary to provide the object to work on.
+	 *
+	 * @param context application context to load beans
+	 */
+	public void init(final ApplicationContext context) {
+
+		// if the implementation is provided, nothing to do.
+		if (this.implementation == null) {
+			if (this.beanType != null) {
+				this.implementation = context.getBean(this.beanType);
+			} else if (this.anInterface != null) {
+				this.implementation = context.getBean(this.anInterface);
+			}
 		}
+		Assert.notNull(this.implementation, "one of implementation, beanType, anInterface is required");
+		setMethod();
 	}
 
 	/**
@@ -96,5 +141,20 @@ public class BeanOperation {
 				.collect(Collectors.toList()).toArray();
 
 		return result;
+	}
+
+	private void setMethod() {
+		Assert.notNull(this.implementation, "to extract the method, the implementation has to be set bevore");
+
+		try {
+			log.atDebug().log("going to extract method {}::{}", this.implementation.getClass().getName(),
+					this.methodIdentifier);
+			this.method = this.implementation.getClass().getDeclaredMethod(this.methodIdentifier,
+					argumentTypes(this.arguments));
+		} catch (NoSuchMethodException | SecurityException e) {
+			final String message = "could not build bean operation";
+			log.atError().log(message, e);
+			throw new BuilderException(message, e);
+		}
 	}
 }

@@ -7,33 +7,37 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContextAware;
 
 import de.adesso.example.framework.exception.UnknownMethodException;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * The
+ * The class implements an infrastructure which is capable to call during a
+ * method call on the emulated interface several methods of implementing beans.
+ * This supports separation of concerns. The participating beans belong to
+ * probably different business domains. They are invoked if the required
+ * parameters are available.
+ * <p>
+ * The emulation is achieved via an invocation handler and a proxy. The calls to
+ * the provided implementations are described by {@link MethodImplementation},
+ * {@link BeanOperation} and {@link Argument}.
+ * <p>
+ * This class is the factory which establishes the functionality.
  *
  * @author Matthias
  *
- * @param <INTERFACE>
  */
 @Log4j2
-@Service
-@Scope("prototype")
-public class DaisyChainDispatcherFactory implements BeanClassLoaderAware {
+public class DaisyChainDispatcherFactory {
 
 	private final Map<String, MethodImplementation> emulateMethods = new HashMap<>();
 	private Class<?> implementationInterface;
 	private Map<String, Method> interfaceMethods = new HashMap<>();
-	private ClassLoader classLoader;
+	private final ClassLoader classLoader;
 
-	@Override
-	public void setBeanClassLoader(final ClassLoader classLoader) {
+	public DaisyChainDispatcherFactory(final ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
@@ -98,15 +102,15 @@ public class DaisyChainDispatcherFactory implements BeanClassLoaderAware {
 
 	@SuppressWarnings("unchecked")
 	public <T> T build() {
-		Assert.notNull(this.classLoader, "classloader not defined, fix initialization");
 		// create the dispatcher and feed collected information
-		final DaisyChainDispatcher dispatcher = new DaisyChainDispatcher()
-				.setImplementationInterface(this.implementationInterface)
-				.setEmulateMethods(this.emulateMethods);
+		final DaisyChainDispatcher dispatcher = new DaisyChainDispatcher(
+				this.implementationInterface, this.emulateMethods);
 
-		// create the proxy
+		// create the proxy, ApplicationContextAware is required, because beans might
+		// have to be loaded, InitializingBean because the initialization needs to be
+		// finished.
 		final T proxy = (T) Proxy.newProxyInstance(this.classLoader,
-				new Class[] { this.implementationInterface },
+				new Class[] { this.implementationInterface, ApplicationContextAware.class, InitializingBean.class },
 				dispatcher);
 
 		return proxy;

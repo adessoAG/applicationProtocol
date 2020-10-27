@@ -7,26 +7,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.BeanClassLoaderAware;
-
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class AppendixRegistryImpl implements AppendixRegistry, BeanClassLoaderAware {
+public class AppendixRegistryImpl implements AppendixRegistry {
 
 	private final List<String> appendixClassesNames;
 	private Map<Class<Object>, Class<? extends ApplicationAppendix<?>>> map;
-	private ClassLoader classLoader;
+	private final ClassLoader classLoader;
 
-	public AppendixRegistryImpl(final List<String> appendixClassesNames) {
+	public AppendixRegistryImpl(final ClassLoader classLoader, final List<String> appendixClassesNames) {
+		this.classLoader = classLoader;
 		this.appendixClassesNames = appendixClassesNames;
+		init();
 	}
 
-	@PostConstruct
 	public void init() {
 		this.map = this.appendixClassesNames.stream()
 				.peek(n -> log.atInfo().log("found appendix {}", n))
@@ -38,11 +35,6 @@ public class AppendixRegistryImpl implements AppendixRegistry, BeanClassLoaderAw
 				.collect(Collectors.toMap(Mapping::getKey, Mapping::getValue));
 		log.atInfo().log(
 				"prepared all appendixes, if one is missing check @Appendix annotation, the class has to extend ApplicationAppendix and has to be independent");
-	}
-
-	@Override
-	public void setBeanClassLoader(final ClassLoader classLoader) {
-		this.classLoader = classLoader;
 	}
 
 	@Override

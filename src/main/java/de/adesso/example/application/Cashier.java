@@ -2,15 +2,15 @@ package de.adesso.example.application;
 
 import java.math.BigDecimal;
 
-import de.adesso.example.application.accounting.Customer;
-import de.adesso.example.application.stock.Article;
+import de.adesso.example.application.accounting.PointOfSale;
+import de.adesso.example.application.shopping.ShoppingCart;
 import de.adesso.example.framework.ApplicationProtocol;
+import de.adesso.example.framework.annotation.Emulated;
+import de.adesso.example.framework.annotation.Implementation;
 
+@Emulated
 public interface Cashier {
 
-	ApplicationProtocol<BigDecimal> openBill(Customer customer);
-
-	ApplicationProtocol<BigDecimal> addItem(Article article, ApplicationProtocol<BigDecimal> protocol);
-
-	ApplicationProtocol<BigDecimal> encash(ApplicationProtocol<BigDecimal> state);
+	@Implementation(implementations = { PointOfSale.class })
+	ApplicationProtocol<BigDecimal> encash(ShoppingCart cart, ApplicationProtocol<BigDecimal> state);
 }

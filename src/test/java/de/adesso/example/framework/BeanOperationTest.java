@@ -7,10 +7,15 @@ import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 public class BeanOperationTest {
+
+	@Mock
+	private ApplicationContext context;
 
 	@Test
 	public void testBuilder() throws NoSuchMethodException, SecurityException {
@@ -25,6 +30,7 @@ public class BeanOperationTest {
 				.argument(new MethodArgument(String.class, 0))
 				.argument(new MethodArgument(int.class, 1))
 				.build();
+		operation.init(this.context);
 
 		assertThat(operation)
 				.isNotNull()
@@ -37,7 +43,7 @@ public class BeanOperationTest {
 				.isEqualTo(declaredMethod);
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testBuilderMissingMethodIdentifier() throws NoSuchMethodException, SecurityException {
 		final TestImplementation implementation = new TestImplementation();
 
@@ -46,13 +52,14 @@ public class BeanOperationTest {
 				.build();
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testBuilderMissingImplementation() throws NoSuchMethodException, SecurityException {
 		final String methodIdentifier = "testMethod";
 
-		BeanOperation.builder()
+		final BeanOperation operation = BeanOperation.builder()
 				.methodIdentifier(methodIdentifier)
 				.build();
+		operation.init(this.context);
 	}
 
 	@Test
@@ -99,6 +106,7 @@ public class BeanOperationTest {
 				.argument(new MethodArgument(String.class, 0))
 				.argument(new MethodArgument(int.class, 1))
 				.build();
+		operation.init(this.context);
 		final String testString = "Das ist ein netter kleiner Teststring : ";
 		final int testInt = 7;
 		final Object[] args = { testString, testInt };
@@ -113,7 +121,7 @@ public class BeanOperationTest {
 				.isEqualTo(testString + testInt);
 	}
 
-	private class TestImplementation implements ApplicationFrameworkInvokable {
+	private class TestImplementation {
 
 		@SuppressWarnings("unused")
 		public ApplicationProtocol<String> testMethod(final String a, final int b) {

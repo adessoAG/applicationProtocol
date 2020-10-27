@@ -2,12 +2,13 @@ package de.adesso.example.framework;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -31,13 +32,20 @@ import lombok.extern.log4j.Log4j2;
  *                    the final result.
  * @param RETURN_TYPE type of the return value
  */
-@Getter(value = AccessLevel.PACKAGE)
-@Setter(value = AccessLevel.PACKAGE)
 @Log4j2
 public class DaisyChainDispatcher implements InvocationHandler {
 
-	private Class<?> implementationInterface;
-	private Map<String, MethodImplementation> emulateMethods = new HashMap<>();
+	private final Class<?> implementationInterface;
+	private final Map<String, MethodImplementation> emulateMethods;
+	private final Set<String> standardMethods = new HashSet<>();
+	private ApplicationContext applicationContext;
+
+	DaisyChainDispatcher(final Class<?> implementationInterface,
+			final Map<String, MethodImplementation> emulateMethods) {
+		this.implementationInterface = implementationInterface;
+		this.emulateMethods = emulateMethods;
+		fillStandardMethods();
+	}
 
 	/**
 	 * Implement the requirements of interface {@link InvocationHandler}.
@@ -54,9 +62,12 @@ public class DaisyChainDispatcher implements InvocationHandler {
 
 		// get the implementation
 		final MethodImplementation implementation = this.emulateMethods.get(method.getName());
+		if (isStandardMethod(method)) {
+			return handleStandardMethod(proxy, method, args);
+		}
 		if (implementation == null) {
 			// there is no implementation, therefore this method is not provided.
-			log.atWarn().log("no implementation for interface %s::method %s",
+			log.atWarn().log("no implementation for interface {}::method {}",
 					this.implementationInterface.getName(),
 					method.getName());
 			return null;
@@ -71,6 +82,32 @@ public class DaisyChainDispatcher implements InvocationHandler {
 		return state;
 	}
 
+	private void fillStandardMethods() {
+		this.standardMethods.add("afterPropertiesSet");
+		this.standardMethods.add("toString");
+		this.standardMethods.add("setApplicationContext");
+	}
+
+	private boolean isStandardMethod(final Method method) {
+		return this.standardMethods.contains(method.getName());
+	}
+
+	private Object handleStandardMethod(final Object proxy, final Method method, final Object[] args) throws Exception {
+
+		if (method.getName().equals("toString")) {
+			return this.implementationInterface.getName() + " implemented by proxy";
+
+		} else if (method.getName().equals("setApplicationContext")) {
+			setApplicationContext((ApplicationContext) args[0]);
+
+		} else if (method.getName().equals("afterPropertiesSet")) {
+			afterPropertiesSet();
+		}
+
+		// no standard implementation, return nothing
+		return null;
+	}
+
 	private ApplicationProtocol<?> createOrExtractProtocolFrom(final Object[] args) {
 		final Object lastArgument = lastArgument(args);
 		@SuppressWarnings("rawtypes")
@@ -82,5 +119,14 @@ public class DaisyChainDispatcher implements InvocationHandler {
 
 	private Object lastArgument(final Object[] args) {
 		return args.length > 0 ? args[args.length - 1] : null;
+	}
+
+	private void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
+
+	private void afterPropertiesSet() throws Exception {
+		this.emulateMethods.values().stream()
+				.forEach(m -> m.init(this.applicationContext));
 	}
 }

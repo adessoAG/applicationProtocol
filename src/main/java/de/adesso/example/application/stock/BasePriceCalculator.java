@@ -4,11 +4,10 @@ import java.math.BigDecimal;
 
 import org.springframework.stereotype.Service;
 
-import de.adesso.example.framework.ApplicationFrameworkInvokable;
 import de.adesso.example.framework.ApplicationProtocol;
 
 @Service
-public class BasePriceCalculator implements ApplicationFrameworkInvokable {
+public class BasePriceCalculator {
 
 	public ApplicationProtocol<BigDecimal> calculatePrice(final Article article) {
 

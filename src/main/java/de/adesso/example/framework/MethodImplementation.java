@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import org.springframework.context.ApplicationContext;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
@@ -79,5 +81,9 @@ public class MethodImplementation {
 		this.method = method;
 
 		return this;
+	}
+
+	public void init(final ApplicationContext context) {
+		this.beanOperations.stream().forEach(o -> o.init(context));
 	}
 }

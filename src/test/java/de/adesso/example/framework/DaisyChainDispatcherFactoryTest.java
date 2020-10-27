@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -21,8 +20,7 @@ import lombok.Getter;
 @ContextConfiguration(classes = { TestConfig.class })
 public class DaisyChainDispatcherFactoryTest {
 
-	@Autowired
-	private DaisyChainDispatcherFactory factory;
+	private final ClassLoader classloader = DaisyChainDispatcherFactoryTest.class.getClassLoader();
 
 	@Test
 	public void testBuild() {
@@ -79,28 +77,30 @@ public class DaisyChainDispatcherFactoryTest {
 
 	@Test(expected = ClassCastException.class)
 	public void testNotInterface() {
-		this.factory.implementationInterface(Wrong.class);
+		new DaisyChainDispatcherFactory(this.classloader)
+				.implementationInterface(Wrong.class);
 	}
 
 	@Test(expected = UnknownMethodException.class)
 	public void testWrongOrdering() {
-		this.factory.operation(MethodImplementation.builder()
-				.methodIdentifier(EmulatedInterface.method_1)
-				.returnValueType(String.class)
-				.beanOperation(BeanOperation.builder()
-						.implementation(new TestBean_1())
-						.methodIdentifier("doSomething")
-						.argument(new MethodArgument(String.class, 0))
-						.argument(new MethodArgument(int.class, 1))
-						.argument(new MethodArgument(Integer.class, 2))
-						.build())
-				.build());
+		new DaisyChainDispatcherFactory(this.classloader)
+				.operation(MethodImplementation.builder()
+						.methodIdentifier(EmulatedInterface.method_1)
+						.returnValueType(String.class)
+						.beanOperation(BeanOperation.builder()
+								.implementation(new TestBean_1())
+								.methodIdentifier("doSomething")
+								.argument(new MethodArgument(String.class, 0))
+								.argument(new MethodArgument(int.class, 1))
+								.argument(new MethodArgument(Integer.class, 2))
+								.build())
+						.build());
 	}
 
 	// ------------------------------------------------------------------------//
 
 	private EmulatedInterface createProxy() {
-		final EmulatedInterface emulated = this.factory
+		final EmulatedInterface emulated = new DaisyChainDispatcherFactory(this.classloader)
 				.implementationInterface(EmulatedInterface.class)
 				.operation(MethodImplementation.builder()
 						.methodIdentifier(EmulatedInterface.method_1)
@@ -158,7 +158,7 @@ public class DaisyChainDispatcherFactoryTest {
 		}
 	}
 
-	private static class TestBean_1 implements ApplicationFrameworkInvokable {
+	private static class TestBean_1 {
 
 		@SuppressWarnings("unused")
 		public ApplicationProtocol<String> doSomething(final String aString, final int anInt, final Integer anInteger) {
@@ -208,7 +208,7 @@ public class DaisyChainDispatcherFactoryTest {
 		}
 	}
 
-	public class TestBean_2 implements ApplicationFrameworkInvokable {
+	public class TestBean_2 {
 
 		public ApplicationProtocol<String> anotherAction(final String anotherString,
 				final ApplicationProtocol<String> state) {

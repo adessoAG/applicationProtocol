@@ -7,15 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
 
 import de.adesso.example.framework.MethodImplementation.MethodImplementationBuilder;
@@ -41,35 +34,20 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class ApplicationProxyFactory
-		implements ApplicationContextAware, BeanClassLoaderAware, FactoryBean<Object>, DisposableBean {
+		implements FactoryBean<Object> {
 
-	private final String emulatedInterfaceName;
-	private Class<Object> emulatedInterface;
-	private ApplicationContext applicationContext;
-	private ClassLoader classLoader;
+	private final Class<Object> emulatedInterface;
 	private Object generatedEmulation;
+	private final ApplicationContext context;
 
-	@Autowired
-	private ArgumentFactory argumentFactory;
+	private final ArgumentFactory argumentFactory;
 
-	public ApplicationProxyFactory(final String emulatedInterfaceName) {
-		this.emulatedInterfaceName = emulatedInterfaceName;
-	}
-
-	@Override
-	public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
-	}
-
-	@Override
-	public void setBeanClassLoader(final ClassLoader classLoader) {
-		this.classLoader = classLoader;
-	}
-
-	@PostConstruct
-	@SuppressWarnings("unchecked")
-	public void init() throws ClassNotFoundException {
-		this.emulatedInterface = (Class<Object>) this.classLoader.loadClass(this.emulatedInterfaceName);
+	public ApplicationProxyFactory(final ApplicationContext context, final ArgumentFactory argumentFactory,
+			final Class<Object> emulatedInterface) {
+		Assert.notNull(emulatedInterface, "the emulated interface may not be null");
+		this.argumentFactory = argumentFactory;
+		this.emulatedInterface = emulatedInterface;
+		this.context = context;
 	}
 
 	@Override
@@ -85,16 +63,11 @@ public class ApplicationProxyFactory
 		return this.emulatedInterface;
 	}
 
-	@Override
-	public void destroy() {
-		log.atTrace().log("going to destroy factory for class " + this.emulatedInterfaceName);
-	}
-
 	private Object emulateInterface(@NonNull final Class<Object> interfaceType) {
 		validateClassAnnotations(interfaceType);
 
 		// initialize the factory to build the proxy
-		final DaisyChainDispatcherFactory factory = new DaisyChainDispatcherFactory()
+		final DaisyChainDispatcherFactory factory = new DaisyChainDispatcherFactory(this.context.getClassLoader())
 				.implementationInterface(interfaceType);
 
 		// add the methods of the interface to be emulated
@@ -102,6 +75,16 @@ public class ApplicationProxyFactory
 				.forEach(m -> factory.operation(m));
 
 		return factory.build();
+	}
+
+	private <T> Collection<MethodImplementation> processAllMethods(final Class<T> interfaceType) {
+		final List<MethodImplementation> implementations = new ArrayList<>();
+		for (final Method m : interfaceType.getMethods()) {
+			final MethodImplementation methodEmulation = buildMethodEmulation(m);
+			methodEmulation.method(m);
+			implementations.add(methodEmulation);
+		}
+		return implementations;
 	}
 
 	private MethodImplementation buildMethodEmulation(final Method interfaceMethod) {
@@ -116,12 +99,11 @@ public class ApplicationProxyFactory
 		// will be called consecutively
 		final Implementation implAnnotation = interfaceMethod.getAnnotation(Implementation.class);
 		final MatchingStrategy[] strategies = buildStrategy(implAnnotation.strategy());
-		for (final String implClassName : implAnnotation.implementations()) {
-			final Object implBean = this.applicationContext.getBean(implClassName);
+		for (final Class<?> implClass : implAnnotation.implementations()) {
 			BeanOperation.builder()
-					.implementation((ApplicationFrameworkInvokable) implBean)
+					.implementation(implClass)
 					.methodIdentifier(methodName);
-			final Method beanMethod = extractCorrespondingBeanMethod(methodName, implBean.getClass());
+			final Method beanMethod = extractCorrespondingBeanMethod(methodName, implClass);
 			if (beanMethod == null) {
 				// basic requirement: the implementation bean provides at least one method with
 				// the same identifier
@@ -145,7 +127,7 @@ public class ApplicationProxyFactory
 									p.getName());
 							break;
 						case FromAppendix:
-							argument = this.argumentFactory.createArgumentFromAppendix(interfaceMethod, p.getType());
+							argument = this.argumentFactory.createArgumentFromAppendix(beanMethod, p.getType());
 							break;
 						default:
 							// should not be reached
@@ -159,12 +141,13 @@ public class ApplicationProxyFactory
 					}
 					if (argument != null) {
 						argumentList.add(argument);
+						break;
 					}
 				}
 				if (argument == null) {
 					// could not find any content for the argument
-					final String message = String.format("could not provide bean %s with argument % of type %s",
-							implBean.getClass().getName(), p.getName(), p.getType());
+					final String message = String.format("could not provide bean %s with argument %s of type %s",
+							implClass.getName(), p.getName(), p.getType().getName());
 					log.atFatal().log(message);
 					throw new UndefinedParameterException(message);
 				}
@@ -190,7 +173,8 @@ public class ApplicationProxyFactory
 
 	private Class<?> extractReturnValueType(final Method m) {
 		final Class<?> returnType = m.getReturnType();
-		Assert.isInstanceOf(ApplicationProtocol.class, "by convention, the return type has to be ApplicationProtocol");
+		Assert.isTrue(returnType == ApplicationProtocol.class,
+				"by convention, the return type has to be ApplicationProtocol");
 		// ApplicationProtocol is a generic type
 		final TypeVariable<?>[] typeParameters = returnType.getTypeParameters();
 		if (typeParameters.length != 1) {
@@ -199,16 +183,6 @@ public class ApplicationProxyFactory
 			throw new GenericDeclarationException(message);
 		}
 		return typeParameters[0].getClass();
-	}
-
-	private <T> Collection<MethodImplementation> processAllMethods(final Class<T> interfaceType) {
-		final List<MethodImplementation> implementations = new ArrayList<>();
-		for (final Method m : interfaceType.getMethods()) {
-			final MethodImplementation methodEmulation = buildMethodEmulation(m);
-			methodEmulation.method(m);
-			implementations.add(methodEmulation);
-		}
-		return implementations;
 	}
 
 	/**

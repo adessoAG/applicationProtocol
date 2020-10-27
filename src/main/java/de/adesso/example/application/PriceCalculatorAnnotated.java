@@ -2,11 +2,13 @@ package de.adesso.example.application;
 
 import java.math.BigDecimal;
 
+import de.adesso.example.application.employment.EmployeeDiscountCalculator;
+import de.adesso.example.application.marketing.VoucherDiscountCalculator;
 import de.adesso.example.application.stock.Article;
+import de.adesso.example.application.stock.BasePriceCalculator;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.Emulated;
 import de.adesso.example.framework.annotation.Implementation;
-import de.adesso.example.framework.annotation.MatchingStrategy;
 import de.adesso.example.framework.annotation.RequiredParameter;
 
 /**
@@ -26,13 +28,10 @@ public interface PriceCalculatorAnnotated {
 	 */
 	@Implementation(
 			implementations = {
-					"BasePriceCalculator",
-					"EmployeeDiscountCalculator",
-					"VoucherDiscountCalculator"
-			},
-			strategy = { MatchingStrategy.ByType,
-					MatchingStrategy.FromAppendix,
-					MatchingStrategy.ByName })
+					BasePriceCalculator.class,
+					EmployeeDiscountCalculator.class,
+					VoucherDiscountCalculator.class
+			})
 	ApplicationProtocol<BigDecimal> calculatePrice(
 			@RequiredParameter Article article,
 			@RequiredParameter ApplicationProtocol<BigDecimal> appendixes);

@@ -7,15 +7,21 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import de.adesso.example.framework.exception.UndefinedParameterException;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 
-@Service
+/**
+ * The class is responsible to create the appropriate argument.
+ * 
+ * @author Matthias
+ *
+ */
 @Log4j2
 public class ArgumentFactory {
 
@@ -26,6 +32,16 @@ public class ArgumentFactory {
 		this.appendixRegistry = appendixRegistry;
 	}
 
+	/**
+	 * Create an argument based on the identifier of the arguments. The type have to
+	 * assignment compatible.
+	 * 
+	 * @param emulatedMethod      the emulated method
+	 * @param beanMethod          the method of the bean
+	 * @param parameterIdentifier the identifier of the parameter
+	 * @return the generated argument
+	 * @throws UndefinedParameterException if no matching could be found
+	 */
 	public Argument createArgumentByName(@NonNull final Method emulatedMethod, @NonNull final Method beanMethod,
 			@NonNull final String parameterIdentifier) {
 		// check possible pairs
@@ -39,6 +55,16 @@ public class ArgumentFactory {
 		return argument;
 	}
 
+	/**
+	 * Create an argument based on the type of the argument. The types have to be
+	 * assignment compatible.
+	 * 
+	 * @param emulatedMethod the emulated method
+	 * @param beanMethod     the method of the bean
+	 * @param type           the type of the parameter
+	 * @return the generated argument
+	 * @throws UndefinedParameterException if no matching could be found
+	 */
 	public Argument createArgumentByType(final Method emulatedMethod, final Method beanMethod, final Class<?> type) {
 		// check possible pairs
 		final ParameterPosition targetCandidate = findMatchingParametersByType(emulatedMethod, type);
@@ -50,10 +76,17 @@ public class ArgumentFactory {
 		return argument;
 	}
 
-	public Argument createArgumentFromAppendix(@NonNull final Method emulatedMethod,
+	/**
+	 * Create the argument from types within the appendix. The appendix registry is
+	 * queried for appendix types.
+	 * 
+	 * @param emulatedMethod the emulated method
+	 * @param parameterType  the requested type of the parameter
+	 * @return the generated parameter
+	 */
+	public Argument createArgumentFromAppendix(@NonNull final Method beanmMethod,
 			@NonNull final Class<?> parameterType) {
-		final ParameterPosition targetCandidate = findMatchingParametersByType(emulatedMethod, parameterType);
-		@NonNull
+		final ParameterPosition targetCandidate = findMatchingParametersByType(beanmMethod, parameterType);
 		final Class<? extends ApplicationAppendix<?>> appendixClass = this.appendixRegistry.lookUp(parameterType);
 		if (appendixClass == null) {
 			final String message = "no appropriate appendix registered. Cannot retrieve the required type";
@@ -104,6 +137,8 @@ public class ArgumentFactory {
 
 	@AllArgsConstructor
 	@Getter
+	@EqualsAndHashCode
+	@ToString
 	private static class ParameterPosition {
 
 		private final Integer position;
