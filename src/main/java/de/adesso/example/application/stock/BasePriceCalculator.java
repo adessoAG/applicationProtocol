@@ -5,11 +5,17 @@ import java.math.BigDecimal;
 import org.springframework.stereotype.Service;
 
 import de.adesso.example.framework.ApplicationProtocol;
+import de.adesso.example.framework.annotation.CallStrategy;
+import de.adesso.example.framework.annotation.CallingStrategy;
+import de.adesso.example.framework.annotation.Required;
 
 @Service
 public class BasePriceCalculator {
 
-	public ApplicationProtocol<BigDecimal> calculatePrice(final Article article) {
+	@CallStrategy(strategy = CallingStrategy.Eager)
+	public ApplicationProtocol<BigDecimal> calculatePrice(
+			@Required final Article article,
+			final ApplicationProtocol<BigDecimal> state) {
 
 		final ApplicationProtocol<BigDecimal> protocol = new ApplicationProtocol<>();
 

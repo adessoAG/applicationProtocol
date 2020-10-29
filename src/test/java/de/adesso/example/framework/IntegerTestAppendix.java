@@ -7,7 +7,7 @@ import de.adesso.example.framework.annotation.Appendix;
 @Appendix
 public class IntegerTestAppendix extends ApplicationAppendix<Integer> {
 
-	protected IntegerTestAppendix(final Integer content) {
+	public IntegerTestAppendix(final Integer content) {
 		super(content);
 	}
 

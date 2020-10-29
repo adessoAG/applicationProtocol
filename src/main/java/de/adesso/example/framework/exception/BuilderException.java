@@ -7,4 +7,8 @@ public class BuilderException extends RuntimeException {
 	public BuilderException(final String message, final Exception e) {
 		super(message, e);
 	}
+
+	public BuilderException(final String message) {
+		super(message);
+	}
 }

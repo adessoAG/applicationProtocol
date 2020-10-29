@@ -4,5 +4,5 @@ import java.util.UUID;
 
 public abstract class ApplicationOwner {
 
-	protected abstract UUID getOwner();
+	protected abstract UUID getOwnerId();
 }

@@ -9,7 +9,7 @@ public class Warehousing extends ApplicationOwner {
 	final static UUID ownerId = UUID.randomUUID();
 
 	@Override
-	protected UUID getOwner() {
+	protected UUID getOwnerId() {
 		return ownerId;
 	}
 }

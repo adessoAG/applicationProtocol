@@ -18,11 +18,12 @@ import de.adesso.example.application.marketing.VoucherAppendix;
 import de.adesso.example.application.marketing.VoucherDiscountCalculator;
 import de.adesso.example.application.stock.Article;
 import de.adesso.example.application.stock.BasePriceCalculator;
-import de.adesso.example.framework.ArgumentFromAppendix;
-import de.adesso.example.framework.BeanOperation;
-import de.adesso.example.framework.DaisyChainDispatcherFactory;
-import de.adesso.example.framework.MethodArgument;
-import de.adesso.example.framework.MethodImplementation;
+import de.adesso.example.framework.core.ArgumentApplicationProtocol;
+import de.adesso.example.framework.core.ArgumentFromAppendix;
+import de.adesso.example.framework.core.ArgumentFromMethod;
+import de.adesso.example.framework.core.BeanOperation;
+import de.adesso.example.framework.core.DaisyChainDispatcherFactory;
+import de.adesso.example.framework.core.MethodImplementation;
 import lombok.extern.log4j.Log4j2;
 
 @Configuration
@@ -59,21 +60,24 @@ public class ApplicationConfig {
 						.beanOperation(BeanOperation.builder()
 								.implementation(this.basePriceCalculator)
 								.methodIdentifier("calculatePrice")
-								.argument(new MethodArgument(Article.class, 0))
+								.argument(new ArgumentFromMethod(Article.class, 0))
+								.argument(new ArgumentApplicationProtocol())
 								.build())
 						// second call EmployeeDiscountCalculator
 						.beanOperation(BeanOperation.builder()
 								.implementation(this.employeeDiscountCalculator)
 								.methodIdentifier("calculatePrice")
-								.argument(new MethodArgument(Article.class, 0))
+								.argument(new ArgumentFromMethod(Article.class, 0))
 								.argument(new ArgumentFromAppendix(Employee.class, EmployeeAppendix.class))
+								.argument(new ArgumentApplicationProtocol())
 								.build())
 						// third call VoucherDiscountCalculator
 						.beanOperation(BeanOperation.builder()
 								.implementation(this.voucherDiscountCalculator)
 								.methodIdentifier("calculatePrice")
-								.argument(new MethodArgument(Article.class, 0))
+								.argument(new ArgumentFromMethod(Article.class, 0))
 								.argument(new ArgumentFromAppendix(Voucher.class, VoucherAppendix.class))
+								.argument(new ArgumentApplicationProtocol())
 								.build())
 						.build())
 				.build();

@@ -9,7 +9,7 @@ public class Marketing extends ApplicationOwner {
 	public static final UUID marketingOwner = UUID.randomUUID();
 
 	@Override
-	protected UUID getOwner() {
+	protected UUID getOwnerId() {
 		// TODO Auto-generated method stub
 		return marketingOwner;
 	}

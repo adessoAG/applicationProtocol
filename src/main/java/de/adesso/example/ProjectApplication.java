@@ -11,7 +11,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
-import de.adesso.example.framework.ApplicationFrameworkBanner;
+import de.adesso.example.framework.core.ApplicationFrameworkBanner;
 
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class })
 @EnableAutoConfiguration

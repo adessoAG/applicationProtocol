@@ -9,7 +9,7 @@ public class Accounting extends ApplicationOwner {
 	final static UUID id = UUID.randomUUID();
 
 	@Override
-	protected UUID getOwner() {
+	protected UUID getOwnerId() {
 		return id;
 	}
 }

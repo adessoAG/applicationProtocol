@@ -73,6 +73,10 @@ public class ApplicationProtocol<RESULT_TYPE> {
 		return this.data.getAllAppenixesOfTypeAsSet(appendixClass);
 	}
 
+	public List<ApplicationAppendix<?>> getAllAppendixesOfOwnerAsList(final ApplicationOwner owner) {
+		return this.data.getAllAppendixesOfOwnerAsList(owner);
+	}
+
 	// modifier
 	// -----------------------------------------------------------------------//
 

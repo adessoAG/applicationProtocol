@@ -23,8 +23,6 @@ public abstract class ApplicationAppendix<T> {
 	@Getter
 	private final T content;
 
-	private static Class<Object> contentType = null;
-
 	protected ApplicationAppendix(final T content) {
 		this.content = content;
 	}
@@ -33,12 +31,4 @@ public abstract class ApplicationAppendix<T> {
 	 * UUID of the owner which created this appendix.
 	 */
 	public abstract UUID getOwner();
-
-	public static Class<Object> getType() {
-		return ApplicationAppendix.contentType;
-	}
-
-	static void setType(final Class<Object> type) {
-		ApplicationAppendix.contentType = type;
-	}
 }

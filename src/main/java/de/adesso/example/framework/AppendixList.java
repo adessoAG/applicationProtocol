@@ -36,7 +36,7 @@ class AppendixList {
 	 */
 	public Optional<ApplicationAppendix<?>> getAppendixOfType(
 			final Class<? extends ApplicationAppendix<?>> appendixClass) throws TooManyElementsException {
-		final List<? extends ApplicationAppendix<?>> allAppendixesOfTypeT = getAllAppendixesOfClass(appendixClass)
+		final List<? extends ApplicationAppendix<?>> allAppendixesOfTypeT = this.getAllAppendixesOfClass(appendixClass)
 				.collect(Collectors.toList());
 		if (allAppendixesOfTypeT.size() > 1) {
 			throw new TooManyElementsException("more than one element");
@@ -58,7 +58,7 @@ class AppendixList {
 	 */
 	public <T> List<T> getAllAppenixesOfTypeAsList(final Class<? extends ApplicationAppendix<?>> appendixClass) {
 		@SuppressWarnings("unchecked")
-		final List<T> allAppendixesOfTypeT = (List<T>) getAllAppendixesOfClass(appendixClass)
+		final List<T> allAppendixesOfTypeT = (List<T>) this.getAllAppendixesOfClass(appendixClass)
 				.collect(Collectors.toList());
 
 		return allAppendixesOfTypeT;
@@ -74,7 +74,7 @@ class AppendixList {
 	 */
 	public <T> Set<T> getAllAppenixesOfTypeAsSet(final Class<? extends ApplicationAppendix<?>> appendixClass) {
 		@SuppressWarnings("unchecked")
-		final Set<T> allAppendixesOfTypeT = (Set<T>) getAllAppendixesOfClass(appendixClass)
+		final Set<T> allAppendixesOfTypeT = (Set<T>) this.getAllAppendixesOfClass(appendixClass)
 				.collect(Collectors.toSet());
 
 		return allAppendixesOfTypeT;
@@ -93,5 +93,11 @@ class AppendixList {
 
 	public void addAppendix(final Collection<ApplicationAppendix<?>> additionalAppendixes) {
 		this.appendixes.addAll(additionalAppendixes);
+	}
+
+	public List<ApplicationAppendix<?>> getAllAppendixesOfOwnerAsList(final ApplicationOwner owner) {
+		return this.appendixes.stream()
+				.filter(a -> a.getOwner().equals(owner.getOwnerId()))
+				.collect(Collectors.toList());
 	}
 }

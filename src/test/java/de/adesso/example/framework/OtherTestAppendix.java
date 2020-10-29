@@ -7,7 +7,7 @@ import de.adesso.example.framework.annotation.Appendix;
 @Appendix
 public class OtherTestAppendix extends ApplicationAppendix<Other> {
 
-	protected OtherTestAppendix(final Other content) {
+	public OtherTestAppendix(final Other content) {
 		super(content);
 	}
 

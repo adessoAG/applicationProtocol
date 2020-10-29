@@ -36,7 +36,7 @@ public class Employment extends ApplicationOwner {
 	}
 
 	@Override
-	protected UUID getOwner() {
+	protected UUID getOwnerId() {
 		return ownUuid;
 	}
 }
