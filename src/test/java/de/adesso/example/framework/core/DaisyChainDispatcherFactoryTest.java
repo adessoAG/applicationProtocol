@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -28,7 +29,7 @@ public class DaisyChainDispatcherFactoryTest {
 	private final ClassLoader classloader = DaisyChainDispatcherFactoryTest.class.getClassLoader();
 
 	@Test
-	public void testBuild() {
+	public void testBuild() throws Exception {
 		final EmulatedInterface emulated = this.createProxy();
 
 		assertThat(emulated)
@@ -36,7 +37,7 @@ public class DaisyChainDispatcherFactoryTest {
 	}
 
 	@Test
-	public void testOperationOnEmulatedInterface() {
+	public void testOperationOnEmulatedInterface() throws Exception {
 		final EmulatedInterface emulated = this.createProxy();
 
 		final String testString = "So sieht der String aus. ";
@@ -104,7 +105,7 @@ public class DaisyChainDispatcherFactoryTest {
 
 	// ------------------------------------------------------------------------//
 
-	private EmulatedInterface createProxy() {
+	private EmulatedInterface createProxy() throws Exception {
 		final EmulatedInterface emulated = new DaisyChainDispatcherFactory(this.classloader)
 				.implementationInterface(EmulatedInterface.class)
 				.operation(MethodImplementation.builder()
@@ -130,11 +131,15 @@ public class DaisyChainDispatcherFactoryTest {
 						.beanOperation(BeanOperation.builder()
 								.implementation(new TestBean_2())
 								.methodIdentifier("anotherAction")
-								.argument(new ArgumentFromMethod(String.class, 3))
+								.argument(new ArgumentFromMethod(String.class, 0))
 								.argument(new ArgumentApplicationProtocol())
 								.build())
 						.build())
 				.build();
+		if (emulated instanceof InitializingBean) {
+			final InitializingBean bean = (InitializingBean) emulated;
+			bean.afterPropertiesSet();
+		}
 		return emulated;
 	}
 

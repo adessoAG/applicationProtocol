@@ -99,7 +99,7 @@ public class BeanOperation {
 	 * @param context              application context to load beans
 	 */
 	public void init(final MethodImplementation methodImplementation, final ApplicationContext context) {
-		this.methodImplementation = methodImplementation;
+		this.methodImplementation = methodImplementation; // parent
 
 		// if the implementation is provided, nothing to do.
 		if (this.implementation == null) {

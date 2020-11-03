@@ -15,7 +15,7 @@ public class BasePriceCalculator {
 	@CallStrategy(strategy = CallingStrategy.Eager)
 	public ApplicationProtocol<BigDecimal> calculatePrice(
 			@Required final Article article,
-			final ApplicationProtocol<BigDecimal> state) {
+			@Required final ApplicationProtocol<BigDecimal> state) {
 
 		final ApplicationProtocol<BigDecimal> protocol = new ApplicationProtocol<>();
 

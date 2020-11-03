@@ -1,15 +1,20 @@
 package de.adesso.example.framework.core;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.Assert;
 
 import de.adesso.example.framework.ApplicationProtocol;
+import de.adesso.example.framework.annotation.RequiredParameter;
 import de.adesso.example.framework.exception.RequiredParameterException;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
@@ -51,6 +56,8 @@ public class MethodImplementation {
 	@NotNull
 	private Method method;
 
+	private transient List<ParameterDescription> parameters;
+
 	private transient DaisyChainDispatcher dispatcher;
 
 	@Builder
@@ -67,6 +74,7 @@ public class MethodImplementation {
 	public <T> ApplicationProtocol<T> execute(final ApplicationProtocol<T> state, final Object[] args) {
 
 		ApplicationProtocol<T> intermediateState = state;
+		this.validateArgs(args);
 
 		// call all bean methods defined
 		for (final BeanOperation o : this.beanOperations) {
@@ -99,5 +107,30 @@ public class MethodImplementation {
 	public void init(final DaisyChainDispatcher dispatcher, final ApplicationContext context) {
 		this.beanOperations.stream().forEach(o -> o.init(this, context));
 		this.dispatcher = dispatcher;
+
+		Assert.notNull(this.method, "the method is required to initialize the handling");
+		this.evaluateMethodAnnotations();
+	}
+
+	private void validateArgs(final Object[] args) {
+		for (int i = 0; i < args.length; i++) {
+			if (this.parameters.get(i).isRequiredParameter && args[i] == null) {
+				throw new NullPointerException(String.format("required parameter at position %i is null.", i));
+			}
+		}
+	}
+
+	private void evaluateMethodAnnotations() {
+		this.parameters = Arrays.asList(this.method.getParameters()).stream()
+				.map(p -> new ParameterDescription(p.getType(), p.isAnnotationPresent(RequiredParameter.class)))
+				.collect(Collectors.toList());
+	}
+
+	@Getter
+	@AllArgsConstructor
+	class ParameterDescription {
+
+		private final Class<?> parameterType;
+		private final boolean isRequiredParameter;
 	}
 }

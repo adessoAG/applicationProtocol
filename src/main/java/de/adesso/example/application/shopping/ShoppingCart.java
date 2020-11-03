@@ -19,7 +19,7 @@ public class ShoppingCart {
 	}
 
 	public void addEntry(final Article article) {
-		final OptionalInt pos = posOfArticle(article);
+		final OptionalInt pos = this.posOfArticle(article);
 		if (pos.isEmpty()) {
 			this.entries.add(new ShoppingCartEntry(article, 1));
 		} else {
@@ -28,7 +28,7 @@ public class ShoppingCart {
 	}
 
 	public void addEntry(final Article article, final int count) {
-		final OptionalInt pos = posOfArticle(article);
+		final OptionalInt pos = this.posOfArticle(article);
 		if (pos.isEmpty()) {
 			this.entries.add(new ShoppingCartEntry(article, count));
 		} else {
@@ -38,7 +38,7 @@ public class ShoppingCart {
 
 	private OptionalInt posOfArticle(final Article article) {
 		return IntStream.range(0, this.entries.size())
-				.filter(i -> this.entries.get(i).equals(article))
+				.filter(i -> this.entries.get(i).getArticle().equals(article))
 				.findFirst();
 	}
 }

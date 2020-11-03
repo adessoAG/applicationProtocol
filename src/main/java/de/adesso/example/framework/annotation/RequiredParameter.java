@@ -7,10 +7,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is the advice for the application framework to ensure, that
- * every implementation annotated at the interface method has to provide this
- * parameter. This is a proper way to define on which information the
- * calculation has to be based on.
+ * This annotation is the advice for the application framework to ensure, the
+ * parameter may not be null during a call.
  *
  * @author Matthias
  *
