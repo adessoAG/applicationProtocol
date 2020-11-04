@@ -97,6 +97,7 @@ public class BeanOperation {
 	 *
 	 * @param context              application context to load beans
 	 */
+	@SuppressWarnings("unchecked")
 	public void init(final MethodImplementation methodImplementation, final ApplicationContext context) {
 		this.methodImplementation = methodImplementation; // parent
 

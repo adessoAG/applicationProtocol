@@ -132,45 +132,16 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 				throw new RuntimeException(message, e);
 			}
 
-			// bean definition
-			final BeanDefinition newDefinition = this.buildBeanDefinition(beanDefintion, factoryBeanName,
-					emulatedInterface);
-
 			// factory definition
-			final RootBeanDefinition factoryBeanDefintion = this.buildFactoryDefinition(newDefinition,
+			final RootBeanDefinition factoryBeanDefintion = this.buildFactoryDefinition(
 					emulatedInterface,
 					factoryBeanName);
 
 			this.registerBeanIfNotAlreadyRegistered(registry, factoryBeanName, factoryBeanDefintion);
-//			this.registerBeanIfNotAlreadyRegistered(registry, beanName, newDefinition);
 		}
 	}
 
-	private BeanDefinition buildBeanDefinition(final BeanDefinition beanDefintion, final String factoryBeanName,
-			final Class<?> emulatedInterface) {
-
-		final String description = "factory to create the emulated interface : " + beanDefintion.getBeanClassName();
-
-		final RootBeanDefinition newDefinition = new RootBeanDefinition();
-
-		newDefinition.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
-		newDefinition.setAutowireCandidate(true);
-		newDefinition.setBeanClassName(null);
-		newDefinition.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_ALL);
-		newDefinition.setDependsOn(factoryBeanName);
-		newDefinition.setDescription(description);
-		newDefinition.setFactoryBeanName(factoryBeanName);
-		newDefinition.setFactoryMethodName("getObject");
-		newDefinition.setOriginatingBeanDefinition(beanDefintion);
-		newDefinition.setRole(BeanDefinition.ROLE_APPLICATION);
-		newDefinition.setScope(ConfigurableBeanFactory.SCOPE_SINGLETON);
-		newDefinition.setSynthetic(true);
-		newDefinition.setTargetType(emulatedInterface);
-
-		return newDefinition;
-	}
-
-	private RootBeanDefinition buildFactoryDefinition(final BeanDefinition beanDefintion,
+	private RootBeanDefinition buildFactoryDefinition(
 			final Class<Object> emulatedInterface,
 			final String factoryBeanName) {
 
@@ -181,7 +152,7 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 		factoryBeanDefintion.setConstructorArgumentValues(
 				this.buildFactoryConstructorArguments(emulatedInterface));
 		factoryBeanDefintion.setDescription("factory for bean " + emulatedInterface.getName());
-		beanDefintion.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		factoryBeanDefintion.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		factoryBeanDefintion.setScope(ConfigurableBeanFactory.SCOPE_SINGLETON);
 		factoryBeanDefintion.setTargetType(emulatedInterface);
 
