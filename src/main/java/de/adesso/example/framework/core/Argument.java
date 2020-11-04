@@ -3,6 +3,7 @@ package de.adesso.example.framework.core;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Collection;
+import java.util.Optional;
 
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.Required;
@@ -72,20 +73,30 @@ public abstract class Argument {
 		}
 	}
 
-	protected void validateArgument(final Object result) {
-		if (this.isRequired() && result == null) {
-			final String message = String.format("required parameter %s not found, will not call the bean %s",
-					this.parameterName, this.beanOperation.getClazz().getName());
-			log.atInfo().log(message);
-			throw new RequiredParameterException(message);
+	protected void validateArgument(final Optional<?> result) {
+		if (this.isRequired() && result.isEmpty()) {
+			this.throwRequiredParameterException();
 		}
+	}
+
+	protected void validateArgument(final ApplicationProtocol<?> result) {
+		if (this.isRequired() && result == null) {
+			this.throwRequiredParameterException();
+		}
+	}
+
+	private void throwRequiredParameterException() {
+		final String message = String.format("required parameter %s not found, will not call the bean %s",
+				this.parameterName, this.beanOperation.getBeanType().getName());
+		log.atInfo().log(message);
+		throw new RequiredParameterException(message);
 	}
 
 	protected void validateArgumentCollection(final Collection<?> result) {
 		if (this.isRequired() && result == null) {
 			final String message = String.format("required parameter %s not found, will not call the bean %s%s",
 					this.parameterName,
-					this.beanOperation.getClazz().getName(),
+					this.beanOperation.getBeanType().getName(),
 					this.beanOperation.getMethodIdentifier());
 			log.atInfo().log(message);
 			throw new RequiredParameterException(message);
@@ -94,7 +105,7 @@ public abstract class Argument {
 			final String message = String.format(
 					"required collection %s in call %s::%s is empty, but should not be empty by annotation",
 					this.parameterName,
-					this.beanOperation.getClazz().getName(),
+					this.beanOperation.getBeanType().getName(),
 					this.beanOperation.getMethodIdentifier());
 			log.atInfo().log(message);
 			throw new RequiredParameterException(message);
@@ -102,7 +113,7 @@ public abstract class Argument {
 	}
 
 	protected Class<?> getBean() {
-		return this.getBeanOperation().getClazz();
+		return this.getBeanOperation().getBeanType();
 	}
 
 	protected String getBeanMethodIdentifier() {

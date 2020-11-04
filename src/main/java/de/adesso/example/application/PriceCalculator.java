@@ -1,6 +1,6 @@
 package de.adesso.example.application;
 
-import java.math.BigDecimal;
+import org.javamoney.moneta.Money;
 
 import de.adesso.example.application.stock.Article;
 import de.adesso.example.framework.ApplicationProtocol;
@@ -19,5 +19,5 @@ public interface PriceCalculator {
 	 * @param article
 	 * @return
 	 */
-	ApplicationProtocol<BigDecimal> calculatePrice(Article article, ApplicationProtocol<BigDecimal> appendixes);
+	ApplicationProtocol<Money> calculatePrice(Article article, ApplicationProtocol<Money> appendixes);
 }

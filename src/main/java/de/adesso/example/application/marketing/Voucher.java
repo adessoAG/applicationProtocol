@@ -1,11 +1,17 @@
 package de.adesso.example.application.marketing;
 
-import lombok.AllArgsConstructor;
+import org.javamoney.moneta.Money;
+
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
-public class Voucher {
+public abstract class Voucher {
 
-	private String voucherId;
+	private final String voucherId;
+
+	public Voucher(final String voucherId) {
+		this.voucherId = voucherId;
+	}
+
+	public abstract Money calculateDiscount(Money price);
 }

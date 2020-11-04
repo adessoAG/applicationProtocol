@@ -46,7 +46,7 @@ public class ArgumentFromMethod extends Argument {
 				.getParameters().length) {
 			final String message = String.format(
 					"parameter position is greater as the method parameters (%s::%s) available from the describing interface(%s)",
-					this.getBeanOperation().getClazz().getName(),
+					this.getBean().getName(),
 					this.getBeanMethodIdentifier(),
 					this.getBeanOperation().getMethodImplementation().getDispatcher().getImplementationInterface()
 							.getName());
@@ -59,7 +59,7 @@ public class ArgumentFromMethod extends Argument {
 					"parameter of interface %s::%s cannot be assigned to bean %s::%s.",
 					this.getEmulatedInterface().getName(),
 					this.getEmulatedInterfaceMethod().getName(),
-					this.getBean(),
+					this.getBean().getName(),
 					this.getEmulatedInterface().getName());
 			log.atError().log(message);
 			throw new BuilderException(message);

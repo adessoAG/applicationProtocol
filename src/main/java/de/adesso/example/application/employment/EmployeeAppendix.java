@@ -10,7 +10,7 @@ import lombok.Getter;
 @Appendix
 public class EmployeeAppendix extends ApplicationAppendix<Employee> {
 
-	EmployeeAppendix(final Employee employee) {
+	public EmployeeAppendix(final Employee employee) {
 		super(employee);
 	}
 

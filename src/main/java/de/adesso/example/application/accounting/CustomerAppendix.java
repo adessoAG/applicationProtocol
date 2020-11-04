@@ -4,18 +4,17 @@ import java.util.UUID;
 
 import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.annotation.Appendix;
-import lombok.ToString;
 
 @Appendix
-@ToString
-public class AccountingRecordAppendix extends ApplicationAppendix<AccountingRecord> {
+public class CustomerAppendix extends ApplicationAppendix<Debitor> {
 
-	public AccountingRecordAppendix(final AccountingRecord accountingRecord) {
-		super(accountingRecord);
+	public CustomerAppendix(final Debitor content) {
+		super(content);
 	}
 
 	@Override
 	public UUID getOwner() {
 		return Accounting.id;
 	}
+
 }

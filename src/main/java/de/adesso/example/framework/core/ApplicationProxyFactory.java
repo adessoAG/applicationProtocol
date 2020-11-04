@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 import de.adesso.example.framework.ApplicationProtocol;
@@ -34,45 +32,42 @@ import lombok.extern.log4j.Log4j2;
  *
  */
 @Log4j2
-public class ApplicationProxyFactory
-		implements FactoryBean<Object> {
+public class ApplicationProxyFactory {
 
 	private final Class<Object> emulatedInterface;
 	private Object generatedEmulation;
-	private final ApplicationContext context;
+	private final ClassLoader classLoader;
 
 	private final ArgumentFactory argumentFactory;
 
-	public ApplicationProxyFactory(final ApplicationContext context, final ArgumentFactory argumentFactory,
+	public ApplicationProxyFactory(final ClassLoader classLoader, final ArgumentFactory argumentFactory,
 			final Class<Object> emulatedInterface) {
 		Assert.notNull(emulatedInterface, "the emulated interface may not be null");
 		this.argumentFactory = argumentFactory;
 		this.emulatedInterface = emulatedInterface;
-		this.context = context;
+		this.classLoader = classLoader;
 	}
 
-	@Override
 	public Object getObject() {
 		if (this.generatedEmulation == null) {
-			this.generatedEmulation = emulateInterface(this.emulatedInterface);
+			this.generatedEmulation = this.emulateInterface(this.emulatedInterface);
 		}
 		return this.generatedEmulation;
 	}
 
-	@Override
 	public Class<Object> getObjectType() {
 		return this.emulatedInterface;
 	}
 
 	private Object emulateInterface(@NonNull final Class<Object> interfaceType) {
-		validateClassAnnotations(interfaceType);
+		this.validateClassAnnotations(interfaceType);
 
 		// initialize the factory to build the proxy
-		final DaisyChainDispatcherFactory factory = new DaisyChainDispatcherFactory(this.context.getClassLoader())
+		final DaisyChainDispatcherFactory factory = new DaisyChainDispatcherFactory(this.classLoader)
 				.implementationInterface(interfaceType);
 
 		// add the methods of the interface to be emulated
-		processAllMethods(interfaceType).stream()
+		this.processAllMethods(interfaceType).stream()
 				.forEach(m -> factory.operation(m));
 
 		return factory.build();
@@ -81,7 +76,7 @@ public class ApplicationProxyFactory
 	private <T> Collection<MethodImplementation> processAllMethods(final Class<T> interfaceType) {
 		final List<MethodImplementation> implementations = new ArrayList<>();
 		for (final Method m : interfaceType.getMethods()) {
-			final MethodImplementation methodEmulation = buildMethodEmulation(m);
+			final MethodImplementation methodEmulation = this.buildMethodEmulation(m);
 			methodEmulation.method(m);
 			implementations.add(methodEmulation);
 		}
@@ -94,17 +89,17 @@ public class ApplicationProxyFactory
 		final String methodName = interfaceMethod.getName();
 		final MethodImplementationBuilder builder = MethodImplementation.builder()
 				.methodIdentifier(methodName)
-				.returnValueType(extractReturnValueType(interfaceMethod));
+				.returnValueType(this.extractReturnValueType(interfaceMethod));
 
 		// the interface may annotate several beans to provide implementations which
 		// will be called consecutively
 		final Implementation implAnnotation = interfaceMethod.getAnnotation(Implementation.class);
-		final MatchingStrategy[] strategies = buildStrategy(implAnnotation.strategy());
+		final MatchingStrategy[] strategies = this.buildStrategy(implAnnotation.strategy());
 		for (final Class<?> implClass : implAnnotation.implementations()) {
 			BeanOperation.builder()
 					.implementation(implClass)
 					.methodIdentifier(methodName);
-			final Method beanMethod = extractCorrespondingBeanMethod(methodName, implClass);
+			final Method beanMethod = this.extractCorrespondingBeanMethod(methodName, implClass);
 			if (beanMethod == null) {
 				// basic requirement: the implementation bean provides at least one method with
 				// the same identifier

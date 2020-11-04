@@ -107,6 +107,13 @@ Lets have a look at the next bean, the EmployeeDiscountCalculator:
 ```
 The difference is, that the strategy now is RequiredParameters. Thus the call will
 only happen, if the employee can be found within the appendix. Remember the interface PriceCalculator, at the method calculatePrice now employee is given in the signature. In this case the system extracts the employee from the appendix. If it is not present, this bean will not be called. 
+
+Another aspect of this procedure is, that the calculation result can easily archived. Staying with the example above, the procedure could be:
+- Customer informs about possible price for an article.
+- Later on at check out the customer wants to purchase the article. 
+
+Normally one would repeat the whole calculation which could be require extensive resources. By using a cache it would be possible to reuse the first calculation and save resources. 
+
 ## Summary
 The system introduces new Annotations to be used. Dependencies between business departments cooperating to implement price calculation are removed. By this the 
 development team should have an easier task to keep the system tidy. 

@@ -1,6 +1,6 @@
 package de.adesso.example.application;
 
-import java.math.BigDecimal;
+import org.javamoney.moneta.Money;
 
 import de.adesso.example.application.employment.EmployeeDiscountCalculator;
 import de.adesso.example.application.marketing.VoucherDiscountCalculator;
@@ -32,7 +32,7 @@ public interface PriceCalculatorAnnotated {
 					EmployeeDiscountCalculator.class,
 					VoucherDiscountCalculator.class
 			})
-	ApplicationProtocol<BigDecimal> calculatePrice(
+	ApplicationProtocol<Money> calculatePrice(
 			@RequiredParameter Article article,
-			@RequiredParameter ApplicationProtocol<BigDecimal> appendixes);
+			@RequiredParameter ApplicationProtocol<Money> appendixes);
 }

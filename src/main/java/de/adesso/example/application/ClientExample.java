@@ -1,40 +1,55 @@
 package de.adesso.example.application;
 
-import java.math.BigDecimal;
-
+import org.javamoney.moneta.Money;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Service;
 
+import de.adesso.example.application.employment.EmployeeAppendix;
+import de.adesso.example.application.employment.Employment;
 import de.adesso.example.application.stock.Article;
 import de.adesso.example.framework.ApplicationProtocol;
 
+@Service
 public class ClientExample implements CommandLineRunner {
 
 	private final PriceCalculator priceCalculator;
 
 	private final Cashier cashier;
 
+	private final Employment employment;
+
 	@Autowired
-	public ClientExample(final PriceCalculator priceCalculator, final Cashier cashier) {
+	public ClientExample(final PriceCalculator priceCalculator, final Cashier cashier, final Employment employment) {
 		this.priceCalculator = priceCalculator;
 		this.cashier = cashier;
+		this.employment = employment;
 	}
 
 	@Override
 	public void run(final String... args) throws Exception {
 
 		// customer informs about the price
-		final Article article = customerEnteredArticle();
-		final ApplicationProtocol<BigDecimal> state = this.priceCalculator.calculatePrice(article, null);
-		final BigDecimal price = state.getResult();
-		System.out.println(String.format("%d: %.2f €", article, price));
+		Article article = this.customerEnteredArticle();
+		ApplicationProtocol<Money> state = this.priceCalculator.calculatePrice(article, null);
+		Money price = state.getResult();
+		System.out.println(String.format("%s: %s", article.getArticelId(), price));
+		System.out.println("The protocol is: ");
+		System.out.println(state.toString());
+
+		// employee informs about the price
+		article = this.customerEnteredArticle();
+		state = new ApplicationProtocol<>();
+		state.addAppendix(new EmployeeAppendix(this.employment.createEmployee("Müller", "Hans", 1234)));
+		state = this.priceCalculator.calculatePrice(article, state);
+		price = state.getResult();
+		System.out.println(String.format("%s: %s", article.getArticelId(), price));
 		System.out.println("The protocol is: ");
 		System.out.println(state.toString());
 	}
 
 	private Article customerEnteredArticle() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Article("112244");
 	}
 
 }

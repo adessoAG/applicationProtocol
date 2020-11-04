@@ -9,10 +9,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 @Builder
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Getter
 public class Account {
-	private UUID id;
-	private String name;
+
+	@EqualsAndHashCode.Include
+	private final UUID id;
 	Money amount;
 }

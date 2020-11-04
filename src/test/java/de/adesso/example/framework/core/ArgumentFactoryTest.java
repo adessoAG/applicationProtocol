@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.StringTestAppendix;
 import de.adesso.example.framework.exception.UndefinedParameterException;
@@ -25,10 +26,10 @@ public class ArgumentFactoryTest {
 
 	@Before
 	public void setup() {
-		final List<String> appendixClassesNames = new ArrayList<>();
-		appendixClassesNames.add(StringTestAppendix.class.getName());
+		final List<Class<? extends ApplicationAppendix<?>>> appendixClasses = new ArrayList<>();
+		appendixClasses.add(StringTestAppendix.class);
 		final AppendixRegistry appendixRegistry = new AppendixRegistryImpl(this.getClass().getClassLoader(),
-				appendixClassesNames);
+				appendixClasses);
 		this.factory = new ArgumentFactory(appendixRegistry);
 	}
 

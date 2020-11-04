@@ -128,7 +128,7 @@ public class MethodImplementation {
 
 	@Getter
 	@AllArgsConstructor
-	class ParameterDescription {
+	private class ParameterDescription {
 
 		private final Class<?> parameterType;
 		private final boolean isRequiredParameter;

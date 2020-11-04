@@ -12,6 +12,7 @@ import org.springframework.util.Assert;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.CallStrategy;
 import de.adesso.example.framework.exception.BuilderException;
+import de.adesso.example.framework.exception.RequiredParameterException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -53,7 +54,7 @@ public class BeanOperation {
 	 * Spring to instrument the bean which would not be possible if the
 	 * corresponding object would be used.
 	 */
-	private final Class<Object> beanType;
+	private Class<Object> beanType;
 
 	/**
 	 * The implementation is an object which will be used during execution of the
@@ -68,8 +69,6 @@ public class BeanOperation {
 	 * List of the arguments of the operation.
 	 */
 	private final List<Argument> arguments;
-
-	private Class<?> clazz;
 
 	private transient CallStrategy callStrategy;
 	private transient MethodImplementation methodImplementation;
@@ -110,6 +109,9 @@ public class BeanOperation {
 			}
 		}
 		Assert.notNull(this.implementation, "one of implementation, beanType, anInterface is required");
+		if (this.beanType == null) {
+			this.beanType = (Class<Object>) this.implementation.getClass();
+		}
 
 		// provide the target position to the arguments
 		IntStream.range(0, this.arguments.size())
@@ -125,7 +127,13 @@ public class BeanOperation {
 	 */
 	public ApplicationProtocol<?> execute(final ApplicationProtocol<?> state, final Object[] args) {
 
-		final Object[] methodArguments = this.prepareArguments(state, args);
+		final Object[] methodArguments;
+		try {
+			methodArguments = this.prepareArguments(state, args);
+		} catch (final RequiredParameterException e) {
+			return state; // bean has to be called, if required parameters are present
+		}
+
 		ApplicationProtocol<?> result = null;
 		try {
 			result = (ApplicationProtocol<?>) this.method.invoke(this.implementation, methodArguments);

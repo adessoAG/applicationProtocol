@@ -81,7 +81,7 @@ public class ApplicationConfig {
 								.build())
 						.build())
 				.build();
-		log.atDebug().log("done with initializationof PriceCalculator");
+		log.atDebug().log("done with initialization of PriceCalculator");
 
 		return priceCalculator;
 	}

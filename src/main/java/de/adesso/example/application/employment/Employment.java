@@ -4,12 +4,15 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import de.adesso.example.application.accounting.Creditor;
 import de.adesso.example.framework.ApplicationOwner;
 
 @Service
 public class Employment extends ApplicationOwner {
 
 	public final static UUID ownUuid = UUID.randomUUID();
+
+	private final static Creditor employeeDiscountCreditor = new Creditor(UUID.randomUUID());
 
 	// employee factory methods
 
@@ -38,5 +41,13 @@ public class Employment extends ApplicationOwner {
 	@Override
 	protected UUID getOwnerId() {
 		return ownUuid;
+	}
+
+	public void registerNonCashBenefit(final EmployeeBenefit benefit) {
+		benefit.getEmployee().registerBenefit(benefit);
+	}
+
+	public static Creditor getEmployeeDiscountCreditor() {
+		return employeeDiscountCreditor;
 	}
 }

@@ -1,6 +1,6 @@
 package de.adesso.example.application;
 
-import java.math.BigDecimal;
+import org.javamoney.moneta.Money;
 
 import de.adesso.example.application.accounting.PointOfSale;
 import de.adesso.example.application.shopping.ShoppingCart;
@@ -12,5 +12,5 @@ import de.adesso.example.framework.annotation.Implementation;
 public interface Cashier {
 
 	@Implementation(implementations = { PointOfSale.class })
-	ApplicationProtocol<BigDecimal> encash(ShoppingCart cart, ApplicationProtocol<BigDecimal> state);
+	ApplicationProtocol<Money> encash(ShoppingCart cart, ApplicationProtocol<Money> state);
 }

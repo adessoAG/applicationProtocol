@@ -2,6 +2,9 @@ package de.adesso.example.application.accounting;
 
 import java.util.Collection;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class BookKeeper {
 
 	public void process(final Collection<AccountingRecordAppendix> accountingRecords) throws BookKeepingException {
