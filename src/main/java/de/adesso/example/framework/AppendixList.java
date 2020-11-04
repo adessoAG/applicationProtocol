@@ -9,9 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import de.adesso.example.framework.exception.TooManyElementsException;
-import lombok.ToString;
 
-@ToString
 class AppendixList {
 
 	/**
@@ -99,5 +97,18 @@ class AppendixList {
 		return this.appendixes.stream()
 				.filter(a -> a.getOwner().equals(owner.getOwnerId()))
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+		sb.append(this.getClass().getName())
+				.append(": number of appendixes: ")
+				.append(this.appendixes.size())
+				.append('\n');
+		this.appendixes.stream()
+				.forEach(aa -> aa.toString(sb, 1));
+
+		return sb.toString();
 	}
 }

@@ -19,4 +19,9 @@ public class Debitor extends Account {
 		super(id, Money.of(0.0, de.adesso.example.application.Standard.EUROS));
 	}
 
+	@Override
+	public String toString() {
+		return "debitor (" + this.getId().toString() + "): " + this.getAmount().toString();
+	}
+
 }
