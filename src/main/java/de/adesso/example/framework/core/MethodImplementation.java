@@ -115,7 +115,7 @@ public class MethodImplementation {
 	private void validateArgs(final Object[] args) {
 		for (int i = 0; i < args.length; i++) {
 			if (this.parameters.get(i).isRequiredParameter && args[i] == null) {
-				throw new NullPointerException(String.format("required parameter at position %i is null.", i));
+				throw new NullPointerException(String.format("required parameter at position %d is null.", i));
 			}
 		}
 	}

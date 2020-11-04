@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 import de.adesso.example.framework.ApplicationProtocol;
@@ -32,7 +34,7 @@ import lombok.extern.log4j.Log4j2;
  *
  */
 @Log4j2
-public class ApplicationProxyFactory {
+public class ApplicationProxyFactory implements FactoryBean<Object> {
 
 	private final Class<Object> emulatedInterface;
 	private Object generatedEmulation;
@@ -48,9 +50,13 @@ public class ApplicationProxyFactory {
 		this.classLoader = classLoader;
 	}
 
-	public Object getObject() {
+	public Object getObject() throws Exception {
 		if (this.generatedEmulation == null) {
 			this.generatedEmulation = this.emulateInterface(this.emulatedInterface);
+			if (this.generatedEmulation instanceof InitializingBean) {
+				final InitializingBean ib = (InitializingBean) this.generatedEmulation;
+				ib.afterPropertiesSet();
+			}
 		}
 		return this.generatedEmulation;
 	}

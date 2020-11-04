@@ -13,14 +13,15 @@ import de.adesso.example.framework.ApplicationProtocol;
 @Service
 public class ClientExample implements CommandLineRunner {
 
-	private final PriceCalculator priceCalculator;
+	private final PriceCalculatorAnnotated priceCalculator;
 
 	private final Cashier cashier;
 
 	private final Employment employment;
 
 	@Autowired
-	public ClientExample(final PriceCalculator priceCalculator, final Cashier cashier, final Employment employment) {
+	public ClientExample(final PriceCalculatorAnnotated priceCalculator, final Cashier cashier,
+			final Employment employment) {
 		this.priceCalculator = priceCalculator;
 		this.cashier = cashier;
 		this.employment = employment;
@@ -31,7 +32,8 @@ public class ClientExample implements CommandLineRunner {
 
 		// customer informs about the price
 		Article article = this.customerEnteredArticle();
-		ApplicationProtocol<Money> state = this.priceCalculator.calculatePrice(article, null);
+		ApplicationProtocol<Money> state = new ApplicationProtocol<>();
+		state = this.priceCalculator.calculatePrice(article, state);
 		Money price = state.getResult();
 		System.out.println(String.format("%s: %s", article.getArticelId(), price));
 		System.out.println("The protocol is: ");

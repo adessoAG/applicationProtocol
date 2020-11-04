@@ -142,7 +142,7 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 					factoryBeanName);
 
 			this.registerBeanIfNotAlreadyRegistered(registry, factoryBeanName, factoryBeanDefintion);
-			this.registerBeanIfNotAlreadyRegistered(registry, beanName, newDefinition);
+//			this.registerBeanIfNotAlreadyRegistered(registry, beanName, newDefinition);
 		}
 	}
 
@@ -176,14 +176,14 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 
 		final RootBeanDefinition factoryBeanDefintion = new RootBeanDefinition();
 
-		factoryBeanDefintion.setBeanClass(ApplicationProxyFactory.class);
-		factoryBeanDefintion.setTargetType(emulatedInterface);
 		factoryBeanDefintion.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_NAME);
-		factoryBeanDefintion.setDescription("factory for bean " + emulatedInterface.getName());
-		factoryBeanDefintion.setScope(ConfigurableBeanFactory.SCOPE_SINGLETON);
-		beanDefintion.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		factoryBeanDefintion.setBeanClass(ApplicationProxyFactory.class);
 		factoryBeanDefintion.setConstructorArgumentValues(
 				this.buildFactoryConstructorArguments(emulatedInterface));
+		factoryBeanDefintion.setDescription("factory for bean " + emulatedInterface.getName());
+		beanDefintion.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		factoryBeanDefintion.setScope(ConfigurableBeanFactory.SCOPE_SINGLETON);
+		factoryBeanDefintion.setTargetType(emulatedInterface);
 
 		return factoryBeanDefintion;
 	}
