@@ -32,8 +32,8 @@ repositories {
 build.doFirst{
 println("hallo")
 		copy{
-			from ('build/gen-html'){
-				include 'ReadMe.html'
+			from ('src/markdown'){
+				include 'ReadMe.md'
 			}
 			into getProject().getProjectDir()
 		}
