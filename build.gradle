@@ -21,10 +21,24 @@ group = 'de.adesso.applicationFW'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.11'
 
+// configure mark down
+//markdownToHtml.outputDir = "$buildDir"
+
 repositories {
     jcenter()
 	mavenCentral()
 }
+	
+build.doFirst{
+println("hallo")
+		copy{
+			from ('build/gen-html'){
+				include 'ReadMe.html'
+			}
+			into getProject().getProjectDir()
+		}
+}
+build.dependsOn(markdownToHtml)
 
 dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.12'
@@ -53,4 +67,4 @@ dependencies {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-log4j'
     }
-}
+ }

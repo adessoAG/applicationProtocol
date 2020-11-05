@@ -1,22 +1,21 @@
 # Readme Application Framework
 ## Motivation
-The main motivation to create the framework was to support clean software. The following list shows some 
-procedure to achieve better code quality.
+The main motivation to create the framework was to support clean software. The following list shows a new idea to achieve better code quality.
 * Work in small teams. One precondition is, that the tasks are small and concise. 
 * Keep the number of dependencies as low as possible.  
-* Surely there are many other circumstances which should be noted.
-Let's have a simple example. 
+* Find ways to minimize degradation of inner quality of a system while working on it. 
+
+Surely there are many other circumstances which should be noted. Let's have a simple example. 
 ```java
 Money price calculatePrice(Article article);
 ```
-This is a rather simple signature. It is required, because articles may depend on daily purchase prices.
-Therefore there should be some functionality to calculate the price. 
+This is a rather simple signature. It is required, because articles may depend on daily purchase prices. Therefore there should be some functionality to calculate the price. 
 
-The next requirement is, that you want to offer your employees reduced prices for personal need. This requirement changes the signature to:
+Some time later, you may want to excite your employees and support the commitment to your shop. Thus you provide the personal the possibility to purchase your goods to reduced prices. This requirement changes the signature to:
 ```java
 Money price calculatePrice(Article article, Employee employee);
 ```
-Now the marketing department wants to create some buying incentives for the customers. They are going to introduce vouchers which can be given
+Next the marketing department wants to create some buying incentives for the customers. They are going to introduce vouchers which can be given
 to customers. The requirement changes the signature to:
 ```java
 Money price calculatePrice(Article article, Employee employee, Voucher voucher);
@@ -40,6 +39,7 @@ What the heck if I could stay at the simple call of the first implementation. Al
 * minimum of dependencies
 * no improper use of other internal information
 * no danger of wrong dependencies
+* clear responsibilities
 
 So the idea is, to divide the task in several components:
 * BasePriceCalculator which does the original job
@@ -47,10 +47,7 @@ So the idea is, to divide the task in several components:
 the human resources department.
 * VoucherDiscountCalculator which calculates the discount based on a voucher the customer provides. This component is owned by the marketing. 
 
-At next we need a small component which combines the different calculators. The idea of the framework is, that all the calculators are provided 
-as independent components. The component which binds them together is a standard component which binds Spring to achieve the result. To make this 
-happen, it is necessary to adopt the signature. Since we want to transport more than one result, I created the so called ApplicationProtocoll. 
-It carries the original calculation result and all further information as so called appendixes (ApplicationAppendix). 
+At next we need a small component which combines the different calculators. The idea of the framework is, that all the calculators are provided as independent components by the responsible business department. Than there is one component of the framework, which binds them together. To make this happen, it is necessary to slightly change the signature of the original call. Since we want to transport more information, I created the so called ApplicationProtocoll. It allows for various appendixes  (ApplicationAppendix) which can provide information to the calculating beans. Since there are also many result values, the protocol collects them together. This leads to a calculation pipeline. 
 
 An Appendix is owned by a business organization, e.g. the marketing. Each appendix owned by marketing carries the id of marketing. So the 
 appendixes marketing is responsible can easily identified. Applying this changes, the signature would like this:
@@ -67,7 +64,7 @@ interface PriceCalculator {
 }
 ```
  The application protocol is input to receive private information and it is output, to be able to forward all information inclusive appendixes of 
- different responsibilities. The annotation @Emulated tells the system, that it has to do some magic with this interface. The annotation @Implementation tells the beans which should be used. 
+ different responsibilities. The annotation @Emulated tells the system, that it has to do some magic with this interface. The annotation @Implementation tells the magic behind the scene which beans which should be used. 
  
  The signature of the BasePriceCalculator could be like this:
 ```java
@@ -106,9 +103,9 @@ public class EmployeeDiscountCalculator {
 }
 ```
 The difference is, that the strategy now is RequiredParameters. Thus the call will
-only happen, if the employee can be found within the appendix. Remember the interface PriceCalculator, at the method calculatePrice now employee is given in the signature. In this case the system extracts the employee from the appendix. If it is not present, this bean will not be called. 
+only happen, if the employee can be found within the appendix. Remember the interface PriceCalculator. This bean requires the  at the method signature of calculatePrice the additional parameter employee. It is annotated as required. In this case the system extracts the employee from the appendix, since there is no employee available within the signature of the emulated interface. If the employee is not found in the appendix, the bean will not be called. 
 
-Another aspect of this procedure is, that the calculation result can easily archived. Staying with the example above, the procedure could be:
+Another aspect of this procedure is, that the calculation result can easily archived, because it is available as a complex object (the protocol). Staying with the example above, the procedure could be:
 - Customer informs about possible price for an article.
 - Later on at check out the customer wants to purchase the article. 
 
@@ -138,3 +135,17 @@ MethodImplementation is the helper class which represents an emulated method of 
 ## Summary
 The system introduces new Annotations to be used. Dependencies between business departments cooperating to implement price calculation are removed. By this the 
 development team should have an easier task to keep the system tidy. 
+
+This is a proposal. It is the first draft of an idea. It can grow to useful tool if many ideas can be incorporated. Please don't hesitate, I appreciate any comment on it, even if you don't like it. 
+
+There are still ideas which are not implemented yet.
+
+### Further dispatchers
+At the moment there is only a DaisyChainDispatcher which provides calculations like pipelines. The only extension to pipelines is, that calculations within the pipe can be made optional. 
+
+Another dispatcher idea could be a splitting and a joining dispatcher. For example if your business task is to provide offers from various suppliers, than you might collect offers in parallel to minimize the elapsed time during calculation. The procedure could be, select the suppliers, prepare the requests and then split the calculation. Each request itself could be processed again as a daisy chain. Later on, the join collects all results in a common format. 
+
+### Distinction
+This idea is in competition with other possibilities to implement this problem. At first I want to note BPMN driven engines. The process is designed with help of a standardized notation, which can be processed by various different engines. Chaining of tasks, split and join are already available. 
+
+The BPMN engine introduces a lot of new infrastructure. If your shop already works with BPMN, that's fine and a very good choice. In this case this framework could probably support implementation of tasks of a fine grained level. But it will never replace the BPMN solution.
