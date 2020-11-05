@@ -32,11 +32,7 @@ repositories {
 build.doFirst{
 println("hallo")
 		copy{
-<<<<<<< HEAD
 			from ('src/markdown'){
-=======
-			from ('build/gen-html'){
->>>>>>> branch 'master' of https://github.com/bconnection42/applicationProtocol.git
 				include 'ReadMe.md'
 			}
 			into getProject().getProjectDir()
