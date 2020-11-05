@@ -4,15 +4,12 @@ import java.util.UUID;
 
 import org.javamoney.moneta.Money;
 
-import lombok.ToString;
-
 /**
  * Accounts we sell to.
  *
  * @author Matthias
  *
  */
-@ToString
 public class Debitor extends Account {
 
 	public Debitor(final UUID id) {
