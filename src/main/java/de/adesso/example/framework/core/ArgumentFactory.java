@@ -73,8 +73,8 @@ public class ArgumentFactory {
 			@NonNull final Method beanMethod,
 			@NonNull final Class<?> type) {
 		// check possible pairs
-		final ParameterPosition targetCandidate = this.findMatchingParametersByType(emulatedMethod, type);
-		final ParameterPosition sourceCandidate = this.findMatchingParametersByType(beanMethod, type);
+		final ParameterPosition targetCandidate = this.findMatchingParametersByType(beanMethod, type);
+		final ParameterPosition sourceCandidate = this.findMatchingParametersByType(emulatedMethod, type);
 
 		final Argument argument = new ArgumentFromMethod(targetCandidate.getParameter().getType(),
 				sourceCandidate.getPosition());
@@ -113,9 +113,9 @@ public class ArgumentFactory {
 				.collect(Collectors.toList());
 		if (relevantParameters.size() != 1) {
 			final String message = String.format(
-					"unambigious parameter matching required, there should be exactly one matching parameter. Found : %d",
+					"lookup parameters by name, there should be exactly one matching parameter. Found : %d",
 					relevantParameters.size());
-			log.atWarn().log(message);
+			log.atDebug().log(message);
 			throw new UndefinedParameterException(message);
 		}
 
@@ -130,9 +130,9 @@ public class ArgumentFactory {
 				.collect(Collectors.toList());
 		if (relevantParameters.size() != 1) {
 			final String message = String.format(
-					"unambigious parameter matching required, there should be exactly one matching parameter. Found : %d",
+					"lookup parameters by type, there should be exactly one matching parameter. Found : %d",
 					relevantParameters.size());
-			log.atWarn().log(message);
+			log.atDebug().log(message);
 			throw new UndefinedParameterException(message);
 		}
 

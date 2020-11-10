@@ -3,11 +3,13 @@ package de.adesso.example.application.marketing;
 import java.util.UUID;
 
 import org.javamoney.moneta.Money;
+import org.springframework.stereotype.Service;
 
 import de.adesso.example.application.Standard;
 import de.adesso.example.application.accounting.Creditor;
 import de.adesso.example.framework.ApplicationOwner;
 
+@Service
 public class Marketing extends ApplicationOwner {
 
 	private static final UUID marketingOwner = UUID.randomUUID();

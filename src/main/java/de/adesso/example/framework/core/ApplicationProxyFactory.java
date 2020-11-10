@@ -7,15 +7,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
 
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.Emulated;
 import de.adesso.example.framework.annotation.Implementation;
 import de.adesso.example.framework.annotation.MatchingStrategy;
+import de.adesso.example.framework.core.BeanOperation.BeanOperationBuilder;
 import de.adesso.example.framework.core.MethodImplementation.MethodImplementationBuilder;
+import de.adesso.example.framework.exception.BuilderException;
 import de.adesso.example.framework.exception.GenericDeclarationException;
 import de.adesso.example.framework.exception.MissingAnnotationException;
 import de.adesso.example.framework.exception.UndefinedParameterException;
@@ -34,25 +39,33 @@ import lombok.extern.log4j.Log4j2;
  *
  */
 @Log4j2
-public class ApplicationProxyFactory implements FactoryBean<Object> {
+public class ApplicationProxyFactory implements FactoryBean<Object>, ApplicationContextAware {
 
 	private final Class<Object> emulatedInterface;
 	private Object generatedEmulation;
-	private final ClassLoader classLoader;
-
 	private final ArgumentFactory argumentFactory;
+	private ApplicationContext applicationContext;
 
-	public ApplicationProxyFactory(final ClassLoader classLoader, final ArgumentFactory argumentFactory,
+	public ApplicationProxyFactory(final ArgumentFactory argumentFactory,
 			final Class<Object> emulatedInterface) {
 		Assert.notNull(emulatedInterface, "the emulated interface may not be null");
 		this.argumentFactory = argumentFactory;
 		this.emulatedInterface = emulatedInterface;
-		this.classLoader = classLoader;
+	}
+
+	@Override
+	public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+		applicationContext.getClassLoader();
 	}
 
 	public Object getObject() throws Exception {
 		if (this.generatedEmulation == null) {
 			this.generatedEmulation = this.emulateInterface(this.emulatedInterface);
+			if (this.generatedEmulation instanceof ApplicationContextAware) {
+				final ApplicationContextAware aca = (ApplicationContextAware) this.generatedEmulation;
+				aca.setApplicationContext(this.applicationContext);
+			}
 			if (this.generatedEmulation instanceof InitializingBean) {
 				final InitializingBean ib = (InitializingBean) this.generatedEmulation;
 				ib.afterPropertiesSet();
@@ -69,7 +82,7 @@ public class ApplicationProxyFactory implements FactoryBean<Object> {
 		this.validateClassAnnotations(interfaceType);
 
 		// initialize the factory to build the proxy
-		final DaisyChainDispatcherFactory factory = new DaisyChainDispatcherFactory(this.classLoader)
+		final DaisyChainDispatcherFactory factory = new DaisyChainDispatcherFactory(this.applicationContext)
 				.implementationInterface(interfaceType);
 
 		// add the methods of the interface to be emulated
@@ -89,11 +102,12 @@ public class ApplicationProxyFactory implements FactoryBean<Object> {
 		return implementations;
 	}
 
+	@SuppressWarnings("unchecked")
 	private MethodImplementation buildMethodEmulation(final Method interfaceMethod) {
 		Assert.notNull(interfaceMethod, "method is mandatory argument");
 
 		final String methodName = interfaceMethod.getName();
-		final MethodImplementationBuilder builder = MethodImplementation.builder()
+		final MethodImplementationBuilder miBuilder = MethodImplementation.builder()
 				.methodIdentifier(methodName)
 				.returnValueType(this.extractReturnValueType(interfaceMethod));
 
@@ -102,15 +116,23 @@ public class ApplicationProxyFactory implements FactoryBean<Object> {
 		final Implementation implAnnotation = interfaceMethod.getAnnotation(Implementation.class);
 		final MatchingStrategy[] strategies = this.buildStrategy(implAnnotation.strategy());
 		for (final Class<?> implClass : implAnnotation.implementations()) {
-			BeanOperation.builder()
-					.implementation(implClass)
-					.methodIdentifier(methodName);
+			final BeanOperationBuilder operationBuilder = BeanOperation.builder();
+			if (implClass.isInterface()) {
+				operationBuilder.anInterface(implClass);
+			} else {
+				operationBuilder.beanType((Class<Object>) implClass);
+			}
+			operationBuilder.methodIdentifier(methodName);
 			final Method beanMethod = this.extractCorrespondingBeanMethod(methodName, implClass);
 			if (beanMethod == null) {
 				// basic requirement: the implementation bean provides at least one method with
 				// the same identifier
-				continue;
+				final String message = String.format("could not locate the requested method %s::%s",
+						implClass.getName(), methodName);
+				log.atError().log(message);
+				throw new BuilderException(message);
 			}
+			operationBuilder.method(beanMethod);
 
 			// found appropriate method, now instrument it
 			final List<Argument> argumentList = new ArrayList<>();
@@ -154,8 +176,10 @@ public class ApplicationProxyFactory implements FactoryBean<Object> {
 					throw new UndefinedParameterException(message);
 				}
 			}
+			operationBuilder.arguments(argumentList);
+			miBuilder.beanOperation(operationBuilder.build());
 		}
-		return builder.build();
+		return miBuilder.build();
 	}
 
 	private Method extractCorrespondingBeanMethod(final String methodName, final Class<?> implClass) {

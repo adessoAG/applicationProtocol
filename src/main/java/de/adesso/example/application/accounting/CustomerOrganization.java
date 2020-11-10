@@ -7,7 +7,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class CustomerOrganization extends Debitor {
+public class CustomerOrganization extends Customer {
 
 	CustomerOrganization(final UUID customerId, final String name) {
 		super(customerId);

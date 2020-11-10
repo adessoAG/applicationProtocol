@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import de.adesso.example.framework.exception.UnknownMethodException;
@@ -37,8 +38,8 @@ public class DaisyChainDispatcherFactory {
 	private Map<String, Method> interfaceMethods = new HashMap<>();
 	private final ClassLoader classLoader;
 
-	public DaisyChainDispatcherFactory(final ClassLoader classLoader) {
-		this.classLoader = classLoader;
+	public DaisyChainDispatcherFactory(final ApplicationContext applicationContext) {
+		this.classLoader = applicationContext.getClassLoader();
 	}
 
 	//

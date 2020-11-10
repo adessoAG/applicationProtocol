@@ -6,13 +6,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.CallStrategy;
 import de.adesso.example.framework.exception.BuilderException;
-import de.adesso.example.framework.exception.RequiredParameterException;
+import de.adesso.example.framework.exception.CalculationNotApplicable;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -75,7 +76,7 @@ public class BeanOperation {
 
 	@Builder
 	private BeanOperation(final String methodIdentifier, final Class<?> anInterface, final Class<Object> beanType,
-			final Object implementation, @Singular final List<Argument> arguments) {
+			final Object implementation, @Singular final List<Argument> arguments, final Method method) {
 		Assert.notNull(arguments, "arguments are required to build the configuration");
 		Assert.notNull(methodIdentifier, "method identifier is required to instantiate");
 
@@ -85,8 +86,11 @@ public class BeanOperation {
 		this.implementation = implementation;
 		this.method = null;
 		this.arguments = arguments;
+		this.method = method;
 
-		this.setMethod(this.getDescribingClass());
+		if (method == null) {
+			this.setMethod(this.getDescribingClass());
+		}
 	}
 
 	/**
@@ -103,10 +107,33 @@ public class BeanOperation {
 
 		// if the implementation is provided, nothing to do.
 		if (this.implementation == null) {
-			if (this.beanType != null) {
-				this.implementation = context.getBean(this.beanType);
-			} else if (this.anInterface != null) {
-				this.implementation = context.getBean(this.anInterface);
+			// validate information is available
+			if (this.beanType == null && this.anInterface == null) {
+				final String message = String.format("no type given for implementation bean %s", this.methodIdentifier);
+				log.atError().log(message);
+				throw new NullPointerException(message);
+			}
+
+			// determine the type
+			try {
+				if (this.beanType != null) {
+					this.implementation = context.getBean(this.beanType);
+				} else if (this.anInterface != null) {
+					this.implementation = context.getBean(this.anInterface);
+				}
+			} catch (final BeansException e) {
+				// ignore that exception. It might be a POJO.
+				log.atDebug().log("given type is not a valid bean: %s, try classloader",
+						this.beanType != null ? this.beanType.getName() : this.anInterface.getName());
+				try {
+					this.implementation = this.beanType.getDeclaredConstructor().newInstance();
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+						| InvocationTargetException | NoSuchMethodException | SecurityException e1) {
+					final String message = String.format(
+							"finally could not provide class, class loader failed to load %s", this.methodIdentifier);
+					log.atError().log(message, e1);
+					throw new BuilderException(message, e1);
+				}
 			}
 		}
 		Assert.notNull(this.implementation, "one of implementation, beanType, anInterface is required");
@@ -131,7 +158,7 @@ public class BeanOperation {
 		final Object[] methodArguments;
 		try {
 			methodArguments = this.prepareArguments(state, args);
-		} catch (final RequiredParameterException e) {
+		} catch (final CalculationNotApplicable e) {
 			return state; // bean has to be called, if required parameters are present
 		}
 
@@ -177,8 +204,6 @@ public class BeanOperation {
 	}
 
 	private void setMethod(final Class<?> describingClass) {
-		Assert.notNull(this.implementation, "to extract the method, the implementation has to be set bevore");
-
 		try {
 			log.atDebug().log("going to extract method {}::{}", describingClass.getName(),
 					this.methodIdentifier);

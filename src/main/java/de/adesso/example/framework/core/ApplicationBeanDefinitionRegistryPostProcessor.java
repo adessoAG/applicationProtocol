@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -14,6 +13,8 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
@@ -28,12 +29,12 @@ import lombok.extern.log4j.Log4j2;
 @Configuration
 @Log4j2
 public class ApplicationBeanDefinitionRegistryPostProcessor
-		implements BeanDefinitionRegistryPostProcessor, PriorityOrdered, BeanClassLoaderAware {
+		implements BeanDefinitionRegistryPostProcessor, PriorityOrdered, ApplicationContextAware {
 
 	private final static String basePackage = "de.adesso.example";
 
 	private List<Class<? extends ApplicationAppendix<?>>> appendixClasses = null;
-	private ClassLoader classLoader;
+	private ApplicationContext applicationContext;
 	private ArgumentFactory argumentFactorySingelton = null;
 	private AppendixRegistry appendixRegistrySingelton;
 
@@ -48,8 +49,8 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 	}
 
 	@Override
-	public void setBeanClassLoader(final ClassLoader classLoader) {
-		this.classLoader = classLoader;
+	public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
 	}
 
 	@Override
@@ -60,7 +61,8 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 	@Bean
 	public AppendixRegistry appendixRegistry() {
 		if (this.appendixRegistrySingelton == null) {
-			this.appendixRegistrySingelton = new AppendixRegistryImpl(this.classLoader, this.appendixClasses);
+			this.appendixRegistrySingelton = new AppendixRegistryImpl(this.applicationContext.getClassLoader(),
+					this.appendixClasses);
 		}
 		return this.appendixRegistrySingelton;
 	}
@@ -87,7 +89,7 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 	private Class<? extends ApplicationAppendix<Object>> getClassFromClassName(final String className) {
 		Class<?> loadedClass;
 		try {
-			loadedClass = this.classLoader.loadClass(className);
+			loadedClass = this.applicationContext.getClassLoader().loadClass(className);
 		} catch (final ClassNotFoundException e) {
 			final String message = String.format("could not load class %s", className);
 			log.atError().log(message);
@@ -125,7 +127,8 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 			final String factoryBeanName = beanNameBuilder.append("Factory").toString();
 			Class<Object> emulatedInterface;
 			try {
-				emulatedInterface = (Class<Object>) this.classLoader.loadClass(beanDefintion.getBeanClassName());
+				emulatedInterface = (Class<Object>) this.applicationContext.getClassLoader()
+						.loadClass(beanDefintion.getBeanClassName());
 			} catch (final ClassNotFoundException e) {
 				final String message = String
 						.format("could not load class of emulated interface, please check spelling (%s)", beanName);
@@ -161,7 +164,6 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 
 	private ConstructorArgumentValues buildFactoryConstructorArguments(final Class<Object> emulatedInterface) {
 		final ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
-		constructorArgumentValues.addGenericArgumentValue(this.classLoader, "ClassLoader");
 		constructorArgumentValues.addGenericArgumentValue(this.argumentFactory(), "ArgumentFactory");
 		constructorArgumentValues.addGenericArgumentValue(emulatedInterface, "Class");
 

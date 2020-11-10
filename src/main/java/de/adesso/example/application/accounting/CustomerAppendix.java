@@ -6,9 +6,9 @@ import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.annotation.Appendix;
 
 @Appendix
-public class CustomerAppendix extends ApplicationAppendix<Debitor> {
+public class CustomerAppendix extends ApplicationAppendix<Customer> {
 
-	public CustomerAppendix(final Debitor content) {
+	public CustomerAppendix(final Customer content) {
 		super(content);
 	}
 

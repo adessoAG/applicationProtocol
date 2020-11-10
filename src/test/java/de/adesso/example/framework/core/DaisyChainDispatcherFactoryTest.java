@@ -9,7 +9,9 @@ import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -26,7 +28,8 @@ import lombok.Getter;
 @ContextConfiguration(classes = { TestConfig.class })
 public class DaisyChainDispatcherFactoryTest {
 
-	private final ClassLoader classloader = DaisyChainDispatcherFactoryTest.class.getClassLoader();
+	@Autowired
+	private ApplicationContext context;
 
 	@Test
 	public void testBuild() throws Exception {
@@ -83,13 +86,13 @@ public class DaisyChainDispatcherFactoryTest {
 
 	@Test(expected = ClassCastException.class)
 	public void testNotInterface() {
-		new DaisyChainDispatcherFactory(this.classloader)
+		new DaisyChainDispatcherFactory(this.context)
 				.implementationInterface(Wrong.class);
 	}
 
 	@Test(expected = UnknownMethodException.class)
 	public void testWrongOrdering() {
-		new DaisyChainDispatcherFactory(this.classloader)
+		new DaisyChainDispatcherFactory(this.context)
 				.operation(MethodImplementation.builder()
 						.methodIdentifier(EmulatedInterface.method_1)
 						.returnValueType(String.class)
@@ -106,7 +109,7 @@ public class DaisyChainDispatcherFactoryTest {
 	// ------------------------------------------------------------------------//
 
 	private EmulatedInterface createProxy() throws Exception {
-		final EmulatedInterface emulated = new DaisyChainDispatcherFactory(this.classloader)
+		final EmulatedInterface emulated = new DaisyChainDispatcherFactory(this.context)
 				.implementationInterface(EmulatedInterface.class)
 				.operation(MethodImplementation.builder()
 						.methodIdentifier(EmulatedInterface.method_1)

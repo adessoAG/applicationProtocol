@@ -1,8 +1,11 @@
 package de.adesso.example.application.employment;
 
+import java.util.UUID;
+
 import org.javamoney.moneta.Money;
 
 import de.adesso.example.application.Standard;
+import de.adesso.example.application.accounting.Customer;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +18,7 @@ public class Employee {
 	private final String name;
 	private final String firstName;
 	private final int id;
+	private final Customer employeeCustomer = new Customer(UUID.randomUUID());
 
 	@Setter(value = AccessLevel.PACKAGE)
 	private Money income;

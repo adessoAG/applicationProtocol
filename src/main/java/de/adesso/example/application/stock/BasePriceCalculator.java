@@ -14,8 +14,8 @@ import de.adesso.example.application.accounting.Accounting;
 import de.adesso.example.application.accounting.AccountingRecord;
 import de.adesso.example.application.accounting.AccountingRecordAppendix;
 import de.adesso.example.application.accounting.Creditor;
+import de.adesso.example.application.accounting.Customer;
 import de.adesso.example.application.accounting.CustomerAppendix;
-import de.adesso.example.application.accounting.Debitor;
 import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.CallStrategy;
@@ -58,12 +58,12 @@ public class BasePriceCalculator {
 	private ApplicationProtocol<Money> addBookingRecords(final ApplicationProtocol<Money> state, final Money price) {
 		final Optional<ApplicationAppendix<?>> customerAppendixOptional = state
 				.getAppendixOfClass(CustomerAppendix.class);
-		Debitor customer;
+		Customer customer;
 		if (customerAppendixOptional.isEmpty()) {
 			customer = Accounting.getUnknownCustomer();
 			state.addAppendix(new CustomerAppendix(customer));
 		} else {
-			customer = (Debitor) customerAppendixOptional.get().getContent();
+			customer = (Customer) customerAppendixOptional.get().getContent();
 		}
 		final Creditor revenueAccount = Accounting.getRevenueAccount();
 
