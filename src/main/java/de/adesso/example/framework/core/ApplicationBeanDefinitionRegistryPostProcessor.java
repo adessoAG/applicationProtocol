@@ -53,9 +53,12 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 		this.applicationContext = applicationContext;
 	}
 
+	/**
+	 * Run early to add further beans to the registry. Thus the order returned is 0;
+	 */
 	@Override
 	public int getOrder() {
-		return 0;
+		return HIGHEST_PRECEDENCE;
 	}
 
 	@Bean

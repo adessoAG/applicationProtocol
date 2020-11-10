@@ -18,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
+import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -37,6 +38,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Getter(value = AccessLevel.PACKAGE)
 @Log4j2
+@ToString
 public class BeanOperation {
 
 	/** identifier of the operation */

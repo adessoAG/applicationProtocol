@@ -64,11 +64,11 @@ public class DaisyChainDispatcher implements InvocationHandler {
 	@Override
 	public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
 
-		// get the implementation
-		final MethodImplementation implementation = this.emulateMethods.get(method.getName());
 		if (this.isStandardMethod(method)) {
 			return this.handleStandardMethod(proxy, method, args);
 		}
+		// get the implementation
+		final MethodImplementation implementation = this.emulateMethods.get(method.getName());
 		if (implementation == null) {
 			// there is no implementation, therefore this method is not provided.
 			log.atWarn().log("no implementation for interface {}::method {}",

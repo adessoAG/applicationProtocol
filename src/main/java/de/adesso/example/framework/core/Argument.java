@@ -10,10 +10,12 @@ import de.adesso.example.framework.annotation.Required;
 import de.adesso.example.framework.exception.RequiredParameterException;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 
 @Getter(value = AccessLevel.PACKAGE)
 @Log4j2
+@ToString
 public abstract class Argument {
 
 	/**
@@ -73,14 +75,14 @@ public abstract class Argument {
 		}
 	}
 
-	protected void validateArgument(final Optional<?> result) {
-		if (this.isRequired() && result.isEmpty()) {
+	protected void validateArgument(final Optional<?> argument) {
+		if (this.isRequired() && argument.isEmpty()) {
 			this.throwRequiredParameterException();
 		}
 	}
 
-	protected void validateArgument(final ApplicationProtocol<?> result) {
-		if (this.isRequired() && result == null) {
+	protected void validateArgument(final ApplicationProtocol<?> protocolArgument) {
+		if (this.isRequired() && protocolArgument == null) {
 			this.throwRequiredParameterException();
 		}
 	}
@@ -92,8 +94,8 @@ public abstract class Argument {
 		throw new RequiredParameterException(message);
 	}
 
-	protected void validateArgumentCollection(final Collection<?> result) {
-		if (this.isRequired() && result == null) {
+	protected void validateArgumentCollection(final Collection<?> argumentCollection) {
+		if (this.isRequired() && argumentCollection == null) {
 			final String message = String.format("required parameter %s not found, will not call the bean %s%s",
 					this.parameterName,
 					this.beanOperation.getBeanType().getName(),
@@ -101,7 +103,7 @@ public abstract class Argument {
 			log.atInfo().log(message);
 			throw new RequiredParameterException(message);
 		}
-		if (this.requiredNotEmpty && result.isEmpty()) {
+		if (this.requiredNotEmpty && argumentCollection.isEmpty()) {
 			final String message = String.format(
 					"required collection %s in call %s::%s is empty, but should not be empty by annotation",
 					this.parameterName,
