@@ -46,16 +46,17 @@ public class BeanOperation {
 
 	/**
 	 * Interface of the bean to be used during execution. The class will look up the
-	 * bean from the application context.
+	 * bean from the application context. Since emulated interfaces are populated to
+	 * the context they can also used this way.
 	 */
 	private final Class<?> anInterface;
 
 	/**
-	 * Class variable of the bean. This can be used, if the bean does not implement
-	 * an appropriate interface. Implementing an interface is the better solution.
-	 * The bean is accessed via the application context. This procedure enables
-	 * Spring to instrument the bean which would not be possible if the
-	 * corresponding object would be used.
+	 * Class variable of the bean. This can be used, if a Spring bean does not
+	 * implement an appropriate interface. Implementing an interface is the better
+	 * solution. The bean will be accessed via the application context. This
+	 * procedure enables Spring to instrument the bean which would not be possible
+	 * if the corresponding object would be used.
 	 */
 	private Class<Object> beanType;
 
@@ -125,7 +126,7 @@ public class BeanOperation {
 				}
 			} catch (final BeansException e) {
 				// ignore that exception. It might be a POJO.
-				log.atDebug().log("given type is not a valid bean: %s, try classloader",
+				log.atDebug().log("given type is not a valid bean: {}, try classloader",
 						this.beanType != null ? this.beanType.getName() : this.anInterface.getName());
 				try {
 					this.implementation = this.beanType.getDeclaredConstructor().newInstance();
