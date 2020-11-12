@@ -24,8 +24,28 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.annotation.Appendix;
 import de.adesso.example.framework.annotation.Emulated;
+import de.adesso.example.framework.exception.BuilderException;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * This class is the anchor for the application framework if it is working with
+ * annotations. The {@link BeanDefinitionRegistryPostProcessor} is called by
+ * spring before the beans are instantiated. Therefore this class can do early
+ * initialization work. It implies also, that this class does not instantiate
+ * the beans. This is task of the container.
+ * <p>
+ * The method
+ * {@link ApplicationBeanDefinitionRegistryPostProcessor#postProcessBeanFactory}
+ * performs the initialization. First it scans the paths maintained by Spring
+ * for appendixes, thus classes annotated with the annotation @Appendix. These
+ * classes are required to initialize the AppendixRegistry.
+ * <p>
+ * The next task is the lookup of interfaces which need to be emulated. For all
+ * of these interfaces a factory and a bean is created.
+ *
+ * @author Matthias
+ *
+ */
 @Configuration
 @Log4j2
 public class ApplicationBeanDefinitionRegistryPostProcessor
@@ -82,29 +102,39 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 		/** register all appendixes to be able to initialize the AppendixRegistry */
 		this.appendixClasses = this.findAppendixClasses(basePackage).stream()
 				.peek(bd -> this.check(registry, bd))
-				.map(BeanDefinition::getBeanClassName)
 				.map(this::getClassFromClassName)
 				.collect(Collectors.toList());
 		log.atInfo().log("found the following appendix classes: {}", this.appendixClasses.toString());
 	}
 
 	@SuppressWarnings("unchecked")
-	private Class<? extends ApplicationAppendix<Object>> getClassFromClassName(final String className) {
-		Class<?> loadedClass;
+	private Class<? extends ApplicationAppendix<Object>> getClassFromClassName(final BeanDefinition beanDefinition) {
+		Class<?> clazz;
+
+		// load the class
+		final String className = beanDefinition.getBeanClassName();
 		try {
-			loadedClass = this.applicationContext.getClassLoader().loadClass(className);
+			clazz = this.applicationContext.getClassLoader().loadClass(className);
 		} catch (final ClassNotFoundException e) {
 			final String message = String.format("could not load class %s", className);
 			log.atError().log(message);
 			throw new RuntimeException(message, e);
 		}
-		if (ApplicationAppendix.class.isAssignableFrom(loadedClass)) {
-			return (Class<? extends ApplicationAppendix<Object>>) loadedClass;
+
+		this.validateAppendixClass(clazz);
+
+		return (Class<? extends ApplicationAppendix<Object>>) clazz;
+	}
+
+	private void validateAppendixClass(final Class<?> beanClass) {
+		if (!ApplicationAppendix.class.isAssignableFrom(beanClass)) {
+			// wrong implementation of class
+			final String message = String.format(
+					"Appendixes are required to subclass ApplicationAppendix, please check class %s",
+					beanClass.getName());
+			log.atError().log(message);
+			throw new BuilderException(message);
 		}
-		final String message = String
-				.format("incompatible class encountered, should be subclass of ApplicationAppendix: %s", className);
-		log.atError().log(message);
-		throw new RuntimeException(message);
 	}
 
 	private BeanDefinition check(final BeanDefinitionRegistry registry, final BeanDefinition bd) {
@@ -135,7 +165,7 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 			} catch (final ClassNotFoundException e) {
 				final String message = String
 						.format("could not load class of emulated interface, please check spelling (%s)", beanName);
-				throw new RuntimeException(message, e);
+				throw new BuilderException(message, e);
 			}
 
 			// factory definition

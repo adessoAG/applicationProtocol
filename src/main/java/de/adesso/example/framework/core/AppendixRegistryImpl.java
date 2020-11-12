@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import de.adesso.example.framework.ApplicationAppendix;
+import de.adesso.example.framework.exception.BuilderException;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
@@ -38,9 +39,11 @@ public class AppendixRegistryImpl implements AppendixRegistry {
 			final String typeName = pt.getActualTypeArguments()[0].getTypeName();
 			parameterTypeClass = (Class<Object>) this.classLoader.loadClass(typeName);
 		} catch (final ClassNotFoundException e) {
-			final String message = String.format("could not load class %s, %s", e);
+			// should never happen, because the type is part of the class variable we
+			// received as parameter.
+			final String message = String.format("problem should never happen, could not load class %s, %s", e);
 			log.error(message);
-			throw new RuntimeException(message, e);
+			throw new BuilderException(message, e);
 		}
 		return parameterTypeClass;
 	}
