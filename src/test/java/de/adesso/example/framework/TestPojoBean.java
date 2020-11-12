@@ -1,8 +1,5 @@
 package de.adesso.example.framework;
 
-import org.springframework.stereotype.Service;
-
-@Service
 public class TestPojoBean {
 
 	public final static String testString = "pojo test";
