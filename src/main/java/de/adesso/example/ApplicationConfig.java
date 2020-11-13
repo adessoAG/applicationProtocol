@@ -52,8 +52,8 @@ public class ApplicationConfig {
 		log.atDebug().log("start with initilization of PriceCalculator");
 
 		final PriceCalculator priceCalculator = new DaisyChainDispatcherFactory(this.context)
-				.implementationInterface(PriceCalculator.class)
-				.operation(MethodImplementation.builder()
+				.emulationInterface(PriceCalculator.class)
+				.implementation(MethodImplementation.builder()
 						.methodIdentifier("calculatePrice")
 						.returnValueType(BigDecimal.class)
 						// first call BasePriceCalculator

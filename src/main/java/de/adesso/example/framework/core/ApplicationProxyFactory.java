@@ -83,11 +83,11 @@ public class ApplicationProxyFactory implements FactoryBean<Object>, Application
 
 		// initialize the factory to build the proxy
 		final DaisyChainDispatcherFactory factory = new DaisyChainDispatcherFactory(this.applicationContext)
-				.implementationInterface(interfaceType);
+				.emulationInterface(interfaceType);
 
 		// add the methods of the interface to be emulated
 		this.processAllMethods(interfaceType).stream()
-				.forEach(m -> factory.operation(m));
+				.forEach(m -> factory.implementation(m));
 
 		return factory.build();
 	}

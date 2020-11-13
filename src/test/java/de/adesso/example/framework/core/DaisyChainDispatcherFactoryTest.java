@@ -87,13 +87,13 @@ public class DaisyChainDispatcherFactoryTest {
 	@Test(expected = ClassCastException.class)
 	public void testNotInterface() {
 		new DaisyChainDispatcherFactory(this.context)
-				.implementationInterface(Wrong.class);
+				.emulationInterface(Wrong.class);
 	}
 
 	@Test(expected = UnknownMethodException.class)
 	public void testWrongOrdering() {
 		new DaisyChainDispatcherFactory(this.context)
-				.operation(MethodImplementation.builder()
+				.implementation(MethodImplementation.builder()
 						.methodIdentifier(EmulatedInterface.method_1)
 						.returnValueType(String.class)
 						.beanOperation(BeanOperation.builder()
@@ -110,8 +110,8 @@ public class DaisyChainDispatcherFactoryTest {
 
 	private EmulatedInterface createProxy() throws Exception {
 		final EmulatedInterface emulated = new DaisyChainDispatcherFactory(this.context)
-				.implementationInterface(EmulatedInterface.class)
-				.operation(MethodImplementation.builder()
+				.emulationInterface(EmulatedInterface.class)
+				.implementation(MethodImplementation.builder()
 						.methodIdentifier(EmulatedInterface.method_1)
 						.returnValueType(String.class)
 						.beanOperation(BeanOperation.builder()
@@ -128,7 +128,7 @@ public class DaisyChainDispatcherFactoryTest {
 								.argument(new ArgumentApplicationProtocol())
 								.build())
 						.build())
-				.operation(MethodImplementation.builder()
+				.implementation(MethodImplementation.builder()
 						.methodIdentifier(EmulatedInterface.method_2)
 						.returnValueType(String.class)
 						.beanOperation(BeanOperation.builder()

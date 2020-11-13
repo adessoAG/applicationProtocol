@@ -20,7 +20,7 @@ public class VoucherDiscountCalculator {
 	public ApplicationProtocol<Money> calculatePrice(
 			@Required final Article article,
 			@Required final Voucher voucher,
-			final ApplicationProtocol<Money> state) {
+			@Required final ApplicationProtocol<Money> state) {
 
 		final Account customer = (Account) state.getAppendixOfClass(CustomerAppendix.class).get().getContent();
 

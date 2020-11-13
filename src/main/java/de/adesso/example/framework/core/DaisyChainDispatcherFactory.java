@@ -50,16 +50,15 @@ public class DaisyChainDispatcherFactory {
 	 * The DispatcherBean will emulate some kind of interface. This is the call to
 	 * provide the type of interface to emulate.
 	 *
-	 * @param implementationInterface the interface which will be emulated.
+	 * @param anInterface the interface which will be emulated.
 	 * @throws ClassCastException if the given type is not an interface
 	 * @return the factory for chained construction
 	 */
-	public DaisyChainDispatcherFactory implementationInterface(
-			final Class<?> implementationInterface) {
+	public DaisyChainDispatcherFactory emulationInterface(final Class<?> anInterface) {
 		// validate the parameters
-		if (!implementationInterface.isInterface()) {
+		if (!anInterface.isInterface()) {
 			throw new ClassCastException(
-					"Implementation is required to be an interface: " + implementationInterface.getClass().getName());
+					"Implementation is required to be an interface: " + anInterface.getClass().getName());
 		}
 		// validate the state
 		if (this.emulateMethods.size() != 0) {
@@ -69,9 +68,9 @@ public class DaisyChainDispatcherFactory {
 		}
 
 		// set the interface
-		this.implementationInterface = implementationInterface;
+		this.implementationInterface = anInterface;
 		// save the contained methods of the interface
-		this.interfaceMethods = Arrays.asList(implementationInterface.getDeclaredMethods())
+		this.interfaceMethods = Arrays.asList(anInterface.getDeclaredMethods())
 				.stream()
 				.collect(Collectors.toMap(Method::getName, m -> m));
 		return this;
@@ -86,7 +85,7 @@ public class DaisyChainDispatcherFactory {
 	 * @throws UnknownMethodException if the implementation describes a method which
 	 *                                is not part of the implementation interface
 	 */
-	public DaisyChainDispatcherFactory operation(final MethodImplementation implementation) {
+	public DaisyChainDispatcherFactory implementation(final MethodImplementation implementation) {
 		// validate the operation
 		if (!this.interfaceMethods.containsKey(implementation.getMethodIdentifier())) {
 			final String message = "cannot emulate methods not provided by the interface to be implemented";
