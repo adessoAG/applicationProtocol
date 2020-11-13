@@ -2,7 +2,6 @@ package de.adesso.example.framework.core;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -14,14 +13,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
 
-import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.Emulated;
 import de.adesso.example.framework.annotation.Implementation;
 import de.adesso.example.framework.annotation.MatchingStrategy;
 import de.adesso.example.framework.core.BeanOperation.BeanOperationBuilder;
 import de.adesso.example.framework.core.MethodImplementation.MethodImplementationBuilder;
 import de.adesso.example.framework.exception.BuilderException;
-import de.adesso.example.framework.exception.GenericDeclarationException;
 import de.adesso.example.framework.exception.MissingAnnotationException;
 import de.adesso.example.framework.exception.UndefinedParameterException;
 import lombok.NonNull;
@@ -108,8 +105,7 @@ public class ApplicationProxyFactory implements FactoryBean<Object>, Application
 
 		final String methodName = interfaceMethod.getName();
 		final MethodImplementationBuilder miBuilder = MethodImplementation.builder()
-				.methodIdentifier(methodName)
-				.returnValueType(this.extractReturnValueType(interfaceMethod));
+				.methodIdentifier(methodName);
 
 		// the interface may annotate several beans to provide implementations which
 		// will be called consecutively
@@ -195,20 +191,6 @@ public class ApplicationProxyFactory implements FactoryBean<Object>, Application
 
 	private MatchingStrategy[] buildStrategy(final MatchingStrategy[] strategy) {
 		return strategy;
-	}
-
-	private Class<?> extractReturnValueType(final Method m) {
-		final Class<?> returnType = m.getReturnType();
-		Assert.isTrue(returnType == ApplicationProtocol.class,
-				"by convention, the return type has to be ApplicationProtocol");
-		// ApplicationProtocol is a generic type
-		final TypeVariable<?>[] typeParameters = returnType.getTypeParameters();
-		if (typeParameters.length != 1) {
-			final String message = "cannot retrieve type parameter of ApplicationProtocol, please check declaration";
-			log.atError().log(message);
-			throw new GenericDeclarationException(message);
-		}
-		return typeParameters[0].getClass();
 	}
 
 	/**
