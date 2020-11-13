@@ -41,11 +41,6 @@ public class MethodImplementation {
 	@NotNull
 	private final String methodIdentifier;
 	/**
-	 * Template type of the {@link ApplicationProtocol}
-	 */
-	@NotNull
-	private final Class<?> returnValueType;
-	/**
 	 * Operations to be performed to implemented that method
 	 */
 	@NotNull
@@ -63,10 +58,8 @@ public class MethodImplementation {
 	@Builder
 	private MethodImplementation(
 			final String methodIdentifier,
-			final Class<?> returnValueType,
 			@Singular final List<BeanOperation> beanOperations) {
 		this.methodIdentifier = methodIdentifier;
-		this.returnValueType = returnValueType;
 		this.beanOperations = beanOperations;
 	}
 

@@ -89,7 +89,6 @@ public class MethodImplementationTest {
 	private MethodImplementation createImplementation() throws NoSuchMethodException {
 		final MethodImplementation implementation = MethodImplementation.builder()
 				.methodIdentifier(EmulatedInterface.method_1)
-				.returnValueType(String.class)
 				.beanOperation(BeanOperation.builder()
 						.implementation(new TestBean_1())
 						.methodIdentifier("doSomething")

@@ -1,7 +1,5 @@
 package de.adesso.example;
 
-import java.math.BigDecimal;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -52,10 +50,9 @@ public class ApplicationConfig {
 		log.atDebug().log("start with initilization of PriceCalculator");
 
 		final PriceCalculator priceCalculator = new DaisyChainDispatcherFactory(this.context)
-				.implementationInterface(PriceCalculator.class)
-				.operation(MethodImplementation.builder()
+				.emulationInterface(PriceCalculator.class)
+				.implementation(MethodImplementation.builder()
 						.methodIdentifier("calculatePrice")
-						.returnValueType(BigDecimal.class)
 						// first call BasePriceCalculator
 						.beanOperation(BeanOperation.builder()
 								.implementation(this.basePriceCalculator)
