@@ -1,5 +1,11 @@
 package de.adesso.example.application.shopping;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import de.adesso.example.application.marketing.Voucher;
+import de.adesso.example.application.marketing.VoucherApplication;
+import de.adesso.example.application.marketing.VoucherBasket;
 import de.adesso.example.application.stock.Article;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -25,9 +31,22 @@ public class ShoppingCartEntry {
 	@Setter
 	private int position;
 	@Setter
-	private int subPosition;
-	@Setter
 	private int count;
+	/**
+	 * If vouchers can only be applied to a single article, the can be attached to
+	 * that article. This ensures, that the voucher is used with that article the
+	 * customer wants to use it.
+	 */
+	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.ApplicableToEntry);
+	/**
+	 * The sub-entries all belong to the same entry, thus they comprise all the same
+	 * article. The number of the articles (count) has always to match the number of
+	 * sub-entries.
+	 * <p>
+	 * Sub-entries are required, if a voucher can only be assigned to a single
+	 * article. In this case, the voucher has to be assigned to the sub-entry.
+	 */
+	private final List<ShoppingCartSubEntry> subEntries = new ArrayList<>();
 
 	public ShoppingCartEntry(final Article article, final int count) {
 		this.article = article;
@@ -36,5 +55,44 @@ public class ShoppingCartEntry {
 
 	public void add(final int number) {
 		this.count += number;
+	}
+
+	public void assignVouchers(final List<Voucher> selectedVouchers) {
+		selectedVouchers.stream()
+				.forEach(this::assignSingleVoucher);
+	}
+
+	private boolean isSplitted() {
+		return this.subEntries.size() > 0;
+	}
+
+	private ShoppingCartSubEntry splitEntries() {
+		final ShoppingCartSubEntry sub = new ShoppingCartSubEntry(1);
+		this.subEntries.add(sub);
+		this.count--;
+		if (this.count > 0) {
+			this.subEntries.add(new ShoppingCartSubEntry(this.count));
+		}
+
+		return sub;
+	}
+
+	private void assignSingleVoucher(final Voucher voucher) {
+		// first try entry
+		if (voucher.getApplicableAt().contains(VoucherApplication.ApplicableToEntry)
+				&& this.basket.isAssignable(voucher)) {
+			this.basket.addVoucher(voucher);
+			return;
+		}
+
+		// try to apply to sub-entries
+		if (voucher.getApplicableAt().contains(VoucherApplication.ApplicableToSubEntry)) {
+			if (!this.isSplitted()) {
+				this.splitEntries();
+			}
+			this.subEntries.stream()
+					.filter(se -> se.isAssignable(voucher))
+					.forEach(se -> se.assignVoucher(voucher));
+		}
 	}
 }

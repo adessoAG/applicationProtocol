@@ -30,6 +30,6 @@ public class Marketing extends ApplicationOwner {
 	}
 
 	public Voucher createTenEuroDiscount() {
-		return new AbsoluteVoucher("10EuroDiscount", Money.of(10.00, Standard.EUROS));
+		return new VoucherDiscountAbsolute("10EuroDiscount", Money.of(10.00, Standard.EUROS));
 	}
 }

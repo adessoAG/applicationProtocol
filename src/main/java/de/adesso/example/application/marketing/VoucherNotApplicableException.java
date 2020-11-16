@@ -8,8 +8,17 @@ public class VoucherNotApplicableException extends CalculationNotApplicable {
 
 	private static final long serialVersionUID = -1911326509746932410L;
 
-	public VoucherNotApplicableException(final Money absoluteDiscount) {
-		super(String.format("price may not below vouchers value: %s", absoluteDiscount));
+	private VoucherNotApplicableException(final String message) {
+		super(message);
 	}
 
+	public static VoucherNotApplicableException lowPriceException(final Money absoluteDiscount) {
+		final String message = String.format("price may not below vouchers value: %s", absoluteDiscount);
+		return new VoucherNotApplicableException(message);
+	}
+
+	public static VoucherNotApplicableException wrongType(final Voucher voucher) {
+		final String message = String.format("voucher is not discountable: %s", voucher);
+		return new VoucherNotApplicableException(message);
+	}
 }

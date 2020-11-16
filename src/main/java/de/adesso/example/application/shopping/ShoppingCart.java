@@ -3,9 +3,11 @@ package de.adesso.example.application.shopping;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import de.adesso.example.application.accounting.Customer;
+import de.adesso.example.application.marketing.Voucher;
+import de.adesso.example.application.marketing.VoucherApplication;
+import de.adesso.example.application.marketing.VoucherBasket;
 import de.adesso.example.application.stock.Article;
 import lombok.Getter;
 
@@ -19,9 +21,13 @@ import lombok.Getter;
  */
 public class ShoppingCart {
 
+	/** entries of the shopping cart */
 	private final List<ShoppingCartEntry> entries = new ArrayList<>();
+	/** customer representation who is going to purchase articles */
 	@Getter
 	private final Customer customer;
+	/** vouchers assigned on cart level */
+	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.ApplicableToCart);
 
 	public ShoppingCart(final Customer customer) {
 		this.customer = customer;
@@ -113,15 +119,6 @@ public class ShoppingCart {
 		return !oce.isEmpty();
 	}
 
-	/**
-	 * Returns a stream of shopping cart entries
-	 *
-	 * @return the stream of entries
-	 */
-	public Stream<ShoppingCartEntry> stream() {
-		return this.entries.stream();
-	}
-
 	private Optional<Integer> posOfArticle(final Article article) {
 		return this.entries.stream()
 				.filter(a -> a.getArticle().equals(article))
@@ -133,5 +130,36 @@ public class ShoppingCart {
 		return this.entries.stream()
 				.filter(a -> a.getArticle().equals(article))
 				.findFirst();
+	}
+
+	public void assignVouchers(final List<Voucher> vouchers) {
+		this.resetTryUse(vouchers);
+
+		// assign applicable vouchers to the cart
+		this.assignAppropriateVouchersToCart(vouchers);
+
+		// assign the remaining applicable vouchers to the entries
+		this.assignAppropriateVouchersToEntries(vouchers);
+	}
+
+	private void assignAppropriateVouchersToCart(final List<Voucher> vouchers) {
+		final List<Voucher> selectedVouchers = VoucherBasket.extractVouchersByApplicability(vouchers,
+				VoucherApplication.ApplicableToCart);
+		selectedVouchers.stream()
+				.filter(v -> this.basket.isAssignable(v))
+				.forEach(v -> this.basket.addVoucher(v));
+	}
+
+	private void assignAppropriateVouchersToEntries(final List<Voucher> vouchers) {
+		List<Voucher> selectedVouchers;
+		selectedVouchers = VoucherBasket.extractVouchersByApplicability(vouchers,
+				VoucherApplication.ApplicableToEntry);
+		this.entries.stream()
+				.forEach(e -> e.assignVouchers(selectedVouchers));
+	}
+
+	private void resetTryUse(final List<Voucher> vouchers) {
+		vouchers.stream()
+				.forEach(v -> v.resetTryUse());
 	}
 }

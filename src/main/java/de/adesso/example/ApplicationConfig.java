@@ -11,7 +11,7 @@ import de.adesso.example.application.PriceCalculator;
 import de.adesso.example.application.employment.Employee;
 import de.adesso.example.application.employment.EmployeeAppendix;
 import de.adesso.example.application.employment.EmployeeDiscountCalculator;
-import de.adesso.example.application.marketing.Voucher;
+import de.adesso.example.application.marketing.VoucherDiscount;
 import de.adesso.example.application.marketing.VoucherAppendix;
 import de.adesso.example.application.marketing.VoucherDiscountCalculator;
 import de.adesso.example.application.stock.Article;
@@ -73,7 +73,7 @@ public class ApplicationConfig {
 								.implementation(this.voucherDiscountCalculator)
 								.methodIdentifier("calculatePrice")
 								.argument(new ArgumentFromMethod(Article.class, 0))
-								.argument(new ArgumentFromAppendix(Voucher.class, VoucherAppendix.class))
+								.argument(new ArgumentFromAppendix(VoucherDiscount.class, VoucherAppendix.class))
 								.argument(new ArgumentApplicationProtocol())
 								.build())
 						.build())
