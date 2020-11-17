@@ -18,10 +18,10 @@ import lombok.Getter;
 public class ShoppingCartSubEntry {
 
 	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.ApplicableToSubEntry);
-	private final int number;
+	private final ShoppingCartEntry entry;
 
-	public ShoppingCartSubEntry(final int number) {
-		this.number = number;
+	public ShoppingCartSubEntry(final ShoppingCartEntry entry) {
+		this.entry = entry;
 	}
 
 	public void addVoucher(final Voucher voucher) {

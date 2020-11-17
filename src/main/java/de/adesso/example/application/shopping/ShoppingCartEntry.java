@@ -2,6 +2,8 @@ package de.adesso.example.application.shopping;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import de.adesso.example.application.marketing.Voucher;
 import de.adesso.example.application.marketing.VoucherApplication;
@@ -55,6 +57,7 @@ public class ShoppingCartEntry {
 
 	public void add(final int number) {
 		this.count += number;
+		this.subEntries.clear();
 	}
 
 	public void assignVouchers(final List<Voucher> selectedVouchers) {
@@ -62,19 +65,11 @@ public class ShoppingCartEntry {
 				.forEach(this::assignSingleVoucher);
 	}
 
-	private boolean isSplitted() {
-		return this.subEntries.size() > 0;
-	}
-
-	private ShoppingCartSubEntry splitEntries() {
-		final ShoppingCartSubEntry sub = new ShoppingCartSubEntry(1);
-		this.subEntries.add(sub);
-		this.count--;
-		if (this.count > 0) {
-			this.subEntries.add(new ShoppingCartSubEntry(this.count));
-		}
-
-		return sub;
+	private void splitEntries() {
+		this.subEntries.clear();
+		this.subEntries.addAll(IntStream.range(0, this.count)
+				.mapToObj(i -> new ShoppingCartSubEntry(this))
+				.collect(Collectors.toList()));
 	}
 
 	private void assignSingleVoucher(final Voucher voucher) {
@@ -87,9 +82,7 @@ public class ShoppingCartEntry {
 
 		// try to apply to sub-entries
 		if (voucher.getApplicableAt().contains(VoucherApplication.ApplicableToSubEntry)) {
-			if (!this.isSplitted()) {
-				this.splitEntries();
-			}
+			this.splitEntries();
 			this.subEntries.stream()
 					.filter(se -> se.isAssignable(voucher))
 					.forEach(se -> se.assignVoucher(voucher));

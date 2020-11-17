@@ -2,10 +2,9 @@ package de.adesso.example.framework.core;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -51,7 +50,8 @@ import lombok.extern.log4j.Log4j2;
 public class ApplicationBeanDefinitionRegistryPostProcessor
 		implements BeanDefinitionRegistryPostProcessor, PriorityOrdered, ApplicationContextAware {
 
-	private final static String basePackage = "de.adesso.example";
+	// TODO get the basePackage from Spring
+	private static final String BASE_PACKAGE = "de.adesso.example";
 
 	private List<Class<? extends ApplicationAppendix<?>>> appendixClasses = null;
 	private ApplicationContext applicationContext;
@@ -59,17 +59,18 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 	private AppendixRegistry appendixRegistrySingelton;
 
 	@Override
-	public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
+	public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) {
+		// required by implementing the interface, but not used.
 	}
 
 	@Override
-	public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) throws BeansException {
+	public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) throws BuilderException {
 		this.prepareAppendixes(registry);
 		this.prepareEmulatedInterfaces(registry);
 	}
 
 	@Override
-	public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
+	public void setApplicationContext(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
@@ -84,8 +85,7 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 	@Bean
 	public AppendixRegistry appendixRegistry() {
 		if (this.appendixRegistrySingelton == null) {
-			this.appendixRegistrySingelton = new AppendixRegistryImpl(this.applicationContext.getClassLoader(),
-					this.appendixClasses);
+			this.appendixRegistrySingelton = new AppendixRegistryImpl(this.appendixClasses);
 		}
 		return this.appendixRegistrySingelton;
 	}
@@ -98,10 +98,17 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 		return this.argumentFactorySingelton;
 	}
 
+	private ClassLoader getClassLoader() {
+		ClassLoader classLoader = this.applicationContext.getClassLoader();
+		if (classLoader == null) {
+			classLoader = ApplicationBeanDefinitionRegistryPostProcessor.class.getClassLoader();
+		}
+		return classLoader;
+	}
+
 	private void prepareAppendixes(final BeanDefinitionRegistry registry) {
 		/** register all appendixes to be able to initialize the AppendixRegistry */
-		this.appendixClasses = this.findAppendixClasses(basePackage).stream()
-				.peek(bd -> this.check(registry, bd))
+		this.appendixClasses = this.findAppendixClasses(BASE_PACKAGE).stream()
 				.map(this::getClassFromClassName)
 				.collect(Collectors.toList());
 		log.atInfo().log("found the following appendix classes: {}", this.appendixClasses.toString());
@@ -112,9 +119,9 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 		Class<?> clazz;
 
 		// load the class
-		final String className = beanDefinition.getBeanClassName();
+		final String className = this.beanName(beanDefinition);
 		try {
-			clazz = this.applicationContext.getClassLoader().loadClass(className);
+			clazz = this.getClassLoader().loadClass(className);
 		} catch (final ClassNotFoundException e) {
 			final String message = String.format("could not load class %s", className);
 			log.atError().log(message);
@@ -137,31 +144,25 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 		}
 	}
 
-	private BeanDefinition check(final BeanDefinitionRegistry registry, final BeanDefinition bd) {
-		final String beanName = this.firstToLower(bd.getBeanClassName()).toString();
-		try {
-			final BeanDefinition beanDefinition = registry.getBeanDefinition(beanName);
-			if (beanDefinition != null) {
-				log.atWarn().log("bean {} already defined. Going to remove it from registry.", beanName);
-				registry.registerBeanDefinition(beanName, beanDefinition);
-			}
-		} catch (final NoSuchBeanDefinitionException e) {
-			// ignore
+	private String beanName(final BeanDefinition bd) {
+		String beanName = bd.getBeanClassName();
+		if (beanName == null) {
+			beanName = String.format("bean%d", ThreadLocalRandom.current().nextInt());
 		}
-		return bd;
+		return beanName;
 	}
 
 	@SuppressWarnings("unchecked")
 	private void prepareEmulatedInterfaces(final BeanDefinitionRegistry registry) {
 
-		for (final BeanDefinition beanDefintion : this.findEmulationInterfaces(basePackage)) {
-			final StringBuilder beanNameBuilder = this.firstToLower(beanDefintion.getBeanClassName());
+		for (final BeanDefinition beanDefintion : this.findEmulationInterfaces(BASE_PACKAGE)) {
+			final StringBuilder beanNameBuilder = this.firstToLower(this.beanName(beanDefintion));
 			final String beanName = beanNameBuilder.toString();
 			final String factoryBeanName = beanNameBuilder.append("Factory").toString();
 			Class<Object> emulatedInterface;
 			try {
-				emulatedInterface = (Class<Object>) this.applicationContext.getClassLoader()
-						.loadClass(beanDefintion.getBeanClassName());
+				emulatedInterface = (Class<Object>) this.getClassLoader()
+						.loadClass(this.beanName(beanDefintion));
 			} catch (final ClassNotFoundException e) {
 				final String message = String
 						.format("could not load class of emulated interface, please check spelling (%s)", beanName);

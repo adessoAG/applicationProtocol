@@ -92,4 +92,8 @@ public class ApplicationProtocol<RESULT_TYPE> {
 
 		return this;
 	}
+
+	public void removeAll(final Class<? extends ApplicationAppendix<?>> appendixType) {
+		this.data.removeAll(appendixType);
+	}
 }

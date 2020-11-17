@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import de.adesso.example.application.accounting.Account;
 import de.adesso.example.application.accounting.AccountingRecord;
 import de.adesso.example.application.accounting.AccountingRecordAppendix;
+import de.adesso.example.application.accounting.Customer;
 import de.adesso.example.application.shopping.ShoppingCart;
 import de.adesso.example.application.stock.Article;
 import de.adesso.example.framework.ApplicationProtocol;
@@ -30,7 +31,7 @@ public class VoucherDiscountCalculator {
 	@CallStrategy(strategy = CallingStrategy.RequiredParameters)
 	public ApplicationProtocol<Money> calculatePrice(
 			@Required final Article article,
-			@Required final Account customer,
+			@Required final Customer customer,
 			@Required final Voucher voucher,
 			@Required final ApplicationProtocol<Money> state) {
 
@@ -60,9 +61,9 @@ public class VoucherDiscountCalculator {
 	 * @return
 	 */
 	@CallStrategy(strategy = CallingStrategy.RequiredParameters)
-	public ApplicationProtocol<ShoppingCart> calculatePriceCart(
+	public ApplicationProtocol<ShoppingCart> calculatePriceOfCart(
 			@Required final ShoppingCart cart,
-			@Required final Account customer,
+			@Required final Customer customer,
 			@Required final ApplicationProtocol<ShoppingCart> state) {
 
 		state.setResult(cart);

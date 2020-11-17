@@ -17,7 +17,7 @@ class AppendixRegistryImplTest {
 	void testLookUpFound() {
 		final List<Class<? extends ApplicationAppendix<?>>> appendixClasses = new ArrayList<>();
 		appendixClasses.add(A1.class);
-		final AppendixRegistryImpl impl = new AppendixRegistryImpl(this.getClass().getClassLoader(), appendixClasses);
+		final AppendixRegistryImpl impl = new AppendixRegistryImpl(appendixClasses);
 
 		final Class<? extends ApplicationAppendix<?>> result = impl.lookUp(String.class);
 
@@ -29,7 +29,7 @@ class AppendixRegistryImplTest {
 	void testLookUpNotFound() {
 		final List<Class<? extends ApplicationAppendix<?>>> appendixClasses = new ArrayList<>();
 		appendixClasses.add(A1.class);
-		final AppendixRegistryImpl impl = new AppendixRegistryImpl(this.getClass().getClassLoader(), appendixClasses);
+		final AppendixRegistryImpl impl = new AppendixRegistryImpl(appendixClasses);
 
 		final Class<? extends ApplicationAppendix<?>> result = impl.lookUp(BigDecimal.class);
 

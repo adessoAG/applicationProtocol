@@ -15,6 +15,7 @@ plugins {
 	//apply plugin: 'eclipse'
 	id "io.freefair.lombok" version "5.2.1"
 	id 'org.kordamp.gradle.markdown' version '2.2.0'
+	id "org.sonarqube" version "3.0"
 }
 
 group = 'de.adesso.applicationFW'
@@ -30,7 +31,6 @@ repositories {
 }
 	
 build.doFirst{
-println("hallo")
 		copy{
 			from ('src/markdown'){
 				include 'ReadMe.md'
@@ -39,6 +39,12 @@ println("hallo")
 		}
 }
 build.dependsOn(markdownToHtml)
+
+sonarqube {
+    properties {
+        property "sonar.sourceEncoding", "UTF-8"
+    }
+}
 
 dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.12'

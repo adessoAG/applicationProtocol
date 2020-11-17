@@ -16,6 +16,9 @@ import de.adesso.example.application.accounting.AccountingRecordAppendix;
 import de.adesso.example.application.accounting.Creditor;
 import de.adesso.example.application.accounting.Customer;
 import de.adesso.example.application.accounting.CustomerAppendix;
+import de.adesso.example.application.employment.Employee;
+import de.adesso.example.application.employment.EmployeeAppendix;
+import de.adesso.example.application.shopping.ShoppingCart;
 import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.CallStrategy;
@@ -43,7 +46,28 @@ public class BasePriceCalculator {
 		final Money price = this.buildPrice(article);
 		state.setResult(price);
 
-		this.addBookingRecords(state, price);
+		final Customer customer = this.checkOrAddCustomer(state);
+		this.addBookingRecords(state, price, customer);
+		return state;
+	}
+
+	/**
+	 * Participate within the price calculation chain. Calculates the discount for a
+	 * single whole shopping cart. Creates also the accounting records within the
+	 * state.
+	 *
+	 * @param cart     the cart to be calculated
+	 * @param customer the customer
+	 * @param vouchers the vouchers the customer provided
+	 * @param state    state which receives the calculated cart
+	 * @return
+	 */
+	@CallStrategy(strategy = CallingStrategy.Eager)
+	public ApplicationProtocol<ShoppingCart> calculatePriceOfCart(
+			@Required final ShoppingCart cart,
+			@Required final ApplicationProtocol<ShoppingCart> state) {
+
+		state.setResult(cart);
 		return state;
 	}
 
@@ -55,16 +79,40 @@ public class BasePriceCalculator {
 		return price;
 	}
 
-	private ApplicationProtocol<Money> addBookingRecords(final ApplicationProtocol<Money> state, final Money price) {
-		final Optional<ApplicationAppendix<?>> customerAppendixOptional = state
-				.getAppendixOfClass(CustomerAppendix.class);
-		Customer customer;
-		if (customerAppendixOptional.isEmpty()) {
-			customer = Accounting.getUnknownCustomer();
-			state.addAppendix(new CustomerAppendix(customer));
+	private Customer checkOrAddCustomer(final ApplicationProtocol<Money> state) {
+		boolean createCustomerAppendix = false;
+		Customer customer = null;
+
+		// if an employee is present, he will be the customer.
+		final Optional<ApplicationAppendix<?>> optionalEmployeeAppendix = state
+				.getAppendixOfClass(EmployeeAppendix.class);
+		if (optionalEmployeeAppendix.isPresent()) {
+			customer = ((Employee) optionalEmployeeAppendix.get().getContent()).getEmployeeCustomer();
+			// remove existing customer appendixes
+			state.removeAll(CustomerAppendix.class);
+			createCustomerAppendix = true;
 		} else {
-			customer = (Customer) customerAppendixOptional.get().getContent();
+
+			// check if customer is set explicitly
+			final Optional<ApplicationAppendix<?>> customerAppendixOptional = state
+					.getAppendixOfClass(CustomerAppendix.class);
+			if (customerAppendixOptional.isPresent()) {
+				customer = (Customer) customerAppendixOptional.get().getContent();
+			} else {
+				customer = Accounting.getUnknownCustomer();
+				createCustomerAppendix = true;
+			}
 		}
+
+		if (createCustomerAppendix) {
+			state.addAppendix(new CustomerAppendix(customer));
+		}
+
+		return customer;
+	}
+
+	private ApplicationProtocol<Money> addBookingRecords(final ApplicationProtocol<Money> state, final Money price,
+			final Customer customer) {
 		final Creditor revenueAccount = Accounting.getRevenueAccount();
 
 		return state.addAppendix(new AccountingRecordAppendix(

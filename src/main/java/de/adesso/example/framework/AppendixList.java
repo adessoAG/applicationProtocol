@@ -99,6 +99,12 @@ class AppendixList {
 				.collect(Collectors.toList());
 	}
 
+	public void removeAll(final Class<? extends ApplicationAppendix<?>> appendixType) {
+		final List<ApplicationAppendix<?>> existingAppendixes = this.getAllAppendixesOfClass(appendixType)
+				.collect(Collectors.toList());
+		this.appendixes.removeAll(existingAppendixes);
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();

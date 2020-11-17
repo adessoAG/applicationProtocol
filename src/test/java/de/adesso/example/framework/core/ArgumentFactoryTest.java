@@ -6,20 +6,20 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.StringTestAppendix;
-import de.adesso.example.framework.exception.UndefinedParameterException;
+import de.adesso.example.framework.exception.AppendixNotRegisteredException;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
 public class ArgumentFactoryTest {
 
 	private ArgumentFactory factory;
@@ -28,17 +28,17 @@ public class ArgumentFactoryTest {
 	public void setup() {
 		final List<Class<? extends ApplicationAppendix<?>>> appendixClasses = new ArrayList<>();
 		appendixClasses.add(StringTestAppendix.class);
-		final AppendixRegistry appendixRegistry = new AppendixRegistryImpl(this.getClass().getClassLoader(),
-				appendixClasses);
+		final AppendixRegistry appendixRegistry = new AppendixRegistryImpl(appendixClasses);
 		this.factory = new ArgumentFactory(appendixRegistry);
 	}
 
 	@Test
-	public void testCreateArgumentByName() throws NoSuchMethodException, SecurityException {
+	public void testCreateArgumentUniqueType() throws NoSuchMethodException, SecurityException {
 		final Method emulatedMethod = ToBeEmulated.class.getMethod("operation", String.class, int.class,
 				ApplicationProtocol.class);
 		final Method beanMethod = Bean.class.getMethod("doSomething", String.class);
-		final Argument argument = this.factory.createArgumentByName(emulatedMethod, beanMethod, "aString");
+		final List<ParameterPosition> parameterList = ParameterPosition.buildParameterList(beanMethod);
+		final Argument argument = this.factory.createArgument(emulatedMethod, beanMethod, parameterList.get(0));
 
 		assertThat(argument)
 				.isNotNull()
@@ -52,22 +52,42 @@ public class ArgumentFactoryTest {
 				.isEqualTo(String.class);
 	}
 
-	@Test(expected = UndefinedParameterException.class)
-	public void testCreateArgumentByNameSourceOtherName() throws NoSuchMethodException, SecurityException {
-		final Method emulatedMethod = ToBeEmulated_OtherParameterName.class.getMethod("operation", String.class,
-				int.class,
-				ApplicationProtocol.class);
+	@Test
+	public void testCreateArgumentNotUniqueTypeUniqueName() throws NoSuchMethodException, SecurityException {
+		final Method emulatedMethod = ToBeEmulated_TwoString.class.getMethod("operation",
+				String.class, String.class, ApplicationProtocol.class);
 		final Method beanMethod = Bean.class.getMethod("doSomething", String.class);
-		this.factory.createArgumentByName(emulatedMethod, beanMethod, "aString");
+		final List<ParameterPosition> parameterList = ParameterPosition.buildParameterList(beanMethod);
+		final Argument argument = this.factory.createArgument(emulatedMethod, beanMethod, parameterList.get(0));
+
+		assertThat(argument)
+				.isNotNull()
+				.isInstanceOf(ArgumentFromMethod.class);
+		final ArgumentFromMethod methodArgument = (ArgumentFromMethod) argument;
+		assertThat(methodArgument.getSourcePosition())
+				.isEqualTo(1);
+		assertThat(methodArgument.getTargetPosition())
+				.isEqualTo(0);
+		assertThat(methodArgument.getType())
+				.isEqualTo(String.class);
 	}
 
-	@Test(expected = UndefinedParameterException.class)
-	public void testCreateArgumentByNameTargetOtherName() throws NoSuchMethodException, SecurityException {
-		final Method emulatedMethod = ToBeEmulated.class.getMethod("operation", String.class,
-				int.class,
+	@Test
+	public void testCreateArgumentNotUniqueTypeNotUniqueName() throws NoSuchMethodException, SecurityException {
+		final Method emulatedMethod = ToBeEmulated_OtherType.class.getMethod("operation", UUID.class,
 				ApplicationProtocol.class);
-		final Method beanMethod = Bean_OtherParameterName.class.getMethod("doSomething", String.class);
-		this.factory.createArgumentByName(emulatedMethod, beanMethod, "aString");
+		final Method beanMethod = Bean.class.getMethod("doSomething", String.class);
+		final List<ParameterPosition> parameterList = ParameterPosition.buildParameterList(beanMethod);
+		final Argument argument = this.factory.createArgument(emulatedMethod, beanMethod, parameterList.get(0));
+
+		assertThat(argument)
+				.isNotNull()
+				.isInstanceOf(ArgumentFromAppendix.class);
+		final ArgumentFromAppendix methodArgument = (ArgumentFromAppendix) argument;
+		assertThat(methodArgument.getTargetPosition())
+				.isEqualTo(0);
+		assertThat(methodArgument.getType())
+				.isEqualTo(String.class);
 	}
 
 	@Test
@@ -75,7 +95,8 @@ public class ArgumentFactoryTest {
 		final Method emulatedMethod = ToBeEmulated.class.getMethod("operation", String.class, int.class,
 				ApplicationProtocol.class);
 		final Method beanMethod = Bean.class.getMethod("doSomething", String.class);
-		final Argument argument = this.factory.createArgumentByType(emulatedMethod, beanMethod, String.class);
+		final List<ParameterPosition> parameterList = ParameterPosition.buildParameterList(beanMethod);
+		final Argument argument = this.factory.createArgument(emulatedMethod, beanMethod, parameterList.get(0));
 
 		assertThat(argument)
 				.isNotNull()
@@ -89,38 +110,48 @@ public class ArgumentFactoryTest {
 				.isEqualTo(String.class);
 	}
 
-	@Test(expected = UndefinedParameterException.class)
-	public void testCreateArgumentByTypeSourceOtherType() throws NoSuchMethodException, SecurityException {
-		final Method emulatedMethod = ToBeEmulated_OtherParameterType.class.getMethod("operation", BigDecimal.class,
-				int.class,
-				ApplicationProtocol.class);
-		final Method beanMethod = Bean.class.getMethod("doSomething", String.class);
-		this.factory.createArgumentByType(emulatedMethod, beanMethod, String.class);
-	}
-
-	@Test(expected = UndefinedParameterException.class)
-	public void testCreateArgumentByTypeTargetOtherType() throws NoSuchMethodException, SecurityException {
-		final Method emulatedMethod = ToBeEmulated.class.getMethod("operation", String.class, int.class,
+	@Test(expected = AppendixNotRegisteredException.class)
+	public void testCreateArgumentNoMatch() throws NoSuchMethodException, SecurityException {
+		final Method emulatedMethod = ToBeEmulated_OtherType.class.getMethod("operation", UUID.class,
 				ApplicationProtocol.class);
 		final Method beanMethod = Bean_OtherParameterType.class.getMethod("doSomething", BigDecimal.class);
-		this.factory.createArgumentByType(emulatedMethod, beanMethod, String.class);
+		final List<ParameterPosition> parameterList = ParameterPosition.buildParameterList(beanMethod);
+		this.factory.createArgument(emulatedMethod, beanMethod, parameterList.get(0));
 	}
 
 	@Test
-	public void testCreateArgumentFromAppendix() throws NoSuchMethodException, SecurityException {
-		final Method emulatedMethod = ToBeEmulated.class.getMethod("operation", String.class, int.class,
+	public void testCreateArgumentList() throws NoSuchMethodException, SecurityException {
+		final Method emulatedMethod = ToBeEmulated_OtherType.class.getMethod("operation", UUID.class,
 				ApplicationProtocol.class);
-		final Argument argument = this.factory.createArgumentFromAppendix(emulatedMethod, String.class);
+		final Method beanMethod = Bean_List.class.getMethod("doSomething", List.class);
+		final List<ParameterPosition> parameterList = ParameterPosition.buildParameterList(beanMethod);
+		final Argument argument = this.factory.createArgument(emulatedMethod, beanMethod, parameterList.get(0));
 
 		assertThat(argument)
 				.isNotNull()
-				.isInstanceOf(ArgumentFromAppendix.class);
-		final ArgumentFromAppendix appendixArgument = (ArgumentFromAppendix) argument;
-		assertThat(appendixArgument.getAppendixClass())
-				.isEqualTo(StringTestAppendix.class);
-		assertThat(appendixArgument.getTargetPosition())
+				.isInstanceOf(ArgumentListFromAppendix.class);
+		final ArgumentListFromAppendix listArgument = (ArgumentListFromAppendix) argument;
+		assertThat(listArgument.getTargetPosition())
 				.isEqualTo(0);
-		assertThat(appendixArgument.getType())
+		assertThat(listArgument.getType())
+				.isEqualTo(String.class);
+	}
+
+	@Test
+	public void testCreateArgumentSet() throws NoSuchMethodException, SecurityException {
+		final Method emulatedMethod = ToBeEmulated_OtherType.class.getMethod("operation", UUID.class,
+				ApplicationProtocol.class);
+		final Method beanMethod = Bean_Set.class.getMethod("doSomething", Set.class);
+		final List<ParameterPosition> parameterList = ParameterPosition.buildParameterList(beanMethod);
+		final Argument argument = this.factory.createArgument(emulatedMethod, beanMethod, parameterList.get(0));
+
+		assertThat(argument)
+				.isNotNull()
+				.isInstanceOf(ArgumentSetFromAppendix.class);
+		final ArgumentSetFromAppendix setArgument = (ArgumentSetFromAppendix) argument;
+		assertThat(setArgument.getTargetPosition())
+				.isEqualTo(0);
+		assertThat(setArgument.getType())
 				.isEqualTo(String.class);
 	}
 
@@ -129,14 +160,15 @@ public class ArgumentFactoryTest {
 		ApplicationProtocol<String> operation(String aString, int aInt, ApplicationProtocol<String> state);
 	}
 
-	private interface ToBeEmulated_OtherParameterName {
+	private interface ToBeEmulated_OtherType {
 
-		ApplicationProtocol<String> operation(String otherString, int otherInt, ApplicationProtocol<String> otherState);
+		ApplicationProtocol<String> operation(UUID aUUID, ApplicationProtocol<String> state);
 	}
 
-	private interface ToBeEmulated_OtherParameterType {
+	private interface ToBeEmulated_TwoString {
 
-		ApplicationProtocol<String> operation(BigDecimal aString, int aInt, ApplicationProtocol<String> state);
+		ApplicationProtocol<String> operation(String otherString, final String aString,
+				ApplicationProtocol<String> otherState);
 	}
 
 	private static class Bean {
@@ -150,12 +182,12 @@ public class ArgumentFactoryTest {
 		}
 	}
 
-	private static class Bean_OtherParameterName {
+	private static class Bean_TwoString {
 
 		@SuppressWarnings("unused")
-		public ApplicationProtocol<String> doSomething(final String otherString) {
+		public ApplicationProtocol<String> doSomething(final String otherString, final String aString) {
 			final ApplicationProtocol<String> result = new ApplicationProtocol<>();
-			result.setResult(otherString);
+			result.setResult(aString);
 
 			return result;
 		}
@@ -165,6 +197,28 @@ public class ArgumentFactoryTest {
 
 		@SuppressWarnings("unused")
 		public ApplicationProtocol<String> doSomething(final BigDecimal aString) {
+			final ApplicationProtocol<String> result = new ApplicationProtocol<>();
+			result.setResult("blubber");
+
+			return result;
+		}
+	}
+
+	private static class Bean_List {
+
+		@SuppressWarnings("unused")
+		public ApplicationProtocol<String> doSomething(final List<String> aStringList) {
+			final ApplicationProtocol<String> result = new ApplicationProtocol<>();
+			result.setResult("blubber");
+
+			return result;
+		}
+	}
+
+	private static class Bean_Set {
+
+		@SuppressWarnings("unused")
+		public ApplicationProtocol<String> doSomething(final Set<String> aStringList) {
 			final ApplicationProtocol<String> result = new ApplicationProtocol<>();
 			result.setResult("blubber");
 
