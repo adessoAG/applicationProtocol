@@ -13,8 +13,9 @@ public enum CallingStrategy {
 	 */
 	Eager,
 	/**
-	 * Call the method if the required parameters can be provided.
+	 * Call the method if the required parameters can be provided. Otherwise the
+	 * method is not called. The call is skipped without any error message. This
+	 * behavior can be used, if the call depends on information provided.
 	 */
 	RequiredParameters
-
 }

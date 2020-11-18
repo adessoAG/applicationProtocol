@@ -12,8 +12,11 @@ import org.springframework.util.Assert;
 
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.CallStrategy;
+import de.adesso.example.framework.annotation.CallingStrategy;
+import de.adesso.example.framework.exception.BeanCallException;
 import de.adesso.example.framework.exception.BuilderException;
 import de.adesso.example.framework.exception.CalculationNotApplicable;
+import de.adesso.example.framework.exception.RequiredParameterException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -74,7 +77,7 @@ public class BeanOperation {
 	 */
 	private final List<Argument> arguments;
 
-	private transient CallStrategy callStrategy;
+	private transient CallingStrategy callStrategy;
 	private transient MethodImplementation methodImplementation;
 
 	@Builder
@@ -92,8 +95,9 @@ public class BeanOperation {
 		this.method = method;
 
 		if (method == null) {
-			this.setMethod(this.getDescribingClass());
+			this.setMethodByName(this.getDescribingClass());
 		}
+		this.evaluateMethodAnnotations();
 	}
 
 	/**
@@ -161,7 +165,16 @@ public class BeanOperation {
 		final Object[] methodArguments;
 		try {
 			methodArguments = this.prepareArguments(state, args);
+		} catch (final RequiredParameterException e) {
+			if (this.callStrategy == CallingStrategy.Eager) {
+				throw BeanCallException.callFailedMissingParameter(this.implementation.getClass(), this.method,
+						e.getMethod());
+			}
+			return state;
 		} catch (final CalculationNotApplicable e) {
+			if (this.callStrategy == CallingStrategy.Eager) {
+				throw BeanCallException.callFailedOnStrategy(this.implementation.getClass(), this.method);
+			}
 			return state; // bean has to be called, if required parameters are present
 		}
 
@@ -169,11 +182,15 @@ public class BeanOperation {
 		try {
 			result = (ApplicationProtocol<?>) this.method.invoke(this.implementation, methodArguments);
 
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		} catch (IllegalAccessException | IllegalArgumentException e) {
 			final String message = String.format("could not invoke configured target bean (%s::%s)",
 					this.implementation.getClass().getName(), this.method.getName());
-			log.atError().log(message);
+			log.atError().log(message, e);
 			throw new ClassCastException(message);
+		} catch (final InvocationTargetException e) {
+			final Throwable targetException = e.getTargetException();
+			throw BeanCallException.callFailedWithException(this.implementation.getClass(), this.method,
+					targetException);
 		}
 
 		return result;
@@ -206,7 +223,7 @@ public class BeanOperation {
 		return describingClass;
 	}
 
-	private void setMethod(final Class<?> describingClass) {
+	private void setMethodByName(final Class<?> describingClass) {
 		try {
 			log.atDebug().log("going to extract method {}::{}", describingClass.getName(),
 					this.methodIdentifier);
@@ -217,9 +234,14 @@ public class BeanOperation {
 			log.atError().log(message, e);
 			throw new BuilderException(message, e);
 		}
+	}
 
+	private void evaluateMethodAnnotations() {
 		// get the annotations from the method
-		this.callStrategy = this.method.getDeclaredAnnotation(CallStrategy.class);
+		final CallStrategy strategyAnnotation = this.method.getDeclaredAnnotation(CallStrategy.class);
+		if (strategyAnnotation != null) {
+			this.callStrategy = strategyAnnotation.strategy();
+		}
 	}
 
 	private Class<?>[] argumentTypes(final List<Argument> arguments) {

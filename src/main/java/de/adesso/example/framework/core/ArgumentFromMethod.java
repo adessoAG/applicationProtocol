@@ -38,7 +38,9 @@ public class ArgumentFromMethod extends Argument {
 
 	@Override
 	protected Object prepareArgument(final ApplicationProtocol<?> state, final Object[] args) {
-		return args[this.sourcePosition];
+		final Object parameter = args[this.sourcePosition];
+		this.validateArgument(parameter);
+		return parameter;
 	}
 
 	private void validateSourcePosition() {

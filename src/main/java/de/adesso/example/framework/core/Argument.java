@@ -11,10 +11,8 @@ import de.adesso.example.framework.exception.RequiredParameterException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
-import lombok.extern.log4j.Log4j2;
 
 @Getter(value = AccessLevel.PACKAGE)
-@Log4j2
 @ToString
 public abstract class Argument {
 
@@ -75,42 +73,67 @@ public abstract class Argument {
 		}
 	}
 
-	protected void validateArgument(final Optional<?> argument) {
-		if (this.isRequired() && argument.isEmpty()) {
-			this.throwRequiredParameterException();
+	protected void validateArgument(final Optional<?> parameterOptional) {
+		if (!this.isRequired()) {
+			return;
+		}
+		// parameter is required
+		if (parameterOptional.isEmpty()) {
+			throw RequiredParameterException.parameterMissing(this.parameterName, this.beanOperation.getBeanType(),
+					this.parameterName);
+		}
+		// parameter is present
+		final Object parameter = parameterOptional.get();
+		if (Collection.class.isAssignableFrom(parameter.getClass())
+				&& this.requiredNotEmpty
+				&& ((Collection<?>) parameter).size() == 0) {
+			throw RequiredParameterException.collectionEmpty(this.parameterName, this.beanOperation.getBeanType(),
+					this.parameterName);
 		}
 	}
 
-	protected void validateArgument(final ApplicationProtocol<?> protocolArgument) {
-		if (this.isRequired() && protocolArgument == null) {
-			this.throwRequiredParameterException();
+	protected void validateArgument(final Object parameter) {
+		if (!this.isRequired()) {
+			return;
+		}
+		// parameter is required
+		if (parameter == null) {
+			throw RequiredParameterException.parameterMissing(this.parameterName, this.beanOperation.getBeanType(),
+					this.parameterName);
+		}
+		// parameter is present
+		if (Collection.class.isAssignableFrom(parameter.getClass())
+				&& this.requiredNotEmpty
+				&& ((Collection<?>) parameter).size() == 0) {
+			throw RequiredParameterException.collectionEmpty(this.parameterName, this.beanOperation.getBeanType(),
+					this.parameterName);
 		}
 	}
 
-	private void throwRequiredParameterException() {
-		final String message = String.format("required parameter %s not found, will not call the bean %s",
-				this.parameterName, this.beanOperation.getBeanType().getName());
-		log.atInfo().log(message);
-		throw new RequiredParameterException(message);
+	protected void validateArgument(final ApplicationProtocol<?> parameter) {
+		if (this.isRequired() && parameter == null) {
+			throw RequiredParameterException.parameterMissing(this.parameterName, this.beanOperation.getBeanType(),
+					this.parameterName);
+		}
+		if (parameter == null) {
+			return;
+		}
+		if (Collection.class.isAssignableFrom(parameter.getClass())
+				&& this.requiredNotEmpty
+				&& ((Collection<?>) parameter).size() == 0) {
+			throw RequiredParameterException.collectionEmpty(this.parameterName, this.beanOperation.getBeanType(),
+					this.parameterName);
+		}
 	}
 
 	protected void validateArgumentCollection(final Collection<?> argumentCollection) {
 		if (this.isRequired() && argumentCollection == null) {
-			final String message = String.format("required parameter %s not found, will not call the bean %s%s",
-					this.parameterName,
-					this.beanOperation.getBeanType().getName(),
-					this.beanOperation.getMethodIdentifier());
-			log.atInfo().log(message);
-			throw new RequiredParameterException(message);
+			throw RequiredParameterException.collectionEmpty(this.parameterName, this.beanOperation.getBeanType(),
+					this.parameterName);
 		}
 		if (this.requiredNotEmpty && argumentCollection.isEmpty()) {
-			final String message = String.format(
-					"required collection %s in call %s::%s is empty, but should not be empty by annotation",
-					this.parameterName,
-					this.beanOperation.getBeanType().getName(),
-					this.beanOperation.getMethodIdentifier());
-			log.atInfo().log(message);
-			throw new RequiredParameterException(message);
+			throw RequiredParameterException.collectionEmpty(this.parameterName, this.beanOperation.getBeanType(),
+					this.parameterName);
 		}
 	}
 

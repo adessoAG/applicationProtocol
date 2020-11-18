@@ -129,7 +129,7 @@ public class ApplicationProxyFactory implements FactoryBean<Object>, Application
 		return miBuilder.build();
 	}
 
-	private Method extractCorrespondingBeanMethod(final String methodName, final Class<?> implClass) {
+	private Method extractCorrespondingBeanMethod(@NonNull final String methodName, @NonNull final Class<?> implClass) {
 		Method beanMethod = null;
 		for (final Method implMethod : implClass.getMethods()) {
 			if (methodName.equals(implMethod.getName())) {

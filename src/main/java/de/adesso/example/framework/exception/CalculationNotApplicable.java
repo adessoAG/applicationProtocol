@@ -19,5 +19,4 @@ public class CalculationNotApplicable extends RuntimeException {
 	public CalculationNotApplicable(final String message) {
 		super(message);
 	}
-
 }

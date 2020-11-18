@@ -182,17 +182,6 @@ public class ArgumentFactoryTest {
 		}
 	}
 
-	private static class Bean_TwoString {
-
-		@SuppressWarnings("unused")
-		public ApplicationProtocol<String> doSomething(final String otherString, final String aString) {
-			final ApplicationProtocol<String> result = new ApplicationProtocol<>();
-			result.setResult(aString);
-
-			return result;
-		}
-	}
-
 	private static class Bean_OtherParameterType {
 
 		@SuppressWarnings("unused")
