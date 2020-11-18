@@ -1,8 +1,8 @@
 package de.adesso.example.framework.core;
 
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -64,7 +64,7 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 	}
 
 	@Override
-	public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) throws BuilderException {
+	public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) {
 		this.prepareAppendixes(registry);
 		this.prepareEmulatedInterfaces(registry);
 	}
@@ -136,18 +136,16 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 	private void validateAppendixClass(final Class<?> beanClass) {
 		if (!ApplicationAppendix.class.isAssignableFrom(beanClass)) {
 			// wrong implementation of class
-			final String message = String.format(
-					"Appendixes are required to subclass ApplicationAppendix, please check class %s",
-					beanClass.getName());
-			log.atError().log(message);
-			throw new BuilderException(message);
+			throw BuilderException.appendixConventionBroken(beanClass);
 		}
 	}
+
+	private final Random random = new Random();
 
 	private String beanName(final BeanDefinition bd) {
 		String beanName = bd.getBeanClassName();
 		if (beanName == null) {
-			beanName = String.format("bean%d", ThreadLocalRandom.current().nextInt());
+			beanName = String.format("bean%d", this.random.nextInt());
 		}
 		return beanName;
 	}
@@ -157,16 +155,13 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 
 		for (final BeanDefinition beanDefintion : this.findEmulationInterfaces(BASE_PACKAGE)) {
 			final StringBuilder beanNameBuilder = this.firstToLower(this.beanName(beanDefintion));
-			final String beanName = beanNameBuilder.toString();
 			final String factoryBeanName = beanNameBuilder.append("Factory").toString();
-			Class<Object> emulatedInterface;
+			Class<Object> emulatedInterface = null;
 			try {
 				emulatedInterface = (Class<Object>) this.getClassLoader()
 						.loadClass(this.beanName(beanDefintion));
 			} catch (final ClassNotFoundException e) {
-				final String message = String
-						.format("could not load class of emulated interface, please check spelling (%s)", beanName);
-				throw new BuilderException(message, e);
+				throw BuilderException.classNotLoaded(this.beanName(beanDefintion), e);
 			}
 
 			// factory definition

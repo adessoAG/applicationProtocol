@@ -57,16 +57,14 @@ public abstract class ApplicationAppendix<T> {
 	@SuppressWarnings("unchecked")
 	public static Class<Object> getParameterType(final Class<? extends ApplicationAppendix<?>> appendixClass) {
 		final ParameterizedType pt = (ParameterizedType) appendixClass.getGenericSuperclass();
-		Class<Object> parameterTypeClass;
+		Class<Object> parameterTypeClass = null;
 		final String typeName = pt.getActualTypeArguments()[0].getTypeName();
 		try {
 			parameterTypeClass = (Class<Object>) ApplicationAppendix.class.getClassLoader().loadClass(typeName);
 		} catch (final ClassNotFoundException e) {
 			// should never happen, because the type is part of the class variable we
 			// received as parameter.
-			final String message = String.format("problem should never happen, could not load class %s", typeName);
-			log.error(message, e);
-			throw new BuilderException(message, e);
+			throw BuilderException.cannotLoadAppendixClass(typeName, e);
 		}
 		return parameterTypeClass;
 	}

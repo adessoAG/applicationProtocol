@@ -45,9 +45,9 @@ public class ArgumentFactoryTest {
 				.isInstanceOf(ArgumentFromMethod.class);
 		final ArgumentFromMethod methodArgument = (ArgumentFromMethod) argument;
 		assertThat(methodArgument.getSourcePosition())
-				.isEqualTo(0);
+				.isZero();
 		assertThat(methodArgument.getTargetPosition())
-				.isEqualTo(0);
+				.isZero();
 		assertThat(methodArgument.getType())
 				.isEqualTo(String.class);
 	}
@@ -67,7 +67,7 @@ public class ArgumentFactoryTest {
 		assertThat(methodArgument.getSourcePosition())
 				.isEqualTo(1);
 		assertThat(methodArgument.getTargetPosition())
-				.isEqualTo(0);
+				.isZero();
 		assertThat(methodArgument.getType())
 				.isEqualTo(String.class);
 	}
@@ -85,7 +85,7 @@ public class ArgumentFactoryTest {
 				.isInstanceOf(ArgumentFromAppendix.class);
 		final ArgumentFromAppendix methodArgument = (ArgumentFromAppendix) argument;
 		assertThat(methodArgument.getTargetPosition())
-				.isEqualTo(0);
+				.isZero();
 		assertThat(methodArgument.getType())
 				.isEqualTo(String.class);
 	}
@@ -103,9 +103,9 @@ public class ArgumentFactoryTest {
 				.isInstanceOf(ArgumentFromMethod.class);
 		final ArgumentFromMethod methodArgument = (ArgumentFromMethod) argument;
 		assertThat(methodArgument.getSourcePosition())
-				.isEqualTo(0);
+				.isZero();
 		assertThat(methodArgument.getTargetPosition())
-				.isEqualTo(0);
+				.isZero();
 		assertThat(methodArgument.getType())
 				.isEqualTo(String.class);
 	}
@@ -132,7 +132,7 @@ public class ArgumentFactoryTest {
 				.isInstanceOf(ArgumentListFromAppendix.class);
 		final ArgumentListFromAppendix listArgument = (ArgumentListFromAppendix) argument;
 		assertThat(listArgument.getTargetPosition())
-				.isEqualTo(0);
+				.isZero();
 		assertThat(listArgument.getType())
 				.isEqualTo(String.class);
 	}
@@ -150,7 +150,7 @@ public class ArgumentFactoryTest {
 				.isInstanceOf(ArgumentSetFromAppendix.class);
 		final ArgumentSetFromAppendix setArgument = (ArgumentSetFromAppendix) argument;
 		assertThat(setArgument.getTargetPosition())
-				.isEqualTo(0);
+				.isZero();
 		assertThat(setArgument.getType())
 				.isEqualTo(String.class);
 	}

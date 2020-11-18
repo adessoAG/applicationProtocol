@@ -13,7 +13,6 @@ import de.adesso.example.framework.exception.AppendixNotRegisteredException;
 import de.adesso.example.framework.exception.BuilderException;
 import de.adesso.example.framework.exception.UndefinedParameterException;
 import lombok.NonNull;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * The class is responsible to create the appropriate argument. This class is
@@ -22,7 +21,6 @@ import lombok.extern.log4j.Log4j2;
  * @author Matthias
  *
  */
-@Log4j2
 public class ArgumentFactory {
 
 	private final AppendixRegistry appendixRegistry;
@@ -52,7 +50,7 @@ public class ArgumentFactory {
 		List<ParameterPosition> candidates = ParameterPosition.buildParameterList(emulatedMethod).stream()
 				.filter(emuParam -> beanParameterType.isAssignableFrom(emuParam.getParameter().getType()))
 				.collect(Collectors.toList());
-		if (candidates.size() == 0) {
+		if (candidates.isEmpty()) {
 			return this.createAppendixArgument(paramterPosition);
 		}
 
@@ -101,9 +99,7 @@ public class ArgumentFactory {
 
 		// simple type
 		appendixClass = this.lookupAppendix(parameter.getType());
-		final Argument argument = new ArgumentFromAppendix(parameter.getType(), appendixClass);
-
-		return argument;
+		return new ArgumentFromAppendix(parameter.getType(), appendixClass);
 	}
 
 	private @NonNull Class<? extends ApplicationAppendix<?>> lookupAppendix(final Class<?> contentClass) {
@@ -121,15 +117,13 @@ public class ArgumentFactory {
 		if (begin >= 0 && end >= 0) {
 			name = className.substring(begin + 1, end);
 		}
-		Class<?> classForName;
+		Class<?> classForName = null;
 		try {
 			classForName = ArgumentFactory.class.getClassLoader().loadClass(name);
 		} catch (final ClassNotFoundException e) {
 			// should never happen, because the type is part of the class variable we
 			// received as parameter.
-			final String message = String.format("problem should never happen, could not load class %s", className);
-			log.error(message, e);
-			throw new BuilderException(message, e);
+			throw BuilderException.classNotLoaded(className, e);
 		}
 		return classForName;
 	}

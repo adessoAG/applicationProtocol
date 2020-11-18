@@ -1,6 +1,5 @@
 package de.adesso.example;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -30,17 +29,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ApplicationConfig {
 
-	@Autowired
-	private ApplicationContext context;
-
-	@Autowired
-	private BasePriceCalculator basePriceCalculator;
-
-	@Autowired
-	private EmployeeDiscountCalculator employeeDiscountCalculator;
-
-	@Autowired
-	private VoucherDiscountCalculator voucherDiscountCalculator;
+	private static final String CALCULATE_PRICE = "calculatePrice";
 
 	public ApplicationConfig() {
 		log.atDebug().log("intatiated the configuration");
@@ -48,24 +37,28 @@ public class ApplicationConfig {
 
 	@Bean
 	@Scope(scopeName = ConfigurableBeanFactory.SCOPE_SINGLETON)
-	PriceCalculator priceCalculator() {
+	PriceCalculator priceCalculator(
+			final ApplicationContext context,
+			final BasePriceCalculator basePriceCalculator,
+			final EmployeeDiscountCalculator employeeDiscountCalculator,
+			final VoucherDiscountCalculator voucherDiscountCalculator) {
 		log.atDebug().log("start with initilization of PriceCalculator");
 
-		final PriceCalculator priceCalculator = new DaisyChainDispatcherFactory(this.context)
+		final PriceCalculator priceCalculator = new DaisyChainDispatcherFactory(context)
 				.emulationInterface(PriceCalculator.class)
 				.implementation(MethodImplementation.builder()
-						.methodIdentifier("calculatePrice")
+						.methodIdentifier(CALCULATE_PRICE)
 						// first call BasePriceCalculator
 						.beanOperation(BeanOperation.builder()
-								.implementation(this.basePriceCalculator)
-								.methodIdentifier("calculatePrice")
+								.implementation(basePriceCalculator)
+								.methodIdentifier(CALCULATE_PRICE)
 								.argument(new ArgumentFromMethod(Article.class, 0))
 								.argument(new ArgumentApplicationProtocol())
 								.build())
 						// second call EmployeeDiscountCalculator
 						.beanOperation(BeanOperation.builder()
-								.implementation(this.employeeDiscountCalculator)
-								.methodIdentifier("calculatePrice")
+								.implementation(employeeDiscountCalculator)
+								.methodIdentifier(CALCULATE_PRICE)
 								.argument(new ArgumentFromMethod(Article.class, 0))
 								.argument(new ArgumentFromAppendix(Customer.class, CustomerAppendix.class))
 								.argument(new ArgumentFromAppendix(Employee.class, EmployeeAppendix.class))
@@ -73,8 +66,8 @@ public class ApplicationConfig {
 								.build())
 						// third call VoucherDiscountCalculator
 						.beanOperation(BeanOperation.builder()
-								.implementation(this.voucherDiscountCalculator)
-								.methodIdentifier("calculatePrice")
+								.implementation(voucherDiscountCalculator)
+								.methodIdentifier(CALCULATE_PRICE)
 								.argument(new ArgumentFromMethod(Article.class, 0))
 								.argument(new ArgumentFromAppendix(Customer.class, CustomerAppendix.class))
 								.argument(new ArgumentFromAppendix(Voucher.class, VoucherAppendix.class))

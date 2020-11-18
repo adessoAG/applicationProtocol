@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -49,7 +48,7 @@ public class ApplicationProxyFactory implements FactoryBean<Object>, Application
 	}
 
 	@Override
-	public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
+	public void setApplicationContext(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 		applicationContext.getClassLoader();
 	}
@@ -98,7 +97,7 @@ public class ApplicationProxyFactory implements FactoryBean<Object>, Application
 	}
 
 	@SuppressWarnings("unchecked")
-	private MethodImplementation buildMethodEmulation(final Method interfaceMethod) throws BuilderException {
+	private MethodImplementation buildMethodEmulation(final Method interfaceMethod) {
 		Assert.notNull(interfaceMethod, "method is mandatory argument");
 
 		final String methodName = interfaceMethod.getName();
@@ -139,10 +138,7 @@ public class ApplicationProxyFactory implements FactoryBean<Object>, Application
 		}
 		// nothing found, basic requirement: the implementation bean provides at least
 		// one method with the same identifier
-		final String message = String.format("could not locate the requested method %s::%s",
-				implClass.getName(), methodName);
-		log.atError().log(message);
-		throw new BuilderException(message);
+		throw BuilderException.methodNotFound(implClass, methodName);
 	}
 
 	/**

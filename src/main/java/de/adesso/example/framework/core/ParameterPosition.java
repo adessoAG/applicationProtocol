@@ -22,10 +22,8 @@ class ParameterPosition {
 	static List<ParameterPosition> buildParameterList(final Method method) {
 
 		final Parameter[] beanMethodParameters = method.getParameters();
-		final List<ParameterPosition> beanParamPositions = IntStream.range(0, beanMethodParameters.length)
+		return IntStream.range(0, beanMethodParameters.length)
 				.mapToObj(i -> new ParameterPosition(i, beanMethodParameters[i]))
 				.collect(Collectors.toList());
-		return beanParamPositions;
-
 	}
 }

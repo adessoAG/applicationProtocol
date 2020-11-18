@@ -86,7 +86,7 @@ public abstract class Argument {
 		final Object parameter = parameterOptional.get();
 		if (Collection.class.isAssignableFrom(parameter.getClass())
 				&& this.requiredNotEmpty
-				&& ((Collection<?>) parameter).size() == 0) {
+				&& ((Collection<?>) parameter).isEmpty()) {
 			throw RequiredParameterException.collectionEmpty(this.parameterName, this.beanOperation.getBeanType(),
 					this.parameterName);
 		}
@@ -104,7 +104,7 @@ public abstract class Argument {
 		// parameter is present
 		if (Collection.class.isAssignableFrom(parameter.getClass())
 				&& this.requiredNotEmpty
-				&& ((Collection<?>) parameter).size() == 0) {
+				&& ((Collection<?>) parameter).isEmpty()) {
 			throw RequiredParameterException.collectionEmpty(this.parameterName, this.beanOperation.getBeanType(),
 					this.parameterName);
 		}
@@ -120,7 +120,7 @@ public abstract class Argument {
 		}
 		if (Collection.class.isAssignableFrom(parameter.getClass())
 				&& this.requiredNotEmpty
-				&& ((Collection<?>) parameter).size() == 0) {
+				&& ((Collection<?>) parameter).isEmpty()) {
 			throw RequiredParameterException.collectionEmpty(this.parameterName, this.beanOperation.getBeanType(),
 					this.parameterName);
 		}
