@@ -2,7 +2,6 @@ package de.adesso.example.application.stock;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -15,18 +14,14 @@ import de.adesso.example.application.accounting.AccountingRecord;
 import de.adesso.example.application.accounting.AccountingRecordAppendix;
 import de.adesso.example.application.accounting.Creditor;
 import de.adesso.example.application.accounting.Customer;
-import de.adesso.example.application.accounting.CustomerAppendix;
-import de.adesso.example.application.employment.Employee;
-import de.adesso.example.application.employment.EmployeeAppendix;
 import de.adesso.example.application.shopping.ShoppingCart;
-import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.CallStrategy;
 import de.adesso.example.framework.annotation.CallingStrategy;
 import de.adesso.example.framework.annotation.Required;
 
 @Service
-public class BasePriceCalculator {
+public class PricingBean {
 
 	private final Map<String, Money> articlePrices = new HashMap<>();
 
@@ -39,14 +34,14 @@ public class BasePriceCalculator {
 	}
 
 	@CallStrategy(strategy = CallingStrategy.Eager)
-	public ApplicationProtocol<Money> calculatePrice(
+	public ApplicationProtocol<Money> buildPrice(
 			@Required final Article article,
+			@Required final Customer customer,
 			@Required final ApplicationProtocol<Money> state) {
 
 		final Money price = this.buildPrice(article);
 		state.setResult(price);
 
-		final Customer customer = this.checkOrAddCustomer(state);
 		this.addBookingRecords(state, price, customer);
 		return state;
 	}
@@ -77,38 +72,6 @@ public class BasePriceCalculator {
 			throw new ArticleNotFoundException(article.getArticelId());
 		}
 		return price;
-	}
-
-	private Customer checkOrAddCustomer(final ApplicationProtocol<Money> state) {
-		boolean createCustomerAppendix = false;
-		Customer customer = null;
-
-		// if an employee is present, he will be the customer.
-		final Optional<ApplicationAppendix<?>> optionalEmployeeAppendix = state
-				.getAppendixOfClass(EmployeeAppendix.class);
-		if (optionalEmployeeAppendix.isPresent()) {
-			customer = ((Employee) optionalEmployeeAppendix.get().getContent()).getEmployeeCustomer();
-			// remove existing customer appendixes
-			state.removeAll(CustomerAppendix.class);
-			createCustomerAppendix = true;
-		} else {
-
-			// check if customer is set explicitly
-			final Optional<ApplicationAppendix<?>> customerAppendixOptional = state
-					.getAppendixOfClass(CustomerAppendix.class);
-			if (customerAppendixOptional.isPresent()) {
-				customer = (Customer) customerAppendixOptional.get().getContent();
-			} else {
-				customer = Accounting.getUnknownCustomer();
-				createCustomerAppendix = true;
-			}
-		}
-
-		if (createCustomerAppendix) {
-			state.addAppendix(new CustomerAppendix(customer));
-		}
-
-		return customer;
 	}
 
 	private ApplicationProtocol<Money> addBookingRecords(final ApplicationProtocol<Money> state, final Money price,

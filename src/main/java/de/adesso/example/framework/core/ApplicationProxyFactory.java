@@ -104,18 +104,17 @@ public class ApplicationProxyFactory implements FactoryBean<Object>, Application
 		final MethodImplementationBuilder miBuilder = MethodImplementation.builder()
 				.methodIdentifier(methodName);
 
-		// the interface may annotate several beans to provide implementations which
-		// will be called consecutively
-		final Implementation implAnnotation = interfaceMethod.getAnnotation(Implementation.class);
-		for (final Class<?> implClass : implAnnotation.implementations()) {
+		final Implementation[] implDef = interfaceMethod.getAnnotationsByType(Implementation.class);
+		for (final Implementation implClass : implDef) {
 			final BeanOperationBuilder operationBuilder = BeanOperation.builder();
-			if (implClass.isInterface()) {
-				operationBuilder.anInterface(implClass);
+			if (implClass.bean().isInterface()) {
+				operationBuilder.anInterface(implClass.bean());
 			} else {
-				operationBuilder.beanType((Class<Object>) implClass);
+				operationBuilder.beanType((Class<Object>) implClass.bean());
 			}
-			operationBuilder.methodIdentifier(methodName);
-			final Method beanMethod = this.extractCorrespondingBeanMethod(methodName, implClass);
+			final String implMethod = implClass.method().isEmpty() ? methodName : implClass.method();
+			operationBuilder.methodIdentifier(implMethod);
+			final Method beanMethod = this.extractCorrespondingBeanMethod(implMethod, implClass.bean());
 			operationBuilder.method(beanMethod);
 
 			// found appropriate method, now instrument it

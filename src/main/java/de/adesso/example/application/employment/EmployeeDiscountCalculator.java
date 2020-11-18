@@ -18,7 +18,7 @@ import de.adesso.example.framework.annotation.Required;
 public class EmployeeDiscountCalculator {
 
 	@CallStrategy(strategy = CallingStrategy.RequiredParameters)
-	public ApplicationProtocol<Money> calculatePrice(
+	public ApplicationProtocol<Money> discountEmployee(
 			@Required final Article article,
 			@Required final Customer customer,
 			@Required final Employee employee,

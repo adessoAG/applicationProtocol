@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import de.adesso.example.framework.exception.BuilderException;
 import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * Base type for the various appendixes. Every new type to be added to the
@@ -16,7 +15,6 @@ import lombok.extern.log4j.Log4j2;
  *
  */
 @Getter
-@Log4j2
 public abstract class ApplicationAppendix<T> {
 
 	/**

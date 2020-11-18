@@ -5,8 +5,8 @@ import de.adesso.example.framework.annotation.CallingStrategy;
 
 /**
  * If a method of a bean is marked with the {@link CallStrategy} with the value
- * {@link CallingStrategy.RequiredParameters} then the calculation can be
- * aborted by throwing this exception or their specializations. The remaining
+ * {@link CallingStrategy#RequiredParameters} then the calculation can be
+ * skipped by throwing this exception or their specializations. The remaining
  * beans will be evaluated.
  *
  * @author Matthias

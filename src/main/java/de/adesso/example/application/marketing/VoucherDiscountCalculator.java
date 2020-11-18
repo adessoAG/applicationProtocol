@@ -29,7 +29,7 @@ public class VoucherDiscountCalculator {
 	 * @return the original state with the reduced price set as result
 	 */
 	@CallStrategy(strategy = CallingStrategy.RequiredParameters)
-	public ApplicationProtocol<Money> calculatePrice(
+	public ApplicationProtocol<Money> discountVoucher(
 			@Required final Article article,
 			@Required final Customer customer,
 			@Required final Voucher voucher,

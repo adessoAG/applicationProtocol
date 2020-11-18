@@ -2,14 +2,16 @@ package de.adesso.example.application;
 
 import org.javamoney.moneta.Money;
 
+import de.adesso.example.application.accounting.AccountingBean;
 import de.adesso.example.application.employment.EmployeeDiscountCalculator;
 import de.adesso.example.application.marketing.VoucherDiscountCalculator;
 import de.adesso.example.application.shopping.ShoppingCart;
 import de.adesso.example.application.stock.Article;
-import de.adesso.example.application.stock.BasePriceCalculator;
+import de.adesso.example.application.stock.PricingBean;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.Emulated;
 import de.adesso.example.framework.annotation.Implementation;
+import de.adesso.example.framework.annotation.ImplementationDefinition;
 import de.adesso.example.framework.annotation.Required;
 import de.adesso.example.framework.annotation.RequiredParameter;
 
@@ -28,16 +30,15 @@ public interface PriceCalculatorAnnotated {
 	 * call does not take in account, if for example a voucher is applicable to only
 	 * one product.
 	 *
-	 * @param previousPrice
-	 * @param article
-	 * @return
+	 * @param article    the article to calculated
+	 * @param appendixes the state of all appendixes traveling through the
+	 *                   calculation chain
+	 * @return the price for the article incorporating all price reductions
 	 */
-	@Implementation(
-			implementations = {
-					BasePriceCalculator.class,
-					EmployeeDiscountCalculator.class,
-					VoucherDiscountCalculator.class
-			})
+	@Implementation(bean = AccountingBean.class, method = "checkOrAddCustomer")
+	@Implementation(bean = PricingBean.class, method = "buildPrice")
+	@Implementation(bean = EmployeeDiscountCalculator.class, method = "discountEmployee")
+	@Implementation(bean = VoucherDiscountCalculator.class, method = "discountVoucher")
 	ApplicationProtocol<Money> calculatePrice(
 			@RequiredParameter Article article,
 			@RequiredParameter ApplicationProtocol<Money> appendixes);
@@ -52,12 +53,9 @@ public interface PriceCalculatorAnnotated {
 	 * @param appendixes the appendixes to the operation
 	 * @return the results for the next step within the calculation chain
 	 */
-	@Implementation(
-			implementations = {
-					BasePriceCalculator.class,
-					EmployeeDiscountCalculator.class,
-					VoucherDiscountCalculator.class
-			})
+	@Implementation(bean = PricingBean.class)
+	@Implementation(bean = EmployeeDiscountCalculator.class)
+	@Implementation(bean = VoucherDiscountCalculator.class)
 	ApplicationProtocol<ShoppingCart> calculatePriceOfCart(
 			@RequiredParameter ShoppingCart cart,
 			@RequiredParameter ApplicationProtocol<ShoppingCart> appendixes);
@@ -66,16 +64,12 @@ public interface PriceCalculatorAnnotated {
 	 * Assign the customer provided vouchers to the shopping cart as reasonable as
 	 * possible.
 	 *
-	 * @param cart     the cart to be calculated
-	 * @param customer the customer
-	 * @param vouchers the vouchers the customer provided
-	 * @param state    state which receives the calculated cart
-	 * @return
+	 * @param cart  the cart to be calculated
+	 * @param state state which receives the calculated cart
+	 * @return the price for the whole shopping cart
 	 */
-	@Implementation(
-			implementations = {
-					VoucherDiscountCalculator.class
-			})
+
+	@ImplementationDefinition(value = @Implementation(bean = VoucherDiscountCalculator.class))
 	public ApplicationProtocol<ShoppingCart> assignVouchers(
 			@Required final ShoppingCart cart,
 			@Required final ApplicationProtocol<ShoppingCart> state);

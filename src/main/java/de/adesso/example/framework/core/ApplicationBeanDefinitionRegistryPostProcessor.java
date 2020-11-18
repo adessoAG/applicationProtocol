@@ -1,5 +1,6 @@
 package de.adesso.example.framework.core;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -140,7 +141,7 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 		}
 	}
 
-	private final Random random = new Random();
+	private final Random random = new SecureRandom();
 
 	private String beanName(final BeanDefinition bd) {
 		String beanName = bd.getBeanClassName();

@@ -29,7 +29,7 @@ public class RequiredParameterException extends CalculationNotApplicable {
 			final Class<Object> beanType, final String method) {
 		final String message = String.format("required parameter %s not found, will not call the bean %s",
 				parameterName, beanType);
-		log.atInfo().log(message);
+		log.atDebug().log(message);
 		return new RequiredParameterException(message, method);
 	}
 
@@ -37,7 +37,7 @@ public class RequiredParameterException extends CalculationNotApplicable {
 			final String method) {
 		final String message = String.format("collection required not empty, but was: parameter %s, %s",
 				parameterName, beanType);
-		log.atInfo().log(message);
+		log.atDebug().log(message);
 		return new RequiredParameterException(message, method);
 	}
 }
