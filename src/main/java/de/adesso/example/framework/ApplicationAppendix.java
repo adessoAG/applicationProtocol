@@ -13,6 +13,7 @@ import lombok.Getter;
  *
  * @author Matthias
  *
+ * @param <T> type to packed within the appendix
  */
 @Getter
 public abstract class ApplicationAppendix<T> {
@@ -29,6 +30,8 @@ public abstract class ApplicationAppendix<T> {
 
 	/**
 	 * UUID of the owner which created this appendix.
+	 *
+	 * @return returns the UUID of the owner
 	 */
 	public abstract UUID getOwner();
 

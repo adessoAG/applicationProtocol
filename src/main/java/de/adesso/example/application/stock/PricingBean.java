@@ -51,11 +51,9 @@ public class PricingBean {
 	 * single whole shopping cart. Creates also the accounting records within the
 	 * state.
 	 *
-	 * @param cart     the cart to be calculated
-	 * @param customer the customer
-	 * @param vouchers the vouchers the customer provided
-	 * @param state    state which receives the calculated cart
-	 * @return
+	 * @param cart  the cart to be calculated
+	 * @param state state which receives the calculated cart
+	 * @return the calculated cart as result of the protocol
 	 */
 	@CallStrategy(strategy = CallingStrategy.Eager)
 	public ApplicationProtocol<ShoppingCart> calculatePriceOfCart(

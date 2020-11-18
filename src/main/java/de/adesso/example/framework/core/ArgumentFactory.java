@@ -34,9 +34,9 @@ public class ArgumentFactory {
 	 * Create an argument based on the type of the argument. The types have to be
 	 * assignment compatible.
 	 *
-	 * @param emulatedMethod the emulated method
-	 * @param beanMethod     the method of the bean
-	 * @param beanParameter  the type of the parameter
+	 * @param emulatedMethod   the emulated method
+	 * @param beanMethod       the method of the bean
+	 * @param paramterPosition the type and position of the parameter
 	 * @return the generated argument
 	 * @throws UndefinedParameterException if no matching could be found
 	 */

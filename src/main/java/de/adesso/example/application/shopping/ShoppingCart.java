@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.javamoney.moneta.Money;
+
 import de.adesso.example.application.accounting.Customer;
 import de.adesso.example.application.marketing.Voucher;
 import de.adesso.example.application.marketing.VoucherApplication;
 import de.adesso.example.application.marketing.VoucherBasket;
 import de.adesso.example.application.stock.Article;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * This class represents the shopping cart which consists of several objects of
@@ -28,6 +31,10 @@ public class ShoppingCart {
 	private final Customer customer;
 	/** vouchers assigned on cart level */
 	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.ApplicableToCart);
+	/** total of the cart */
+	@Getter
+	@Setter
+	private Money total;
 
 	public ShoppingCart(final Customer customer) {
 		this.customer = customer;

@@ -105,8 +105,7 @@ public class BeanOperation {
 	 * Since it is allowed to use an interface during the instantiation, it is
 	 * necessary to provide the object to work on.
 	 *
-	 * @param methodImplementation
-	 *
+	 * @param methodImplementation reference to the parent
 	 * @param context              application context to load beans
 	 */
 	@SuppressWarnings("unchecked")

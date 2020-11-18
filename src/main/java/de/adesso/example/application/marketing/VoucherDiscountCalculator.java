@@ -23,9 +23,10 @@ public class VoucherDiscountCalculator {
 	 * Participate within the price calculation chain. Calculates the discount for a
 	 * single article. Creates also the accounting records within the state.
 	 *
-	 * @param article the article
-	 * @param voucher the voucher to be considered
-	 * @param state   the state piped through the calculation
+	 * @param article  the article
+	 * @param customer the customer
+	 * @param voucher  the voucher to be considered
+	 * @param state    the state piped through the calculation
 	 * @return the original state with the reduced price set as result
 	 */
 	@CallStrategy(strategy = CallingStrategy.RequiredParameters)
@@ -56,9 +57,8 @@ public class VoucherDiscountCalculator {
 	 *
 	 * @param cart     the cart to be calculated
 	 * @param customer the customer
-	 * @param vouchers the vouchers the customer provided
 	 * @param state    state which receives the calculated cart
-	 * @return
+	 * @return the protocol with the calculated cart as result
 	 */
 	@CallStrategy(strategy = CallingStrategy.RequiredParameters)
 	public ApplicationProtocol<ShoppingCart> calculatePriceOfCart(
@@ -75,10 +75,9 @@ public class VoucherDiscountCalculator {
 	 * possible.
 	 *
 	 * @param cart     the cart to be calculated
-	 * @param customer the customer
 	 * @param vouchers the vouchers the customer provided
 	 * @param state    state which receives the calculated cart
-	 * @return
+	 * @return the protocol with the updated cart as result
 	 */
 	@CallStrategy(strategy = CallingStrategy.RequiredParameters)
 	public ApplicationProtocol<ShoppingCart> assignVouchers(

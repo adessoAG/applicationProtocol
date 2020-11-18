@@ -43,16 +43,13 @@ public class EmployeeDiscountCalculator {
 	 * single whole shopping cart. Creates also the accounting records within the
 	 * state.
 	 *
-	 * @param cart     the cart to be calculated
-	 * @param customer the customer
-	 * @param vouchers the vouchers the customer provided
-	 * @param state    state which receives the calculated cart
-	 * @return
+	 * @param cart  the cart to be calculated
+	 * @param state state which receives the calculated cart
+	 * @return the state containing the calculated cart
 	 */
 	@CallStrategy(strategy = CallingStrategy.RequiredParameters)
 	public ApplicationProtocol<ShoppingCart> calculatePriceOfCart(
 			@Required final ShoppingCart cart,
-			@Required final Employee employee,
 			@Required final ApplicationProtocol<ShoppingCart> state) {
 
 		state.setResult(cart);

@@ -66,7 +66,7 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 
 	@Override
 	public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) {
-		this.prepareAppendixes(registry);
+		this.prepareAppendixes();
 		this.prepareEmulatedInterfaces(registry);
 	}
 
@@ -107,7 +107,7 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 		return classLoader;
 	}
 
-	private void prepareAppendixes(final BeanDefinitionRegistry registry) {
+	private void prepareAppendixes() {
 		/** register all appendixes to be able to initialize the AppendixRegistry */
 		this.appendixClasses = this.findAppendixClasses(BASE_PACKAGE).stream()
 				.map(this::getClassFromClassName)
