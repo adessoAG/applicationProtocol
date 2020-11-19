@@ -17,7 +17,7 @@ import lombok.Getter;
 @Getter
 public class ShoppingCartSubEntry {
 
-	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.ApplicableToSubEntry);
+	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.APPLICABLE_TO_SUB_ENTRY);
 	private final ShoppingCartEntry entry;
 
 	public ShoppingCartSubEntry(final ShoppingCartEntry entry) {

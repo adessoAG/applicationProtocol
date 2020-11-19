@@ -128,7 +128,7 @@ public class BeanOperation {
 
 	private Object defineImplementation(
 			final MethodImplementation methodImplementation,
-			final ApplicationContext context) throws BuilderException {
+			final ApplicationContext context) {
 		Object impl = null;
 
 		// validate information is available

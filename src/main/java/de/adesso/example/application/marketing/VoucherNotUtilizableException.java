@@ -1,5 +1,8 @@
 package de.adesso.example.application.marketing;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 public class VoucherNotUtilizableException extends RuntimeException {
 
 	private static final long serialVersionUID = -7917746111740547420L;
@@ -10,6 +13,7 @@ public class VoucherNotUtilizableException extends RuntimeException {
 
 	public static VoucherNotUtilizableException notUtilizable(final Voucher voucher) {
 		final String message = "the voucher is not utilizable: " + voucher.getVoucherId();
+		log.atInfo().log(message);
 		return new VoucherNotUtilizableException(message);
 	}
 
@@ -29,11 +33,14 @@ public class VoucherNotUtilizableException extends RuntimeException {
 		}
 		sb.append("] are feasable to entries, got: ")
 				.append(voucher.getApplicableAt());
-		return new VoucherNotUtilizableException(sb.toString());
+		final String message = sb.toString();
+		log.atInfo().log(message);
+		return new VoucherNotUtilizableException(message);
 	}
 
 	public static VoucherNotUtilizableException conflictException(final VoucherApplication level) {
 		final String message = "the voucher cannot be used with this article, because there are confliction vouchers";
+		log.atInfo().log(message);
 		return new VoucherNotUtilizableException(message);
 	}
 }

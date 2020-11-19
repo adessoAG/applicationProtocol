@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * Each type which can carry an voucher should have an attribute of type
@@ -17,7 +16,6 @@ import lombok.extern.log4j.Log4j2;
  *
  */
 @Getter
-@Log4j2
 public class VoucherBasket {
 
 	private final VoucherApplication level;
@@ -46,7 +44,7 @@ public class VoucherBasket {
 	 *
 	 * @param voucher the voucher to be tested
 	 */
-	public boolean isAssignable(final Voucher voucher) throws VoucherNotApplicableException {
+	public boolean isAssignable(final Voucher voucher) {
 		if (!voucher.isTryUtilizable()) {
 			return false;
 		}
@@ -66,11 +64,8 @@ public class VoucherBasket {
 
 		// there is a voucher which is not compatible
 		optional = this.hasVoucherOfCompatibility(VoucherCompatibility.TopDog);
-		if (!optional.isEmpty()) {
-			return false;
-		}
 
-		return true;
+		return optional.isEmpty();
 	}
 
 	/**
@@ -78,15 +73,15 @@ public class VoucherBasket {
 	 *
 	 * @param voucher the voucher to be tested
 	 */
-	private boolean checkAssignable(final Voucher voucher) throws VoucherNotUtilizableException {
+	private boolean checkAssignable(final Voucher voucher) {
 		if (!voucher.isTryUtilizable()) {
 			// voucher is not utilizable
-			this.throwAndLog(VoucherNotUtilizableException.notUtilizable(voucher));
+			throw VoucherNotUtilizableException.notUtilizable(voucher);
 		}
 
 		if (!voucher.getApplicableAt().contains(this.level)) {
 			// voucher not applicable on this level
-			this.throwAndLog(VoucherNotUtilizableException.wrongLevelException(voucher, this.level));
+			throw VoucherNotUtilizableException.wrongLevelException(voucher, this.level);
 		}
 
 		// check compatibility with existing vouchers
@@ -95,13 +90,13 @@ public class VoucherBasket {
 		Optional<Voucher> optional = this
 				.hasVoucherOfCompatibilityAndType(VoucherCompatibility.StandAloneWithinType, voucher.getType());
 		if (!optional.isEmpty()) {
-			this.throwAndLog(VoucherNotUtilizableException.conflictException(this.level));
+			throw VoucherNotUtilizableException.conflictException(this.level);
 		}
 
 		// there is a voucher which is not compatible
 		optional = this.hasVoucherOfCompatibility(VoucherCompatibility.TopDog);
 		if (!optional.isEmpty()) {
-			this.throwAndLog(VoucherNotUtilizableException.conflictException(this.level));
+			throw VoucherNotUtilizableException.conflictException(this.level);
 		}
 
 		return true;
@@ -150,10 +145,5 @@ public class VoucherBasket {
 		return this.vouchers.stream()
 				.filter(v -> v.getCompatibility() == compatibility && v.getType() == type)
 				.findFirst();
-	}
-
-	private void throwAndLog(final RuntimeException e) throws RuntimeException {
-		log.atInfo().log(e.getMessage());
-		throw e;
 	}
 }

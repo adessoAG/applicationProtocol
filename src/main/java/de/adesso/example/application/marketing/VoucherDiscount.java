@@ -14,6 +14,8 @@ import lombok.Getter;
 @Getter
 public abstract class VoucherDiscount extends Voucher {
 
+	private static final long serialVersionUID = -6289942538060231381L;
+
 	public VoucherDiscount(final String voucherId, final VoucherCompatibility compatibility) {
 		super(voucherId, compatibility, VoucherType.DiscountVoucher);
 	}

@@ -1,5 +1,6 @@
 package de.adesso.example.application.marketing;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,7 +9,9 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class Voucher {
+public class Voucher implements Serializable {
+
+	private static final long serialVersionUID = 6119269215970563757L;
 
 	/** basic voucher type */
 	private final VoucherType type;

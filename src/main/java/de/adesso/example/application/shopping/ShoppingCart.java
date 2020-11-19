@@ -30,7 +30,7 @@ public class ShoppingCart {
 	@Getter
 	private final Customer customer;
 	/** vouchers assigned on cart level */
-	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.ApplicableToCart);
+	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.APPLICABLE_TO_CART);
 	/** total of the cart */
 	@Getter
 	@Setter
@@ -151,7 +151,7 @@ public class ShoppingCart {
 
 	private void assignAppropriateVouchersToCart(final List<Voucher> vouchers) {
 		final List<Voucher> selectedVouchers = VoucherBasket.extractVouchersByApplicability(vouchers,
-				VoucherApplication.ApplicableToCart);
+				VoucherApplication.APPLICABLE_TO_CART);
 		selectedVouchers.stream()
 				.filter(v -> this.basket.isAssignable(v))
 				.forEach(v -> this.basket.addVoucher(v));
@@ -160,7 +160,7 @@ public class ShoppingCart {
 	private void assignAppropriateVouchersToEntries(final List<Voucher> vouchers) {
 		List<Voucher> selectedVouchers;
 		selectedVouchers = VoucherBasket.extractVouchersByApplicability(vouchers,
-				VoucherApplication.ApplicableToEntry);
+				VoucherApplication.APPLICABLE_TO_ENTRY);
 		this.entries.stream()
 				.forEach(e -> e.assignVouchers(selectedVouchers));
 	}

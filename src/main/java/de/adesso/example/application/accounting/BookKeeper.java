@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class BookKeeper {
 
-	public void process(final Collection<AccountingRecordAppendix> accountingRecords) throws BookKeepingException {
+	public void process(final Collection<AccountingRecordAppendix> accountingRecords) {
 		accountingRecords
 				.stream()
 				.forEach(this::book);

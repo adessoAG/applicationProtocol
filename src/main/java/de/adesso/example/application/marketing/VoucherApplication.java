@@ -8,9 +8,9 @@ package de.adesso.example.application.marketing;
  */
 public enum VoucherApplication {
 	/** applicable to the whole shopping cart */
-	ApplicableToCart,
+	APPLICABLE_TO_CART,
 	/** applicable to a shopping cart entry with arbitrary amount */
-	ApplicableToEntry,
+	APPLICABLE_TO_ENTRY,
 	/** applicable to a single article */
-	ApplicableToSubEntry
+	APPLICABLE_TO_SUB_ENTRY
 }

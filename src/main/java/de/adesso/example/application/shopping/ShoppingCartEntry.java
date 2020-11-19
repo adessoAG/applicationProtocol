@@ -39,7 +39,7 @@ public class ShoppingCartEntry {
 	 * that article. This ensures, that the voucher is used with that article the
 	 * customer wants to use it.
 	 */
-	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.ApplicableToEntry);
+	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.APPLICABLE_TO_ENTRY);
 	/**
 	 * The sub-entries all belong to the same entry, thus they comprise all the same
 	 * article. The number of the articles (count) has always to match the number of
@@ -74,14 +74,14 @@ public class ShoppingCartEntry {
 
 	private void assignSingleVoucher(final Voucher voucher) {
 		// first try entry
-		if (voucher.getApplicableAt().contains(VoucherApplication.ApplicableToEntry)
+		if (voucher.getApplicableAt().contains(VoucherApplication.APPLICABLE_TO_ENTRY)
 				&& this.basket.isAssignable(voucher)) {
 			this.basket.addVoucher(voucher);
 			return;
 		}
 
 		// try to apply to sub-entries
-		if (voucher.getApplicableAt().contains(VoucherApplication.ApplicableToSubEntry)) {
+		if (voucher.getApplicableAt().contains(VoucherApplication.APPLICABLE_TO_SUB_ENTRY)) {
 			this.splitEntries();
 			this.subEntries.stream()
 					.filter(se -> se.isAssignable(voucher))
