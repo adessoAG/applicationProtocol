@@ -26,7 +26,7 @@ public class EmployeeShoppingBean {
 
 		// if an employee is present, he will be also the customer.
 		final Optional<ApplicationAppendix<Employee>> optionalEmployeeAppendix = state
-				.getAppendixOfClass(EmployeeAppendix.class);
+				.getAppendixOfClassT(EmployeeAppendix.class);
 		if (optionalEmployeeAppendix.isEmpty()) {
 			return state;
 		}

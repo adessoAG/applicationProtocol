@@ -32,9 +32,37 @@ class AppendixList {
 	 * @throws TooManyElementsException if the list of appendixes contains more than
 	 *                                  one element of type T
 	 */
-	public <T> Optional<ApplicationAppendix<T>> getAppendixOfType(
+	public <T> Optional<ApplicationAppendix<T>> getAppendixOfTypeT(
 			final Class<? extends ApplicationAppendix<T>> appendixClass) throws TooManyElementsException {
+		@SuppressWarnings("unchecked")
 		final List<ApplicationAppendix<T>> allAppendixesOfTypeT = this.getAllAppendixesOfClass(appendixClass)
+				.map(a -> (ApplicationAppendix<T>) a)
+				.collect(Collectors.toList());
+		if (allAppendixesOfTypeT.size() > 1) {
+			throw new TooManyElementsException("more than one element");
+		}
+		if (allAppendixesOfTypeT.isEmpty()) {
+			return Optional.empty();
+		}
+
+		return Optional.of(allAppendixesOfTypeT.get(0));
+	}
+
+	/**
+	 * Retrieves exactly one appendix of given type. If the list contains more than
+	 * one appendix of this type, a {@link TooManyElementsException} is thrown. If
+	 * the type T does not match to your local variable the runtime will throw a
+	 * {@link ClassCastException}.
+	 *
+	 * @param <T>
+	 * @param appendixClass
+	 * @return
+	 * @throws TooManyElementsException if the list of appendixes contains more than
+	 *                                  one element of type T
+	 */
+	public Optional<ApplicationAppendix<?>> getAppendixOfType(
+			final Class<? extends ApplicationAppendix<?>> appendixClass) throws TooManyElementsException {
+		final List<ApplicationAppendix<?>> allAppendixesOfTypeT = this.getAllAppendixesOfClass(appendixClass)
 				.collect(Collectors.toList());
 		if (allAppendixesOfTypeT.size() > 1) {
 			throw new TooManyElementsException("more than one element");
@@ -54,10 +82,43 @@ class AppendixList {
 	 * @param appendixId
 	 * @return
 	 */
-	public <T> List<T> getAllAppenixesOfTypeAsList(final Class<? extends ApplicationAppendix<?>> appendixClass) {
-		@SuppressWarnings("unchecked")
-		final List<T> allAppendixesOfTypeT = (List<T>) this.getAllAppendixesOfClass(appendixClass)
+	public <T> List<ApplicationAppendix<?>> getAllAppenixesOfTypeAsList(
+			final Class<? extends ApplicationAppendix<?>> appendixClass) {
+		final List<ApplicationAppendix<?>> allAppendixesOfTypeT = this.getAllAppendixesOfClass(appendixClass)
+				.map(a -> (ApplicationAppendix<?>) a)
 				.collect(Collectors.toList());
+		return allAppendixesOfTypeT;
+	}
+
+	/**
+	 * Retrieves all appendixes of given type. The list may be empty if there is no
+	 * such element in the list.
+	 *
+	 * @param <T>
+	 * @param appendixId
+	 * @return
+	 */
+	public <T> List<ApplicationAppendix<T>> getAllAppenixesOfTypeAsListT(
+			final Class<? extends ApplicationAppendix<T>> appendixClass) {
+		@SuppressWarnings("unchecked")
+		final List<ApplicationAppendix<T>> allAppendixesOfTypeT = this.getAllAppendixesOfClass(appendixClass)
+				.map(a -> (ApplicationAppendix<T>) a)
+				.collect(Collectors.toList());
+		return allAppendixesOfTypeT;
+	}
+
+	/**
+	 * Retrieves all appendixes of given type. The list may be empty if there is no
+	 * such element in the list.
+	 *
+	 * @param <T>
+	 * @param appendixId
+	 * @return
+	 */
+	public Set<ApplicationAppendix<?>> getAllAppenixesOfTypeAsSet(
+			final Class<? extends ApplicationAppendix<?>> appendixClass) {
+		final Set<ApplicationAppendix<?>> allAppendixesOfTypeT = this.getAllAppendixesOfClass(appendixClass)
+				.collect(Collectors.toSet());
 
 		return allAppendixesOfTypeT;
 	}
@@ -70,20 +131,20 @@ class AppendixList {
 	 * @param appendixId
 	 * @return
 	 */
-	public <T> Set<T> getAllAppenixesOfTypeAsSet(final Class<? extends ApplicationAppendix<?>> appendixClass) {
+	public <T> Set<ApplicationAppendix<T>> getAllAppenixesOfTypeAsSetT(
+			final Class<? extends ApplicationAppendix<T>> appendixClass) {
 		@SuppressWarnings("unchecked")
-		final Set<T> allAppendixesOfTypeT = (Set<T>) this.getAllAppendixesOfClass(appendixClass)
+		final Set<ApplicationAppendix<T>> allAppendixesOfTypeT = this.getAllAppendixesOfClass(appendixClass)
+				.map(a -> (ApplicationAppendix<T>) a)
 				.collect(Collectors.toSet());
 
 		return allAppendixesOfTypeT;
 	}
 
-	private <T> Stream<ApplicationAppendix<T>> getAllAppendixesOfClass(
-			final Class<? extends ApplicationAppendix<T>> appendixClass) {
-		@SuppressWarnings("unchecked")
-		final Stream<ApplicationAppendix<T>> stream = this.appendixes.stream()
-				.filter(a -> a.getClass() == appendixClass)
-				.map(a -> (ApplicationAppendix<T>) a);
+	private Stream<ApplicationAppendix<?>> getAllAppendixesOfClass(
+			final Class<? extends ApplicationAppendix<?>> appendixClass) {
+		final Stream<ApplicationAppendix<?>> stream = this.appendixes.stream()
+				.filter(a -> a.getClass() == appendixClass);
 		return stream;
 	}
 
@@ -101,8 +162,10 @@ class AppendixList {
 				.collect(Collectors.toList());
 	}
 
-	public void removeAll(final Class<? extends ApplicationAppendix<?>> appendixType) {
-		final List<ApplicationAppendix<?>> existingAppendixes = this.getAllAppendixesOfClass(appendixType)
+	public <T> void removeAll(final Class<? extends ApplicationAppendix<T>> appendixType) {
+		@SuppressWarnings("unchecked")
+		final List<ApplicationAppendix<T>> existingAppendixes = this.getAllAppendixesOfClass(appendixType)
+				.map(a -> (ApplicationAppendix<T>) a)
 				.collect(Collectors.toList());
 		this.appendixes.removeAll(existingAppendixes);
 	}

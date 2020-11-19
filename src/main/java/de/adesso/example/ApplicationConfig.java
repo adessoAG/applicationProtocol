@@ -5,6 +5,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import de.adesso.example.application.PriceCalculator;
 import de.adesso.example.application.accounting.AccountingBean;
@@ -27,11 +29,21 @@ import de.adesso.example.framework.core.MethodImplementation;
 import lombok.extern.log4j.Log4j2;
 
 @Configuration
+@EnableAsync
 @Log4j2
 public class ApplicationConfig {
 
 	public ApplicationConfig() {
 		log.atDebug().log("intatiated the configuration");
+	}
+
+	@Bean
+	public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+		final ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+		threadPoolTaskScheduler.setPoolSize(5);
+		threadPoolTaskScheduler.setThreadNamePrefix(
+				"ThreadPoolTaskScheduler");
+		return threadPoolTaskScheduler;
 	}
 
 	@Bean

@@ -41,8 +41,24 @@ public class ApplicationProtocol<RESULT_TYPE> {
 	 * @throws TooManyElementsException if the list of appendixes contains more than
 	 *                                  one element of type T
 	 */
-	public <T> Optional<ApplicationAppendix<T>> getAppendixOfClass(
+	public <T> Optional<ApplicationAppendix<T>> getAppendixOfClassT(
 			final Class<? extends ApplicationAppendix<T>> appendixClass) throws TooManyElementsException {
+		return this.data.getAppendixOfTypeT(appendixClass);
+	}
+
+	/**
+	 * Retrieves exactly one appendix of given type. If the list contains more than
+	 * one appendix of this type, a {@link TooManyElementsException} is thrown. If
+	 * the type T does not match to your local variable the runtime will throw a
+	 * {@link ClassCastException}.
+	 *
+	 * @param appendixClass the type to be searched within the appendix
+	 * @return an optional containing the probably found element
+	 * @throws TooManyElementsException if the list of appendixes contains more than
+	 *                                  one element of type T
+	 */
+	public Optional<ApplicationAppendix<?>> getAppendixOfClass(
+			final Class<? extends ApplicationAppendix<?>> appendixClass) throws TooManyElementsException {
 		return this.data.getAppendixOfType(appendixClass);
 	}
 
@@ -53,9 +69,21 @@ public class ApplicationProtocol<RESULT_TYPE> {
 	 * @param appendixClass class of which the instances should be returned
 	 * @return a list of all appendixes of the given type
 	 */
-	public <T> List<ApplicationAppendix<T>> getAllAppenixesOfTypeAsList(
-			final Class<? extends ApplicationAppendix<T>> appendixClass) {
+	public List<ApplicationAppendix<?>> getAllAppenixesOfTypeAsList(
+			final Class<? extends ApplicationAppendix<?>> appendixClass) {
 		return this.data.getAllAppenixesOfTypeAsList(appendixClass);
+	}
+
+	/**
+	 * Retrieves all appendixes of given type. The list may be empty if there is no
+	 * such element in the list.
+	 *
+	 * @param appendixClass class of which the instances should be returned
+	 * @return a list of all appendixes of the given type
+	 */
+	public <T> List<ApplicationAppendix<T>> getAllAppenixesOfTypeAsListT(
+			final Class<? extends ApplicationAppendix<T>> appendixClass) {
+		return this.data.getAllAppenixesOfTypeAsListT(appendixClass);
 	}
 
 	/**
@@ -65,9 +93,21 @@ public class ApplicationProtocol<RESULT_TYPE> {
 	 * @param appendixClass class of which the instances should be returned
 	 * @return a set of all instances
 	 */
-	public <T> Set<ApplicationAppendix<T>> getAllAppenixesOfTypeAsSet(
-			final Class<? extends ApplicationAppendix<T>> appendixClass) {
+	public Set<ApplicationAppendix<?>> getAllAppenixesOfTypeAsSet(
+			final Class<? extends ApplicationAppendix<?>> appendixClass) {
 		return this.data.getAllAppenixesOfTypeAsSet(appendixClass);
+	}
+
+	/**
+	 * Retrieves all appendixes of given type. The list may be empty if there is no
+	 * such element in the list.
+	 *
+	 * @param appendixClass class of which the instances should be returned
+	 * @return a set of all instances
+	 */
+	public <T> Set<ApplicationAppendix<T>> getAllAppenixesOfTypeAsSetT(
+			final Class<? extends ApplicationAppendix<T>> appendixClass) {
+		return this.data.getAllAppenixesOfTypeAsSetT(appendixClass);
 	}
 
 	/**
@@ -108,7 +148,20 @@ public class ApplicationProtocol<RESULT_TYPE> {
 		return this;
 	}
 
-	public void removeAll(final Class<? extends ApplicationAppendix<?>> appendixType) {
+	/**
+	 * the method adds all appendixes to the protocol
+	 *
+	 * @param additionalAppendixes the appendixes to be added
+	 * @return the protocol itself to allow fluent handling
+	 */
+	public <T> ApplicationProtocol<RESULT_TYPE> addAllAppendixesT(
+			final Collection<ApplicationAppendix<T>> additionalAppendixes) {
+		additionalAppendixes.stream().forEach(this.data::addAppendix);
+
+		return this;
+	}
+
+	public <T> void removeAll(final Class<? extends ApplicationAppendix<T>> appendixType) {
 		this.data.removeAll(appendixType);
 	}
 }

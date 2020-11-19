@@ -146,4 +146,18 @@ public class VoucherBasket {
 				.filter(v -> v.getCompatibility() == compatibility && v.getType() == type)
 				.findFirst();
 	}
+
+	/**
+	 * Through out all vouchers of the basket
+	 */
+	public void clear() {
+		this.vouchers.clear();
+	}
+
+	/**
+	 * If the try use functionality is used, this call resets the counters.
+	 */
+	public void resetTryUse() {
+		this.vouchers.stream().forEach(Voucher::resetTryUse);
+	}
 }

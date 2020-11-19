@@ -37,9 +37,7 @@ public interface ShoppingBean {
 					@Implementation(bean = EmployeeShoppingBean.class, method = "setEmployeeCustomer"),
 					@Implementation(bean = AccountingBean.class, method = "checkOrAddCustomerOnCart"),
 					@Implementation(bean = MarketingBean.class, method = "assignVouchers"),
-					@Implementation(bean = ShoppingCartSplit.class, method = "splitArticles"),
-					@Implementation(bean = PriceCalculatorAnnotated.class, method = "calculatePriceOfArticle"),
-					@Implementation(bean = ShoppingCartJoin.class, method = "joinArticles")
+					@Implementation(bean = ShoppingCartCalculator.class, method = "priceCartParallel")
 			})
 	ApplicationProtocol<ShoppingCart> priceCart(
 			@RequiredParameter ShoppingCart cart,

@@ -53,7 +53,7 @@ public class DaisyChainDispatcherFactoryTest {
 		assertThat(resultState.getResult())
 				.isEqualTo(testString + anotherTestString);
 
-		final Optional<ApplicationAppendix<Integer>> optionalA1 = resultState.getAppendixOfClass(Appendix_A1.class);
+		final Optional<ApplicationAppendix<Integer>> optionalA1 = resultState.getAppendixOfClassT(Appendix_A1.class);
 		assertThat(optionalA1)
 				.isNotNull()
 				.isNotEmpty();
@@ -64,7 +64,7 @@ public class DaisyChainDispatcherFactoryTest {
 		assertThat(appendix_A1.getContent())
 				.isEqualTo(5);
 
-		final Optional<ApplicationAppendix<String>> optionalA2 = resultState.getAppendixOfClass(Appendix_A2.class);
+		final Optional<ApplicationAppendix<String>> optionalA2 = resultState.getAppendixOfClassT(Appendix_A2.class);
 		assertThat(optionalA2)
 				.isNotNull()
 				.isNotEmpty();
@@ -75,7 +75,7 @@ public class DaisyChainDispatcherFactoryTest {
 		assertThat(appendix_A2.getContent())
 				.isEqualTo(anotherTestString);
 
-		final List<ApplicationAppendix<String>> b2List = resultState.getAllAppenixesOfTypeAsList(Appendix_B2.class);
+		final List<ApplicationAppendix<String>> b2List = resultState.getAllAppenixesOfTypeAsListT(Appendix_B2.class);
 		assertThat(b2List)
 				.isNotNull()
 				.hasSize(2);

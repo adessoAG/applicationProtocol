@@ -65,11 +65,9 @@ public class ShoppingCartEntry {
 				.forEach(this::assignSingleVoucher);
 	}
 
-	private void splitEntries() {
-		this.subEntries.clear();
-		this.subEntries.addAll(IntStream.range(0, this.count)
-				.mapToObj(i -> new ShoppingCartSubEntry(this))
-				.collect(Collectors.toList()));
+	public void resetTryUse() {
+		this.basket.resetTryUse();
+		this.subEntries.stream().forEach(ShoppingCartSubEntry::resetTryUse);
 	}
 
 	private void assignSingleVoucher(final Voucher voucher) {
@@ -87,5 +85,12 @@ public class ShoppingCartEntry {
 					.filter(se -> se.isAssignable(voucher))
 					.forEach(se -> se.assignVoucher(voucher));
 		}
+	}
+
+	private void splitEntries() {
+		this.subEntries.clear();
+		this.subEntries.addAll(IntStream.range(0, this.count)
+				.mapToObj(i -> new ShoppingCartSubEntry(this, 1))
+				.collect(Collectors.toList()));
 	}
 }

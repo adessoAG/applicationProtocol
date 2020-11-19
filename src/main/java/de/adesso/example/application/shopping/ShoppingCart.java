@@ -112,6 +112,15 @@ public class ShoppingCart {
 	}
 
 	/**
+	 * Return all entries of the shopping cart.
+	 *
+	 * @return the list of the entries
+	 */
+	public List<ShoppingCartEntry> getAllEntries() {
+		return this.entries;
+	}
+
+	/**
 	 * Check the shopping cart whether it contains a specific article. Returns true
 	 * if the article is present.
 	 *
@@ -121,6 +130,14 @@ public class ShoppingCart {
 	public boolean contains(final Article article) {
 		final Optional<ShoppingCartEntry> oce = this.lookupEntry(article);
 		return !oce.isEmpty();
+	}
+
+	/**
+	 * Reset the try use counters.
+	 */
+	public void resetTryUse() {
+		this.basket.resetTryUse();
+		this.entries.stream().forEach(ShoppingCartEntry::resetTryUse);
 	}
 
 	private Optional<Integer> posOfArticle(final Article article) {

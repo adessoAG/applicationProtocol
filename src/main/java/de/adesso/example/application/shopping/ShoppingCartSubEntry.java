@@ -1,8 +1,11 @@
 package de.adesso.example.application.shopping;
 
+import java.util.Set;
+
 import de.adesso.example.application.marketing.Voucher;
 import de.adesso.example.application.marketing.VoucherApplication;
 import de.adesso.example.application.marketing.VoucherBasket;
+import de.adesso.example.application.marketing.VoucherNotUtilizableException;
 import lombok.Getter;
 
 /**
@@ -17,26 +20,67 @@ import lombok.Getter;
 @Getter
 public class ShoppingCartSubEntry {
 
+	/** vouchers assigned to the sub-entry */
 	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.APPLICABLE_TO_SUB_ENTRY);
+	/** parent link, each sub entry is part of the corresponding entry */
 	private final ShoppingCartEntry entry;
+	/** number of entries represented by this sub-entry */
+	private final int count;
 
-	public ShoppingCartSubEntry(final ShoppingCartEntry entry) {
+	public ShoppingCartSubEntry(final ShoppingCartEntry entry, final int count) {
 		this.entry = entry;
+		this.count = count;
 	}
 
-	public void addVoucher(final Voucher voucher) {
-		this.basket.addVoucher(voucher);
+	/**
+	 * Get all assigned vouchers.
+	 *
+	 * @return the assigned vouchers
+	 */
+	public Set<Voucher> getAllVouchers() {
+		return this.basket.getVouchers();
 	}
 
+	public void clearVouchers() {
+		this.basket.clear();
+	}
+
+	/**
+	 * Removes the given voucher from the set of vouchers assigned to this
+	 * sub-entry. If this voucher is not assigned, does nothing.
+	 *
+	 * @param voucher the voucher to be removed.
+	 */
 	public void removeVoucher(final Voucher voucher) {
 		this.basket.removerVoucher(voucher);
 	}
 
+	/**
+	 * Checks if the voucher can be assigned to this sub-entry. Each voucher,
+	 * already assigned vouchers and the new voucher, can raise constraints which
+	 * hinder assignment.
+	 *
+	 * @param voucher the voucher to be assigned
+	 * @return true if the voucher can be assigned
+	 */
 	public boolean isAssignable(final Voucher voucher) {
 		return this.basket.isAssignable(voucher);
 	}
 
+	/**
+	 * Assigns the voucher to the sub-entry. Will through the exception
+	 * {@link VoucherNotUtilizableException} if the voucher is not assignable.
+	 *
+	 * @param voucher voucher to be assigned to this sub-entry
+	 */
 	public void assignVoucher(final Voucher voucher) {
 		this.basket.addVoucher(voucher);
+	}
+
+	/**
+	 * Reset the try use counters.
+	 */
+	public void resetTryUse() {
+		this.basket.resetTryUse();
 	}
 }

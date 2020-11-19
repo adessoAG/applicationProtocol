@@ -37,7 +37,7 @@ public class AccountingBean {
 	private Customer checkOrSetCustomer(final ApplicationProtocol<?> state) {
 		Customer customer;
 		final Optional<ApplicationAppendix<Customer>> customerAppendixOptional = state
-				.getAppendixOfClass(CustomerAppendix.class);
+				.getAppendixOfClassT(CustomerAppendix.class);
 		if (customerAppendixOptional.isPresent()) {
 			customer = customerAppendixOptional.get().getContent();
 		} else {
