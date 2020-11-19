@@ -41,8 +41,8 @@ public class ApplicationProtocol<RESULT_TYPE> {
 	 * @throws TooManyElementsException if the list of appendixes contains more than
 	 *                                  one element of type T
 	 */
-	public Optional<ApplicationAppendix<?>> getAppendixOfClass(
-			final Class<? extends ApplicationAppendix<?>> appendixClass) throws TooManyElementsException {
+	public <T> Optional<ApplicationAppendix<T>> getAppendixOfClass(
+			final Class<? extends ApplicationAppendix<T>> appendixClass) throws TooManyElementsException {
 		return this.data.getAppendixOfType(appendixClass);
 	}
 
@@ -53,8 +53,8 @@ public class ApplicationProtocol<RESULT_TYPE> {
 	 * @param appendixClass class of which the instances should be returned
 	 * @return a list of all appendixes of the given type
 	 */
-	public List<ApplicationAppendix<?>> getAllAppenixesOfTypeAsList(
-			final Class<? extends ApplicationAppendix<?>> appendixClass) {
+	public <T> List<ApplicationAppendix<T>> getAllAppenixesOfTypeAsList(
+			final Class<? extends ApplicationAppendix<T>> appendixClass) {
 		return this.data.getAllAppenixesOfTypeAsList(appendixClass);
 	}
 
@@ -65,8 +65,8 @@ public class ApplicationProtocol<RESULT_TYPE> {
 	 * @param appendixClass class of which the instances should be returned
 	 * @return a set of all instances
 	 */
-	public Set<ApplicationAppendix<?>> getAllAppenixesOfTypeAsSet(
-			final Class<? extends ApplicationAppendix<?>> appendixClass) {
+	public <T> Set<ApplicationAppendix<T>> getAllAppenixesOfTypeAsSet(
+			final Class<? extends ApplicationAppendix<T>> appendixClass) {
 		return this.data.getAllAppenixesOfTypeAsSet(appendixClass);
 	}
 

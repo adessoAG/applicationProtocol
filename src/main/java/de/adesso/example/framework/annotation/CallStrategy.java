@@ -23,6 +23,6 @@ public @interface CallStrategy {
 	 * @return the CallingStrategy to be applied to the method of the annotated
 	 *         implementation
 	 */
-	CallingStrategy strategy() default CallingStrategy.Eager;
+	CallingStrategy strategy() default CallingStrategy.EAGER;
 
 }

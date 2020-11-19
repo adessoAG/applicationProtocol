@@ -198,13 +198,13 @@ public class BeanOperation {
 		try {
 			methodArguments = this.prepareArguments(state, args);
 		} catch (final RequiredParameterException e) {
-			if (this.callStrategy == CallingStrategy.Eager) {
+			if (this.callStrategy == CallingStrategy.EAGER) {
 				throw BeanCallException.callFailedMissingParameter(this.implementation.getClass(), this.method,
 						e.getMethod());
 			}
 			return state;
 		} catch (final CalculationNotApplicable e) {
-			if (this.callStrategy == CallingStrategy.Eager) {
+			if (this.callStrategy == CallingStrategy.EAGER) {
 				throw BeanCallException.callFailedOnStrategy(this.implementation.getClass(), this.method);
 			}
 			return state; // bean has to be called, if required parameters are present

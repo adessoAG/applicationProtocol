@@ -17,7 +17,7 @@ import de.adesso.example.framework.annotation.CallingStrategy;
 import de.adesso.example.framework.annotation.Required;
 
 @Service
-public class VoucherDiscountCalculator {
+public class MarketingBean {
 
 	/**
 	 * Participate within the price calculation chain. Calculates the discount for a
@@ -29,7 +29,7 @@ public class VoucherDiscountCalculator {
 	 * @param state    the state piped through the calculation
 	 * @return the original state with the reduced price set as result
 	 */
-	@CallStrategy(strategy = CallingStrategy.RequiredParameters)
+	@CallStrategy(strategy = CallingStrategy.REQUIRED_PARAMETER)
 	public ApplicationProtocol<Money> discountVoucher(
 			@Required final Article article,
 			@Required final Customer customer,
@@ -51,26 +51,6 @@ public class VoucherDiscountCalculator {
 	}
 
 	/**
-	 * Participate within the price calculation chain. Calculates the discount for a
-	 * single whole shopping cart. Creates also the accounting records within the
-	 * state.
-	 *
-	 * @param cart     the cart to be calculated
-	 * @param customer the customer
-	 * @param state    state which receives the calculated cart
-	 * @return the protocol with the calculated cart as result
-	 */
-	@CallStrategy(strategy = CallingStrategy.RequiredParameters)
-	public ApplicationProtocol<ShoppingCart> calculatePriceOfCart(
-			@Required final ShoppingCart cart,
-			@Required final Customer customer,
-			@Required final ApplicationProtocol<ShoppingCart> state) {
-
-		state.setResult(cart);
-		return state;
-	}
-
-	/**
 	 * Assign the customer provided vouchers to the shopping cart as reasonable as
 	 * possible.
 	 *
@@ -79,7 +59,7 @@ public class VoucherDiscountCalculator {
 	 * @param state    state which receives the calculated cart
 	 * @return the protocol with the updated cart as result
 	 */
-	@CallStrategy(strategy = CallingStrategy.RequiredParameters)
+	@CallStrategy(strategy = CallingStrategy.REQUIRED_PARAMETER)
 	public ApplicationProtocol<ShoppingCart> assignVouchers(
 			@Required final ShoppingCart cart,
 			@Required final List<Voucher> vouchers,

@@ -28,17 +28,14 @@ public class ShoppingCart {
 	private final List<ShoppingCartEntry> entries = new ArrayList<>();
 	/** customer representation who is going to purchase articles */
 	@Getter
-	private final Customer customer;
+	@Setter
+	private Customer customer;
 	/** vouchers assigned on cart level */
 	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.APPLICABLE_TO_CART);
 	/** total of the cart */
 	@Getter
 	@Setter
 	private Money total;
-
-	public ShoppingCart(final Customer customer) {
-		this.customer = customer;
-	}
 
 	/**
 	 * Remove the shopping cart entry which holds the given article. If this entry

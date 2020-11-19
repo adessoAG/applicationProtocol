@@ -1,5 +1,7 @@
 package de.adesso.example.application.employment;
 
+import java.util.Optional;
+
 import org.javamoney.moneta.Money;
 import org.springframework.stereotype.Service;
 
@@ -7,17 +9,37 @@ import de.adesso.example.application.Standard;
 import de.adesso.example.application.accounting.AccountingRecord;
 import de.adesso.example.application.accounting.AccountingRecordAppendix;
 import de.adesso.example.application.accounting.Customer;
-import de.adesso.example.application.shopping.ShoppingCart;
+import de.adesso.example.application.accounting.CustomerAppendix;
 import de.adesso.example.application.stock.Article;
+import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.CallStrategy;
 import de.adesso.example.framework.annotation.CallingStrategy;
 import de.adesso.example.framework.annotation.Required;
 
 @Service
-public class EmployeeDiscountCalculator {
+public class EmployeeShoppingBean {
 
-	@CallStrategy(strategy = CallingStrategy.RequiredParameters)
+	@CallStrategy(strategy = CallingStrategy.EAGER)
+	public ApplicationProtocol<?> setEmployeeCustomer(
+			@Required final ApplicationProtocol<?> state) {
+
+		// if an employee is present, he will be also the customer.
+		final Optional<ApplicationAppendix<Employee>> optionalEmployeeAppendix = state
+				.getAppendixOfClass(EmployeeAppendix.class);
+		if (optionalEmployeeAppendix.isEmpty()) {
+			return state;
+		}
+
+		final Customer customer = optionalEmployeeAppendix.get().getContent().getEmployeeCustomer();
+		// remove existing customer appendixes
+		state.removeAll(CustomerAppendix.class);
+		state.addAppendix(new CustomerAppendix(customer));
+
+		return state;
+	}
+
+	@CallStrategy(strategy = CallingStrategy.REQUIRED_PARAMETER)
 	public ApplicationProtocol<Money> discountEmployee(
 			@Required final Article article,
 			@Required final Customer customer,
@@ -35,24 +57,6 @@ public class EmployeeDiscountCalculator {
 				.value(discount)
 				.build()));
 
-		return state;
-	}
-
-	/**
-	 * Participate within the price calculation chain. Calculates the discount for a
-	 * single whole shopping cart. Creates also the accounting records within the
-	 * state.
-	 *
-	 * @param cart  the cart to be calculated
-	 * @param state state which receives the calculated cart
-	 * @return the state containing the calculated cart
-	 */
-	@CallStrategy(strategy = CallingStrategy.RequiredParameters)
-	public ApplicationProtocol<ShoppingCart> calculatePriceOfCart(
-			@Required final ShoppingCart cart,
-			@Required final ApplicationProtocol<ShoppingCart> state) {
-
-		state.setResult(cart);
 		return state;
 	}
 }

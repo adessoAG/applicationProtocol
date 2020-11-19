@@ -33,7 +33,7 @@ public class PricingBean {
 		this.articlePrices.put("112266", Money.of(100.00, Standard.EUROS));
 	}
 
-	@CallStrategy(strategy = CallingStrategy.Eager)
+	@CallStrategy(strategy = CallingStrategy.EAGER)
 	public ApplicationProtocol<Money> buildPrice(
 			@Required final Article article,
 			@Required final Customer customer,
@@ -55,7 +55,7 @@ public class PricingBean {
 	 * @param state state which receives the calculated cart
 	 * @return the calculated cart as result of the protocol
 	 */
-	@CallStrategy(strategy = CallingStrategy.Eager)
+	@CallStrategy(strategy = CallingStrategy.EAGER)
 	public ApplicationProtocol<ShoppingCart> calculatePriceOfCart(
 			@Required final ShoppingCart cart,
 			@Required final ApplicationProtocol<ShoppingCart> state) {

@@ -20,7 +20,7 @@ public class TestPojoBean {
 		return state;
 	}
 
-	@CallStrategy(strategy = CallingStrategy.Eager)
+	@CallStrategy(strategy = CallingStrategy.EAGER)
 	public ApplicationProtocol<String> listOperation(
 			@Required(requireNotEmpty = true) final List<String> aList,
 			@Required final ApplicationProtocol<String> state) {
@@ -35,7 +35,7 @@ public class TestPojoBean {
 		throw new Exception("test exception");
 	}
 
-	@CallStrategy(strategy = CallingStrategy.Eager)
+	@CallStrategy(strategy = CallingStrategy.EAGER)
 	public ApplicationProtocol<String> operationOtherType(
 			@Required final String aString,
 			@Required final ApplicationProtocol<String> state) {
@@ -44,7 +44,7 @@ public class TestPojoBean {
 		return state;
 	}
 
-	@CallStrategy(strategy = CallingStrategy.Eager)
+	@CallStrategy(strategy = CallingStrategy.EAGER)
 	public ApplicationProtocol<String> operationOtherType_2(
 			@Required(requireNotEmpty = true) final List<String> aList,
 			@Required final ApplicationProtocol<String> state) {

@@ -6,7 +6,7 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * The exception is thrown, if a required parameter is missing during execution
- * time. If the called bean has the {@link CallingStrategy#RequiredParameters}
+ * time. If the called bean has the {@link CallingStrategy#REQUIRED_PARAMETER}
  * then the calculation of this bean will be stopped. The calculation continues
  * with the remaining beans.
  *

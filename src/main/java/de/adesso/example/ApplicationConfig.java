@@ -12,10 +12,10 @@ import de.adesso.example.application.accounting.Customer;
 import de.adesso.example.application.accounting.CustomerAppendix;
 import de.adesso.example.application.employment.Employee;
 import de.adesso.example.application.employment.EmployeeAppendix;
-import de.adesso.example.application.employment.EmployeeDiscountCalculator;
+import de.adesso.example.application.employment.EmployeeShoppingBean;
+import de.adesso.example.application.marketing.MarketingBean;
 import de.adesso.example.application.marketing.Voucher;
 import de.adesso.example.application.marketing.VoucherAppendix;
-import de.adesso.example.application.marketing.VoucherDiscountCalculator;
 import de.adesso.example.application.stock.Article;
 import de.adesso.example.application.stock.PricingBean;
 import de.adesso.example.framework.core.ArgumentApplicationProtocol;
@@ -40,14 +40,20 @@ public class ApplicationConfig {
 			final ApplicationContext context,
 			final AccountingBean accountingBean,
 			final PricingBean basePriceCalculator,
-			final EmployeeDiscountCalculator employeeDiscountCalculator,
-			final VoucherDiscountCalculator voucherDiscountCalculator) {
+			final EmployeeShoppingBean employeeShopping,
+			final MarketingBean voucherDiscountCalculator) {
 		log.atDebug().log("start with initilization of PriceCalculator");
 
 		final PriceCalculator priceCalculator = new DaisyChainDispatcherFactory(context)
 				.emulationInterface(PriceCalculator.class)
 				.implementation(MethodImplementation.builder()
 						.methodIdentifier("calculatePrice")
+						// check employee and set customer if found
+						.beanOperation(BeanOperation.builder()
+								.implementation(employeeShopping)
+								.methodIdentifier("setEmployeeCustomer")
+								.argument(new ArgumentApplicationProtocol())
+								.build())
 						// set the customer information
 						.beanOperation(BeanOperation.builder()
 								.implementation(accountingBean)
@@ -64,7 +70,7 @@ public class ApplicationConfig {
 								.build())
 						// second call EmployeeDiscountCalculator
 						.beanOperation(BeanOperation.builder()
-								.implementation(employeeDiscountCalculator)
+								.implementation(employeeShopping)
 								.methodIdentifier("discountEmployee")
 								.argument(new ArgumentFromMethod(Article.class, 0))
 								.argument(new ArgumentFromAppendix(Customer.class, CustomerAppendix.class))

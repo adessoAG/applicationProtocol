@@ -32,9 +32,9 @@ class AppendixList {
 	 * @throws TooManyElementsException if the list of appendixes contains more than
 	 *                                  one element of type T
 	 */
-	public Optional<ApplicationAppendix<?>> getAppendixOfType(
-			final Class<? extends ApplicationAppendix<?>> appendixClass) throws TooManyElementsException {
-		final List<? extends ApplicationAppendix<?>> allAppendixesOfTypeT = this.getAllAppendixesOfClass(appendixClass)
+	public <T> Optional<ApplicationAppendix<T>> getAppendixOfType(
+			final Class<? extends ApplicationAppendix<T>> appendixClass) throws TooManyElementsException {
+		final List<ApplicationAppendix<T>> allAppendixesOfTypeT = this.getAllAppendixesOfClass(appendixClass)
 				.collect(Collectors.toList());
 		if (allAppendixesOfTypeT.size() > 1) {
 			throw new TooManyElementsException("more than one element");
@@ -78,10 +78,12 @@ class AppendixList {
 		return allAppendixesOfTypeT;
 	}
 
-	private Stream<ApplicationAppendix<?>> getAllAppendixesOfClass(
-			final Class<? extends ApplicationAppendix<?>> appendixClass) {
-		final Stream<ApplicationAppendix<?>> stream = this.appendixes.stream()
-				.filter(a -> a.getClass() == appendixClass);
+	private <T> Stream<ApplicationAppendix<T>> getAllAppendixesOfClass(
+			final Class<? extends ApplicationAppendix<T>> appendixClass) {
+		@SuppressWarnings("unchecked")
+		final Stream<ApplicationAppendix<T>> stream = this.appendixes.stream()
+				.filter(a -> a.getClass() == appendixClass)
+				.map(a -> (ApplicationAppendix<T>) a);
 		return stream;
 	}
 
