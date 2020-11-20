@@ -15,7 +15,7 @@ public class VoucherBasketTest {
 		final Voucher voucher = this.createDiscountVoucher("voucherId", VoucherCompatibility.Cooperative, 1,
 				VoucherApplication.APPLICABLE_TO_ENTRY);
 
-		basket.addVoucher(voucher);
+		basket.assignVoucher(voucher);
 
 		final Set<Voucher> vouchers = basket.getVouchers();
 		assertThat(vouchers.size())
@@ -30,29 +30,29 @@ public class VoucherBasketTest {
 		final Voucher voucher = this.createDiscountVoucher("voucherId", VoucherCompatibility.Cooperative, 1,
 				VoucherApplication.APPLICABLE_TO_ENTRY);
 
-		basket.addVoucher(voucher);
+		basket.assignVoucher(voucher);
 	}
 
 	@Test(expected = VoucherNotUtilizableException.class)
 	public void testAddVoucherConflictsTopDog() {
 		final VoucherBasket basket = new VoucherBasket(VoucherApplication.APPLICABLE_TO_CART);
-		basket.addVoucher(this.createDiscountVoucher("voucherId", VoucherCompatibility.TopDog, 1,
+		basket.assignVoucher(this.createDiscountVoucher("voucherId", VoucherCompatibility.TopDog, 1,
 				VoucherApplication.APPLICABLE_TO_CART));
 		final Voucher voucher = this.createDiscountVoucher("voucherId", VoucherCompatibility.Cooperative, 1,
 				VoucherApplication.APPLICABLE_TO_CART);
 
-		basket.addVoucher(voucher);
+		basket.assignVoucher(voucher);
 	}
 
 	@Test(expected = VoucherNotUtilizableException.class)
 	public void testAddVoucherConflictsStandAlone() {
 		final VoucherBasket basket = new VoucherBasket(VoucherApplication.APPLICABLE_TO_CART);
-		basket.addVoucher(this.createDiscountVoucher("voucherId", VoucherCompatibility.StandAloneWithinType, 1,
+		basket.assignVoucher(this.createDiscountVoucher("voucherId", VoucherCompatibility.StandAloneWithinType, 1,
 				VoucherApplication.APPLICABLE_TO_CART));
 		final Voucher voucher = this.createDiscountVoucher("voucherId", VoucherCompatibility.Cooperative, 1,
 				VoucherApplication.APPLICABLE_TO_CART);
 
-		basket.addVoucher(voucher);
+		basket.assignVoucher(voucher);
 	}
 
 	@Test
@@ -61,8 +61,8 @@ public class VoucherBasketTest {
 		final Voucher voucher = this.createDiscountVoucher("voucherId", VoucherCompatibility.Cooperative, 2,
 				VoucherApplication.APPLICABLE_TO_CART);
 
-		basket.addVoucher(voucher);
-		basket.addVoucher(voucher);
+		basket.assignVoucher(voucher);
+		basket.assignVoucher(voucher);
 
 		assertThat(basket.getVouchers().size())
 				.isEqualTo(1);
@@ -74,7 +74,7 @@ public class VoucherBasketTest {
 		final Voucher voucher = this.createDiscountVoucher("voucherId", VoucherCompatibility.Cooperative, 2,
 				VoucherApplication.APPLICABLE_TO_CART);
 
-		basket.addVoucher(voucher);
+		basket.assignVoucher(voucher);
 		assertThat(basket.getVouchers().size())
 				.isEqualTo(1);
 

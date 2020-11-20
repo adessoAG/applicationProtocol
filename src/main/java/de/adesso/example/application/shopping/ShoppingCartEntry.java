@@ -2,8 +2,8 @@ package de.adesso.example.application.shopping;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
+import org.javamoney.moneta.Money;
 
 import de.adesso.example.application.marketing.Voucher;
 import de.adesso.example.application.marketing.VoucherApplication;
@@ -34,6 +34,8 @@ public class ShoppingCartEntry {
 	private int position;
 	@Setter
 	private int count;
+	@Setter
+	private Money total;
 	/**
 	 * If vouchers can only be applied to a single article, the can be attached to
 	 * that article. This ensures, that the voucher is used with that article the
@@ -60,37 +62,46 @@ public class ShoppingCartEntry {
 		this.subEntries.clear();
 	}
 
-	public void assignVouchers(final List<Voucher> selectedVouchers) {
-		selectedVouchers.stream()
-				.forEach(this::assignSingleVoucher);
+	public void assignVoucher(final Voucher voucher) {
+		this.basket.assignVoucher(voucher);
 	}
 
-	public void resetTryUse() {
-		this.basket.resetTryUse();
-		this.subEntries.stream().forEach(ShoppingCartSubEntry::resetTryUse);
+	public void clearVouchers() {
+		this.basket.clear();
+		this.subEntries.stream().forEach(ShoppingCartSubEntry::clearVouchers);
 	}
 
-	private void assignSingleVoucher(final Voucher voucher) {
-		// first try entry
-		if (voucher.getApplicableAt().contains(VoucherApplication.APPLICABLE_TO_ENTRY)
-				&& this.basket.isAssignable(voucher)) {
-			this.basket.addVoucher(voucher);
-			return;
-		}
-
-		// try to apply to sub-entries
-		if (voucher.getApplicableAt().contains(VoucherApplication.APPLICABLE_TO_SUB_ENTRY)) {
-			this.splitEntries();
-			this.subEntries.stream()
-					.filter(se -> se.isAssignable(voucher))
-					.forEach(se -> se.assignVoucher(voucher));
-		}
-	}
-
-	private void splitEntries() {
+	public void splitAll() {
 		this.subEntries.clear();
-		this.subEntries.addAll(IntStream.range(0, this.count)
-				.mapToObj(i -> new ShoppingCartSubEntry(this, 1))
-				.collect(Collectors.toList()));
+		this.subEntries.add(new ShoppingCartSubEntry(this, this.count));
+	}
+
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+		return this.toString(sb, 0).toString();
+	}
+
+	public StringBuilder toString(final StringBuilder sb, final int indent) {
+		this.identation(sb, indent)
+				.append(this.getClass().getName()).append("\n");
+		this.identation(sb, indent + 1)
+				.append("article: ").append(this.article.toString()).append("\n");
+		this.identation(sb, indent + 1)
+				.append("count: ").append(this.count)
+				.append(", total: ").append(this.total).append("\n");
+		this.identation(sb, indent + 1)
+				.append("entry basket:\n");
+		this.basket.toString(sb, indent + 2);
+		this.identation(sb, indent + 1)
+				.append("subentries:\n");
+		this.subEntries.stream().forEach(e -> e.toString(sb, indent + 2));
+		return sb;
+	}
+
+	private StringBuilder identation(final StringBuilder sb, final int tabs) {
+		for (int i = 0; i < tabs; i++) {
+			sb.append('\t');
+		}
+		return sb;
 	}
 }

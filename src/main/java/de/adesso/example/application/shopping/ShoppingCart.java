@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.javamoney.moneta.Money;
 
 import de.adesso.example.application.accounting.Customer;
-import de.adesso.example.application.marketing.Voucher;
 import de.adesso.example.application.marketing.VoucherApplication;
 import de.adesso.example.application.marketing.VoucherBasket;
 import de.adesso.example.application.stock.Article;
@@ -31,6 +30,7 @@ public class ShoppingCart {
 	@Setter
 	private Customer customer;
 	/** vouchers assigned on cart level */
+	@Getter
 	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.APPLICABLE_TO_CART);
 	/** total of the cart */
 	@Getter
@@ -132,12 +132,30 @@ public class ShoppingCart {
 		return !oce.isEmpty();
 	}
 
-	/**
-	 * Reset the try use counters.
-	 */
-	public void resetTryUse() {
-		this.basket.resetTryUse();
-		this.entries.stream().forEach(ShoppingCartEntry::resetTryUse);
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+		return this.toString(sb, 0).toString();
+	}
+
+	public StringBuilder toString(final StringBuilder sb, final int indent) {
+		this.identation(sb, indent)
+				.append(this.getClass().getName()).append("\n");
+		this.identation(sb, indent + 1)
+				.append("total: ").append(this.total.toString()).append("\n");
+		this.identation(sb, indent + 1)
+				.append("cart basket:\n");
+		this.basket.toString(sb, indent + 2);
+		this.identation(sb, indent + 1)
+				.append("entries:\n");
+		this.entries.forEach(e -> e.toString(sb, indent + 2));
+		return sb;
+	}
+
+	private StringBuilder identation(final StringBuilder sb, final int tabs) {
+		for (int i = 0; i < tabs; i++) {
+			sb.append('\t');
+		}
+		return sb;
 	}
 
 	private Optional<Integer> posOfArticle(final Article article) {
@@ -153,34 +171,13 @@ public class ShoppingCart {
 				.findFirst();
 	}
 
-	public void assignVouchers(final List<Voucher> vouchers) {
-		this.resetTryUse(vouchers);
-
-		// assign applicable vouchers to the cart
-		this.assignAppropriateVouchersToCart(vouchers);
-
-		// assign the remaining applicable vouchers to the entries
-		this.assignAppropriateVouchersToEntries(vouchers);
-	}
-
-	private void assignAppropriateVouchersToCart(final List<Voucher> vouchers) {
-		final List<Voucher> selectedVouchers = VoucherBasket.extractVouchersByApplicability(vouchers,
-				VoucherApplication.APPLICABLE_TO_CART);
-		selectedVouchers.stream()
-				.filter(v -> this.basket.isAssignable(v))
-				.forEach(v -> this.basket.addVoucher(v));
-	}
-
-	private void assignAppropriateVouchersToEntries(final List<Voucher> vouchers) {
-		List<Voucher> selectedVouchers;
-		selectedVouchers = VoucherBasket.extractVouchersByApplicability(vouchers,
-				VoucherApplication.APPLICABLE_TO_ENTRY);
+	public void clearVouchers() {
+		this.basket.clear();
 		this.entries.stream()
-				.forEach(e -> e.assignVouchers(selectedVouchers));
+				.forEach(ShoppingCartEntry::clearVouchers);
 	}
 
-	private void resetTryUse(final List<Voucher> vouchers) {
-		vouchers.stream()
-				.forEach(v -> v.resetTryUse());
+	public void splitAll() {
+		this.entries.stream().forEach(ShoppingCartEntry::splitAll);
 	}
 }

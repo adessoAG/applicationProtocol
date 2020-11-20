@@ -2,11 +2,14 @@ package de.adesso.example.application.shopping;
 
 import java.util.Set;
 
+import org.javamoney.moneta.Money;
+
 import de.adesso.example.application.marketing.Voucher;
 import de.adesso.example.application.marketing.VoucherApplication;
 import de.adesso.example.application.marketing.VoucherBasket;
 import de.adesso.example.application.marketing.VoucherNotUtilizableException;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * The customer is allowed to use several vouchers per article. Some vouchers
@@ -26,6 +29,9 @@ public class ShoppingCartSubEntry {
 	private final ShoppingCartEntry entry;
 	/** number of entries represented by this sub-entry */
 	private final int count;
+	/** amount for the sub-entry */
+	@Setter
+	private Money total;
 
 	public ShoppingCartSubEntry(final ShoppingCartEntry entry, final int count) {
 		this.entry = entry;
@@ -74,13 +80,30 @@ public class ShoppingCartSubEntry {
 	 * @param voucher voucher to be assigned to this sub-entry
 	 */
 	public void assignVoucher(final Voucher voucher) {
-		this.basket.addVoucher(voucher);
+		this.basket.assignVoucher(voucher);
 	}
 
-	/**
-	 * Reset the try use counters.
-	 */
-	public void resetTryUse() {
-		this.basket.resetTryUse();
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+		return this.toString(sb, 0).toString();
+	}
+
+	public StringBuilder toString(final StringBuilder sb, final int indent) {
+		this.identation(sb, indent)
+				.append(this.getClass().getName()).append("\n");
+		this.identation(sb, indent + 1)
+				.append("sub-entry basket:\n");
+		this.basket.toString(sb, indent + 2);
+		this.identation(sb, indent + 1)
+				.append("count: ").append(this.count)
+				.append(", total: ").append(this.total).append("\n");
+		return sb;
+	}
+
+	private StringBuilder identation(final StringBuilder sb, final int tabs) {
+		for (int i = 0; i < tabs; i++) {
+			sb.append('\t');
+		}
+		return sb;
 	}
 }

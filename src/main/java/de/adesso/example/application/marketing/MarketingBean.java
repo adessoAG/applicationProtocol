@@ -10,6 +10,8 @@ import de.adesso.example.application.accounting.AccountingRecord;
 import de.adesso.example.application.accounting.AccountingRecordAppendix;
 import de.adesso.example.application.accounting.Customer;
 import de.adesso.example.application.shopping.ShoppingCart;
+import de.adesso.example.application.shopping.ShoppingCartEntry;
+import de.adesso.example.application.shopping.ShoppingCartSubEntry;
 import de.adesso.example.application.stock.Article;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.CallStrategy;
@@ -64,10 +66,41 @@ public class MarketingBean {
 			@Required final ShoppingCart cart,
 			@Required final List<Voucher> vouchers,
 			@Required final ApplicationProtocol<ShoppingCart> state) {
-		cart.assignVouchers(vouchers);
+
+		this.resetTryUse(vouchers); // start from scratch
+		cart.clearVouchers(); // no vouchers assigned
+		cart.splitAll(); // entries assigned to sub-entries
+		this.tryAssignVoucherToBasket(cart.getBasket(), vouchers);
+		this.tryAssignVouchersToEntries(cart.getAllEntries(), vouchers);
 
 		state.setResult(cart);
 		return state;
+	}
+
+	private void tryAssignVoucherToBasket(final VoucherBasket basket, final List<Voucher> vouchers) {
+		vouchers.stream()
+				.filter(basket::isAssignable)
+				.forEach(basket::assignVoucher);
+	}
+
+	private void tryAssignVouchersToEntries(final List<ShoppingCartEntry> allEntries, final List<Voucher> vouchers) {
+		allEntries.stream()
+				.map(ShoppingCartEntry::getSubEntries)
+				.flatMap(List::stream)
+				.map(ShoppingCartSubEntry::getBasket)
+				.forEach(b -> this.assignMatchingVouchers(vouchers, b));
+	}
+
+	private void assignMatchingVouchers(final List<Voucher> vouchers, final VoucherBasket basket) {
+		vouchers.stream()
+				.filter(Voucher::isTryUtilizable)
+				.filter(basket::isAssignable)
+				.forEach(basket::assignVoucher);
+	}
+
+	private void resetTryUse(final List<Voucher> vouchers) {
+		vouchers.stream()
+				.forEach(v -> v.resetTryUse());
 	}
 
 	private AccountingRecordAppendix articleBookkeepingRecord(final Account customer,

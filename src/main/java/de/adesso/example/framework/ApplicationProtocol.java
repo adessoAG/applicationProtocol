@@ -63,6 +63,16 @@ public class ApplicationProtocol<RESULT_TYPE> {
 	}
 
 	/**
+	 * Retrieves all appendixes. The list may be empty if there is no such element
+	 * in the list.
+	 *
+	 * @return a list of all appendixes of the given type
+	 */
+	public List<ApplicationAppendix<?>> getAllAppenixesAsList() {
+		return this.data.getAllAppenixesAsList();
+	}
+
+	/**
 	 * Retrieves all appendixes of given type. The list may be empty if there is no
 	 * such element in the list.
 	 *

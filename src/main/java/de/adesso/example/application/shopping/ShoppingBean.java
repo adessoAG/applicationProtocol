@@ -34,6 +34,7 @@ public interface ShoppingBean {
 	 */
 	@ImplementationDefinition(
 			value = {
+					@Implementation(bean = ShoppingCartCalculator.class, method = "init"),
 					@Implementation(bean = EmployeeShoppingBean.class, method = "setEmployeeCustomer"),
 					@Implementation(bean = AccountingBean.class, method = "checkOrAddCustomerOnCart"),
 					@Implementation(bean = MarketingBean.class, method = "assignVouchers"),

@@ -14,7 +14,6 @@ import de.adesso.example.application.accounting.AccountingRecord;
 import de.adesso.example.application.accounting.AccountingRecordAppendix;
 import de.adesso.example.application.accounting.Creditor;
 import de.adesso.example.application.accounting.Customer;
-import de.adesso.example.application.shopping.ShoppingCart;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.CallStrategy;
 import de.adesso.example.framework.annotation.CallingStrategy;
@@ -31,6 +30,8 @@ public class PricingBean {
 		this.articlePrices.put("112244", Money.of(64.00, Standard.EUROS));
 		this.articlePrices.put("112255", Money.of(89.95, Standard.EUROS));
 		this.articlePrices.put("112266", Money.of(100.00, Standard.EUROS));
+		this.articlePrices.put("112267", Money.of(10.00, Standard.EUROS));
+		this.articlePrices.put("112268", Money.of(1.00, Standard.EUROS));
 	}
 
 	@CallStrategy(strategy = CallingStrategy.EAGER)
@@ -43,24 +44,6 @@ public class PricingBean {
 		state.setResult(price);
 
 		this.addBookingRecords(state, price, customer);
-		return state;
-	}
-
-	/**
-	 * Participate within the price calculation chain. Calculates the discount for a
-	 * single whole shopping cart. Creates also the accounting records within the
-	 * state.
-	 *
-	 * @param cart  the cart to be calculated
-	 * @param state state which receives the calculated cart
-	 * @return the calculated cart as result of the protocol
-	 */
-	@CallStrategy(strategy = CallingStrategy.EAGER)
-	public ApplicationProtocol<ShoppingCart> calculatePriceOfCart(
-			@Required final ShoppingCart cart,
-			@Required final ApplicationProtocol<ShoppingCart> state) {
-
-		state.setResult(cart);
 		return state;
 	}
 

@@ -1,10 +1,7 @@
 package de.adesso.example.application.marketing;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import lombok.Getter;
 
@@ -31,8 +28,11 @@ public class VoucherBasket {
 	 *
 	 * @param voucher the voucher to be added to the basket
 	 */
-	public void addVoucher(final Voucher voucher) {
-		this.checkAssignable(voucher);
+	public void assignVoucher(final Voucher voucher) {
+		if (!this.isAssignable(voucher)) {
+			// voucher not applicable on this level
+			throw VoucherNotUtilizableException.wrongLevelException(voucher, this.level);
+		}
 
 		// all is fine
 		this.vouchers.add(voucher);
@@ -49,57 +49,9 @@ public class VoucherBasket {
 			return false;
 		}
 
-		if (!voucher.getApplicableAt().contains(this.level)) {
-			return false;
-		}
-
-		// check compatibility with existing vouchers
-
-		// have a TopDog voucher
-		Optional<Voucher> optional = this
-				.hasVoucherOfCompatibilityAndType(VoucherCompatibility.StandAloneWithinType, voucher.getType());
-		if (!optional.isEmpty()) {
-			return false;
-		}
-
-		// there is a voucher which is not compatible
-		optional = this.hasVoucherOfCompatibility(VoucherCompatibility.TopDog);
-
-		return optional.isEmpty();
-	}
-
-	/**
-	 * Check if the voucher can be assigned to this basket.
-	 *
-	 * @param voucher the voucher to be tested
-	 */
-	private boolean checkAssignable(final Voucher voucher) {
-		if (!voucher.isTryUtilizable()) {
-			// voucher is not utilizable
-			throw VoucherNotUtilizableException.notUtilizable(voucher);
-		}
-
-		if (!voucher.getApplicableAt().contains(this.level)) {
-			// voucher not applicable on this level
-			throw VoucherNotUtilizableException.wrongLevelException(voucher, this.level);
-		}
-
-		// check compatibility with existing vouchers
-
-		// have a TopDog voucher
-		Optional<Voucher> optional = this
-				.hasVoucherOfCompatibilityAndType(VoucherCompatibility.StandAloneWithinType, voucher.getType());
-		if (!optional.isEmpty()) {
-			throw VoucherNotUtilizableException.conflictException(this.level);
-		}
-
-		// there is a voucher which is not compatible
-		optional = this.hasVoucherOfCompatibility(VoucherCompatibility.TopDog);
-		if (!optional.isEmpty()) {
-			throw VoucherNotUtilizableException.conflictException(this.level);
-		}
-
-		return true;
+		// all vouchers within the basket are compatible to the new one?
+		return this.vouchers.stream()
+				.allMatch(v -> v.isCompatible(voucher));
 	}
 
 	/**
@@ -117,36 +69,6 @@ public class VoucherBasket {
 				.findFirst().isEmpty();
 	}
 
-	// helper functions
-
-	/**
-	 * select vouchers by criteria
-	 *
-	 * @param vouchers      the list of vouchers to inspect
-	 * @param applicability requested application
-	 * @return the selected vouchers from the list
-	 */
-	public static List<Voucher> extractVouchersByApplicability(final List<Voucher> vouchers,
-			final VoucherApplication applicability) {
-		return vouchers.stream()
-				.filter(v -> v.isUtilizable()
-						&& v.getApplicableAt().contains(applicability))
-				.collect(Collectors.toList());
-	}
-
-	private Optional<Voucher> hasVoucherOfCompatibility(final VoucherCompatibility compatibility) {
-		return this.vouchers.stream()
-				.filter(v -> v.getCompatibility() == compatibility)
-				.findFirst();
-	}
-
-	private Optional<Voucher> hasVoucherOfCompatibilityAndType(final VoucherCompatibility compatibility,
-			final VoucherType type) {
-		return this.vouchers.stream()
-				.filter(v -> v.getCompatibility() == compatibility && v.getType() == type)
-				.findFirst();
-	}
-
 	/**
 	 * Through out all vouchers of the basket
 	 */
@@ -154,10 +76,26 @@ public class VoucherBasket {
 		this.vouchers.clear();
 	}
 
-	/**
-	 * If the try use functionality is used, this call resets the counters.
-	 */
-	public void resetTryUse() {
-		this.vouchers.stream().forEach(Voucher::resetTryUse);
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+		return this.toString(sb, 0).toString();
+	}
+
+	public StringBuilder toString(final StringBuilder sb, final int indent) {
+		this.identation(sb, indent)
+				.append(this.getClass().getName()).append("\n");
+		this.identation(sb, indent + 1)
+				.append("level: ").append(this.level).append("\n");
+		this.identation(sb, indent + 1)
+				.append("count: ").append(this.vouchers.size()).append("\n");
+		this.vouchers.stream().forEach(voucher -> voucher.toString(sb, 2));
+		return sb;
+	}
+
+	private StringBuilder identation(final StringBuilder sb, final int tabs) {
+		for (int i = 0; i < tabs; i++) {
+			sb.append('\t');
+		}
+		return sb;
 	}
 }

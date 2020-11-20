@@ -84,4 +84,37 @@ public class Voucher implements Serializable {
 	public boolean isTryUtilizable() {
 		return this.maxApplications - this.tryUse > 0;
 	}
+
+	public boolean isTopDog() {
+		return this.compatibility == VoucherCompatibility.TopDog;
+	}
+
+	public boolean isCompatible(final Voucher otherVoucher) {
+		// top dogs are not compatible
+		if (this.isOneOfCompatibility(otherVoucher, VoucherCompatibility.TopDog)) {
+			return false;
+		}
+
+		// standalone are compatible, if they have different type
+		if (this.isOneOfCompatibility(otherVoucher, VoucherCompatibility.StandAloneWithinType)
+				&& this.type == otherVoucher.type) {
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isOneOfCompatibility(final Voucher otherVoucher, final VoucherCompatibility compatibility) {
+		return this.compatibility == compatibility || otherVoucher.compatibility == compatibility;
+	}
+
+	public StringBuilder toString(final StringBuilder sb, final int indent) {
+		return this.identation(sb, indent).append(this.toString()).append("\n");
+	}
+
+	private StringBuilder identation(final StringBuilder sb, final int tabs) {
+		for (int i = 0; i < tabs; i++) {
+			sb.append('\t');
+		}
+		return sb;
+	}
 }

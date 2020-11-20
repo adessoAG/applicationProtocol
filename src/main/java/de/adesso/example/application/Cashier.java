@@ -13,5 +13,5 @@ import de.adesso.example.framework.annotation.ImplementationDefinition;
 public interface Cashier {
 
 	@ImplementationDefinition(value = @Implementation(bean = PointOfSale.class))
-	ApplicationProtocol<Money> encash(ShoppingCart cart, ApplicationProtocol<Money> state);
+	ApplicationProtocol<Money> encash(ShoppingCart cart, ApplicationProtocol<ShoppingCart> state);
 }

@@ -17,6 +17,7 @@ import de.adesso.example.application.marketing.Voucher;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.CallStrategy;
 import de.adesso.example.framework.annotation.CallingStrategy;
+import de.adesso.example.framework.annotation.Required;
 import de.adesso.example.framework.core.ParallelJoin;
 import lombok.SneakyThrows;
 
@@ -32,21 +33,47 @@ public class ShoppingCartCalculator extends ParallelJoin {
 		this.queue = queue;
 	}
 
+	/**
+	 * This is the parallel running part of the calculation. It splits the cart into
+	 * the various products and calculates them in parallel.
+	 *
+	 * @param cart     the cart to be calculated
+	 * @param customer the customer of the cart
+	 * @param vouchers the vouchers the customer provided
+	 * @param state    state of the calculation
+	 * @return the enriched state
+	 */
 	@CallStrategy(strategy = CallingStrategy.EAGER)
 	public ApplicationProtocol<ShoppingCart> priceCartParallel(
-			final ShoppingCart cart,
-			final Customer customer,
-			final Set<Voucher> vouchers,
-			final ApplicationProtocol<ShoppingCart> state) {
+			@Required final ShoppingCart cart,
+			@Required final Customer customer,
+			@Required final Set<Voucher> vouchers,
+			@Required final ApplicationProtocol<ShoppingCart> state) {
 
 		this.clearState(state, cart);
 		final List<Future<ApplicationProtocol<Money>>> result = cart.getAllEntries().stream()
 				.map(ShoppingCartEntry::getSubEntries)
 				.flatMap(List::stream)
-				.map(se -> this.splitter.execute(this.queue, se, customer, vouchers))
+				.map(se -> this.splitter.execute(this.queue, se, customer))
 				.collect(Collectors.toList());
 
 		return this.joinResult(result, cart, state);
+	}
+
+	/**
+	 * Initialize calculation of the shopping cart. This is part of the calculation
+	 * chain and ensures, that the following steps can relay on proper settings.
+	 *
+	 * @param cart  the provided shopping cart
+	 * @param state the state of the calculation
+	 * @return the state to be provided to the next step
+	 */
+	@CallStrategy(strategy = CallingStrategy.EAGER)
+	public ApplicationProtocol<ShoppingCart> init(
+			@Required final ShoppingCart cart,
+			@Required final ApplicationProtocol<ShoppingCart> state) {
+		state.setResult(cart);
+		return state;
 	}
 
 	/**
@@ -66,7 +93,7 @@ public class ShoppingCartCalculator extends ParallelJoin {
 		futures.stream()
 				.map(this::consume)
 				.forEach(s -> this.combine(s, state, cart));
-
+		cart.getAllEntries().forEach(this::sumSubEntries);
 		state.setResult(cart);
 		return state;
 	}
@@ -105,7 +132,14 @@ public class ShoppingCartCalculator extends ParallelJoin {
 			final ApplicationProtocol<ShoppingCart> state,
 			final ShoppingCart cart) {
 		cart.setTotal(cart.getTotal().add(singleResult.getResult()));
-		state.addAllAppendixes(singleResult.getAllAppenixesOfTypeAsList(AccountingRecordAppendix.class));
-		return null;
+		state.addAllAppendixes(singleResult.getAllAppenixesAsList());
+		return state;
+	}
+
+	private void sumSubEntries(final ShoppingCartEntry entry) {
+		final Money total = entry.getSubEntries().stream()
+				.map(ShoppingCartSubEntry::getTotal)
+				.reduce(Standard.zeroEuros, (a, b) -> a.add(b));
+		entry.setTotal(total);
 	}
 }

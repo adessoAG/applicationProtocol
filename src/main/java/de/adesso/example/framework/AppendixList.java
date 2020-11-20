@@ -82,10 +82,21 @@ class AppendixList {
 	 * @param appendixId
 	 * @return
 	 */
-	public <T> List<ApplicationAppendix<?>> getAllAppenixesOfTypeAsList(
+	public List<ApplicationAppendix<?>> getAllAppenixesAsList() {
+		return this.appendixes;
+	}
+
+	/**
+	 * Retrieves all appendixes of given type. The list may be empty if there is no
+	 * such element in the list.
+	 *
+	 * @param <T>
+	 * @param appendixId
+	 * @return
+	 */
+	public List<ApplicationAppendix<?>> getAllAppenixesOfTypeAsList(
 			final Class<? extends ApplicationAppendix<?>> appendixClass) {
 		final List<ApplicationAppendix<?>> allAppendixesOfTypeT = this.getAllAppendixesOfClass(appendixClass)
-				.map(a -> (ApplicationAppendix<?>) a)
 				.collect(Collectors.toList());
 		return allAppendixesOfTypeT;
 	}
