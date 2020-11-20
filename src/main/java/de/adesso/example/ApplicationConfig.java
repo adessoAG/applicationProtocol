@@ -64,6 +64,7 @@ public class ApplicationConfig {
 						.beanOperation(BeanOperation.builder()
 								.implementation(employeeShopping)
 								.methodIdentifier("setEmployeeCustomer")
+								.argument(new ArgumentFromAppendix(Employee.class, EmployeeAppendix.class))
 								.argument(new ArgumentApplicationProtocol())
 								.build())
 						// set the customer information

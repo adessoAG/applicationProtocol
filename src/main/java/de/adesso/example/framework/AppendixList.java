@@ -17,7 +17,7 @@ class AppendixList {
 	 */
 	public List<ApplicationAppendix<?>> appendixes = new ArrayList<>();
 
-	public AppendixList() {
+	AppendixList() {
 	}
 
 	/**

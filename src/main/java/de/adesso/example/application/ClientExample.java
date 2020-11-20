@@ -60,9 +60,11 @@ public class ClientExample implements CommandLineRunner {
 		state.addAllAppendixes(this.createCartVouchers());
 		final ShoppingCart cart = this.buildShoppingCart();
 		state = this.shoppingBean.priceCart(cart, state);
-		System.out.println("the calculated cart is:");
+		System.out.println("the calculated cart is:-------------------------------");
 		System.out.println(cart.toString());
 		// book the last calculation
+		System.out.println("the corresponding state is: --------------------------");
+		System.out.println(state);
 		this.cashier.encash(cart, state);
 	}
 

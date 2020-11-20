@@ -17,22 +17,22 @@ public abstract class VoucherDiscount extends Voucher {
 	private static final long serialVersionUID = -6289942538060231381L;
 
 	public VoucherDiscount(final String voucherId, final VoucherCompatibility compatibility) {
-		super(voucherId, compatibility, VoucherType.DiscountVoucher);
+		super(voucherId, compatibility, VoucherType.DISCOUNT_VOUCHER);
 	}
 
 	public VoucherDiscount(final String voucherId, final VoucherCompatibility compatibility,
 			final int maxApplications) {
-		super(voucherId, compatibility, VoucherType.DiscountVoucher, maxApplications);
+		super(voucherId, compatibility, VoucherType.DISCOUNT_VOUCHER, maxApplications);
 	}
 
 	public VoucherDiscount(final String voucherId, final VoucherCompatibility compatibility,
 			final VoucherApplication... applicableAt) {
-		super(voucherId, compatibility, VoucherType.DiscountVoucher, applicableAt);
+		super(voucherId, compatibility, VoucherType.DISCOUNT_VOUCHER, applicableAt);
 	}
 
 	public VoucherDiscount(final String voucherId, final VoucherCompatibility compatibility, final int maxApplications,
 			final VoucherApplication... applicableAt) {
-		super(voucherId, compatibility, VoucherType.DiscountVoucher, maxApplications, applicableAt);
+		super(voucherId, compatibility, VoucherType.DISCOUNT_VOUCHER, maxApplications, applicableAt);
 	}
 
 	public abstract Money calculateDiscount(Money price);

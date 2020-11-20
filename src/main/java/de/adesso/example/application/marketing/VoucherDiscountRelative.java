@@ -8,7 +8,7 @@ public class VoucherDiscountRelative extends VoucherDiscount {
 	private final int discountPercentage;
 
 	public VoucherDiscountRelative(final String voucherId, final int discountPercentage) {
-		super(voucherId, VoucherCompatibility.StandAloneWithinType, 1, VoucherApplication.APPLICABLE_TO_SUB_ENTRY);
+		super(voucherId, VoucherCompatibility.STAND_ALONE_WITHIN_TYPE, 1, VoucherApplication.APPLICABLE_TO_SUB_ENTRY);
 		this.discountPercentage = discountPercentage;
 	}
 

@@ -86,17 +86,17 @@ public class Voucher implements Serializable {
 	}
 
 	public boolean isTopDog() {
-		return this.compatibility == VoucherCompatibility.TopDog;
+		return this.compatibility == VoucherCompatibility.TOP_DOG;
 	}
 
 	public boolean isCompatible(final Voucher otherVoucher) {
 		// top dogs are not compatible
-		if (this.isOneOfCompatibility(otherVoucher, VoucherCompatibility.TopDog)) {
+		if (this.isOneOfCompatibility(otherVoucher, VoucherCompatibility.TOP_DOG)) {
 			return false;
 		}
 
 		// standalone are compatible, if they have different type
-		if (this.isOneOfCompatibility(otherVoucher, VoucherCompatibility.StandAloneWithinType)
+		if (this.isOneOfCompatibility(otherVoucher, VoucherCompatibility.STAND_ALONE_WITHIN_TYPE)
 				&& this.type == otherVoucher.type) {
 			return false;
 		}

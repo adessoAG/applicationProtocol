@@ -38,7 +38,7 @@ public class MarketingBean {
 			@Required final Voucher voucher,
 			@Required final ApplicationProtocol<Money> state) {
 
-		if (voucher.getType() != VoucherType.DiscountVoucher) {
+		if (voucher.getType() != VoucherType.DISCOUNT_VOUCHER) {
 			throw VoucherNotApplicableException.wrongType(voucher);
 		}
 		final VoucherDiscount discountVoucher = (VoucherDiscount) voucher;

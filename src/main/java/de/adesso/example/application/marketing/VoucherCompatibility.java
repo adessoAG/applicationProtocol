@@ -2,9 +2,9 @@ package de.adesso.example.application.marketing;
 
 public enum VoucherCompatibility {
 	/** allows not other vouchers within the same basket */
-	TopDog,
+	TOP_DOG,
 	/** only one voucher of same type allowed */
-	StandAloneWithinType,
+	STAND_ALONE_WITHIN_TYPE,
 	/** cooperates with other vouchers */
-	Cooperative
+	COOPERATIVE
 }

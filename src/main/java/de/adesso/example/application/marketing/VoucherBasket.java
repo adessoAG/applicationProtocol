@@ -88,7 +88,7 @@ public class VoucherBasket {
 				.append("level: ").append(this.level).append("\n");
 		this.identation(sb, indent + 1)
 				.append("count: ").append(this.vouchers.size()).append("\n");
-		this.vouchers.stream().forEach(voucher -> voucher.toString(sb, 2));
+		this.vouchers.stream().forEach(voucher -> voucher.toString(sb, indent + 2));
 		return sb;
 	}
 

@@ -8,7 +8,7 @@ public class VoucherDiscountAbsolute extends VoucherDiscount {
 	private final Money absoluteDiscount;
 
 	public VoucherDiscountAbsolute(final String voucherId, final Money absoluteDiscount) {
-		super(voucherId, VoucherCompatibility.StandAloneWithinType, 1, VoucherApplication.APPLICABLE_TO_SUB_ENTRY);
+		super(voucherId, VoucherCompatibility.STAND_ALONE_WITHIN_TYPE, 1, VoucherApplication.APPLICABLE_TO_SUB_ENTRY);
 		this.absoluteDiscount = absoluteDiscount;
 	}
 
