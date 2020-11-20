@@ -1,12 +1,11 @@
 package de.adesso.example.framework.core;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -15,12 +14,10 @@ import org.springframework.util.Assert;
 
 import de.adesso.example.framework.annotation.Emulated;
 import de.adesso.example.framework.annotation.Implementation;
-import de.adesso.example.framework.annotation.MatchingStrategy;
 import de.adesso.example.framework.core.BeanOperation.BeanOperationBuilder;
 import de.adesso.example.framework.core.MethodImplementation.MethodImplementationBuilder;
 import de.adesso.example.framework.exception.BuilderException;
 import de.adesso.example.framework.exception.MissingAnnotationException;
-import de.adesso.example.framework.exception.UndefinedParameterException;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
@@ -51,7 +48,7 @@ public class ApplicationProxyFactory implements FactoryBean<Object>, Application
 	}
 
 	@Override
-	public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
+	public void setApplicationContext(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 		applicationContext.getClassLoader();
 	}
@@ -107,78 +104,30 @@ public class ApplicationProxyFactory implements FactoryBean<Object>, Application
 		final MethodImplementationBuilder miBuilder = MethodImplementation.builder()
 				.methodIdentifier(methodName);
 
-		// the interface may annotate several beans to provide implementations which
-		// will be called consecutively
-		final Implementation implAnnotation = interfaceMethod.getAnnotation(Implementation.class);
-		final MatchingStrategy[] strategies = this.buildStrategy(implAnnotation.strategy());
-		for (final Class<?> implClass : implAnnotation.implementations()) {
+		final Implementation[] implDef = interfaceMethod.getAnnotationsByType(Implementation.class);
+		for (final Implementation implClass : implDef) {
 			final BeanOperationBuilder operationBuilder = BeanOperation.builder();
-			if (implClass.isInterface()) {
-				operationBuilder.anInterface(implClass);
+			if (implClass.bean().isInterface()) {
+				operationBuilder.anInterface(implClass.bean());
 			} else {
-				operationBuilder.beanType((Class<Object>) implClass);
+				operationBuilder.beanType((Class<Object>) implClass.bean());
 			}
-			operationBuilder.methodIdentifier(methodName);
-			final Method beanMethod = this.extractCorrespondingBeanMethod(methodName, implClass);
-			if (beanMethod == null) {
-				// basic requirement: the implementation bean provides at least one method with
-				// the same identifier
-				final String message = String.format("could not locate the requested method %s::%s",
-						implClass.getName(), methodName);
-				log.atError().log(message);
-				throw new BuilderException(message);
-			}
+			final String implMethod = implClass.method().isEmpty() ? methodName : implClass.method();
+			operationBuilder.methodIdentifier(implMethod);
+			final Method beanMethod = this.extractCorrespondingBeanMethod(implMethod, implClass.bean());
 			operationBuilder.method(beanMethod);
 
 			// found appropriate method, now instrument it
-			final List<Argument> argumentList = new ArrayList<>();
-			for (final Parameter p : beanMethod.getParameters()) {
-				// find a provider for each parameter
-				Argument argument = null;
-				for (final MatchingStrategy strategy : strategies) {
-					try {
-						switch (strategy) {
-						case ByType:
-							argument = this.argumentFactory.createArgumentByType(interfaceMethod, beanMethod,
-									p.getType());
-							break;
-						case ByName:
-							argument = this.argumentFactory.createArgumentByName(interfaceMethod, beanMethod,
-									p.getName());
-							break;
-						case FromAppendix:
-							argument = this.argumentFactory.createArgumentFromAppendix(beanMethod, p.getType());
-							break;
-						default:
-							// should not be reached
-							final String message = String.format("missing implementation for strategy %s", strategy);
-							log.atFatal().log(message);
-							throw new RuntimeException(message);
-						}
-					} catch (final Throwable e) {
-						// strategy could not generate the parameter
-						continue;
-					}
-					if (argument != null) {
-						argumentList.add(argument);
-						break;
-					}
-				}
-				if (argument == null) {
-					// could not find any content for the argument
-					final String message = String.format("could not provide bean %s with argument %s of type %s",
-							implClass.getName(), p.getName(), p.getType().getName());
-					log.atFatal().log(message);
-					throw new UndefinedParameterException(message);
-				}
-			}
+			final List<Argument> argumentList = ParameterPosition.buildParameterList(beanMethod).stream()
+					.map(pp -> this.argumentFactory.createArgument(interfaceMethod, beanMethod, pp))
+					.collect(Collectors.toList());
 			operationBuilder.arguments(argumentList);
 			miBuilder.beanOperation(operationBuilder.build());
 		}
 		return miBuilder.build();
 	}
 
-	private Method extractCorrespondingBeanMethod(final String methodName, final Class<?> implClass) {
+	private Method extractCorrespondingBeanMethod(@NonNull final String methodName, @NonNull final Class<?> implClass) {
 		Method beanMethod = null;
 		for (final Method implMethod : implClass.getMethods()) {
 			if (methodName.equals(implMethod.getName())) {
@@ -186,11 +135,9 @@ public class ApplicationProxyFactory implements FactoryBean<Object>, Application
 				return beanMethod;
 			}
 		}
-		return null;
-	}
-
-	private MatchingStrategy[] buildStrategy(final MatchingStrategy[] strategy) {
-		return strategy;
+		// nothing found, basic requirement: the implementation bean provides at least
+		// one method with the same identifier
+		throw BuilderException.methodNotFound(implClass, methodName);
 	}
 
 	/**

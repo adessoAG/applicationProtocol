@@ -11,7 +11,7 @@ import de.adesso.example.framework.annotation.RequiredParameter;
 public class PointOfSale {
 
 	public ApplicationProtocol<Money> encash(@RequiredParameter final ShoppingCart cart,
-			final ApplicationProtocol<Money> state) {
+			final ApplicationProtocol<ShoppingCart> state) {
 		return null;
 	}
 

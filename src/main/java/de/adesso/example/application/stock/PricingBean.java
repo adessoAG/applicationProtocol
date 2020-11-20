@@ -2,7 +2,6 @@ package de.adesso.example.application.stock;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -15,15 +14,13 @@ import de.adesso.example.application.accounting.AccountingRecord;
 import de.adesso.example.application.accounting.AccountingRecordAppendix;
 import de.adesso.example.application.accounting.Creditor;
 import de.adesso.example.application.accounting.Customer;
-import de.adesso.example.application.accounting.CustomerAppendix;
-import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.CallStrategy;
 import de.adesso.example.framework.annotation.CallingStrategy;
 import de.adesso.example.framework.annotation.Required;
 
 @Service
-public class BasePriceCalculator {
+public class PricingBean {
 
 	private final Map<String, Money> articlePrices = new HashMap<>();
 
@@ -33,17 +30,20 @@ public class BasePriceCalculator {
 		this.articlePrices.put("112244", Money.of(64.00, Standard.EUROS));
 		this.articlePrices.put("112255", Money.of(89.95, Standard.EUROS));
 		this.articlePrices.put("112266", Money.of(100.00, Standard.EUROS));
+		this.articlePrices.put("112267", Money.of(10.00, Standard.EUROS));
+		this.articlePrices.put("112268", Money.of(1.00, Standard.EUROS));
 	}
 
-	@CallStrategy(strategy = CallingStrategy.Eager)
-	public ApplicationProtocol<Money> calculatePrice(
+	@CallStrategy(strategy = CallingStrategy.EAGER)
+	public ApplicationProtocol<Money> buildPrice(
 			@Required final Article article,
+			@Required final Customer customer,
 			@Required final ApplicationProtocol<Money> state) {
 
 		final Money price = this.buildPrice(article);
 		state.setResult(price);
 
-		this.addBookingRecords(state, price);
+		this.addBookingRecords(state, price, customer);
 		return state;
 	}
 
@@ -55,16 +55,8 @@ public class BasePriceCalculator {
 		return price;
 	}
 
-	private ApplicationProtocol<Money> addBookingRecords(final ApplicationProtocol<Money> state, final Money price) {
-		final Optional<ApplicationAppendix<?>> customerAppendixOptional = state
-				.getAppendixOfClass(CustomerAppendix.class);
-		Customer customer;
-		if (customerAppendixOptional.isEmpty()) {
-			customer = Accounting.getUnknownCustomer();
-			state.addAppendix(new CustomerAppendix(customer));
-		} else {
-			customer = (Customer) customerAppendixOptional.get().getContent();
-		}
+	private ApplicationProtocol<Money> addBookingRecords(final ApplicationProtocol<Money> state, final Money price,
+			final Customer customer) {
 		final Creditor revenueAccount = Accounting.getRevenueAccount();
 
 		return state.addAppendix(new AccountingRecordAppendix(

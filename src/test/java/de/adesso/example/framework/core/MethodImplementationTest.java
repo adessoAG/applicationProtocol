@@ -61,14 +61,14 @@ public class MethodImplementationTest {
 				.isNotNull()
 				.isEqualTo(testString + anotherTestString);
 
-		final Optional<ApplicationAppendix<?>> a1 = resultState.getAppendixOfClass(Appendix_A1.class);
+		final Optional<ApplicationAppendix<Integer>> a1 = resultState.getAppendixOfClassT(Appendix_A1.class);
 		assertThat(a1)
 				.isNotEmpty();
 		final Appendix_A1 appendix_A1 = (Appendix_A1) a1.get();
 		assertThat(appendix_A1.getContent())
 				.isEqualTo(5);
 
-		final Optional<ApplicationAppendix<?>> a2 = resultState.getAppendixOfClass(Appendix_A2.class);
+		final Optional<ApplicationAppendix<String>> a2 = resultState.getAppendixOfClassT(Appendix_A2.class);
 		assertThat(a2)
 				.isNotEmpty();
 		assertThat(a2.get())
@@ -77,7 +77,7 @@ public class MethodImplementationTest {
 		assertThat(appendix_A2.getContent())
 				.isEqualTo(anotherTestString);
 
-		final List<ApplicationAppendix<?>> b2List = resultState.getAllAppenixesOfTypeAsList(Appendix_B2.class);
+		final List<ApplicationAppendix<String>> b2List = resultState.getAllAppenixesOfTypeAsListT(Appendix_B2.class);
 		assertThat(b2List)
 				.isNotNull()
 				.hasSize(2);

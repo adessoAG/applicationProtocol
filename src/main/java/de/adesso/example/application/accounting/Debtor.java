@@ -10,9 +10,9 @@ import org.javamoney.moneta.Money;
  * @author Matthias
  *
  */
-public class Debitor extends Account {
+public class Debtor extends Account {
 
-	public Debitor(final UUID id) {
+	public Debtor(final UUID id) {
 		super(id, Money.of(0.0, de.adesso.example.application.Standard.EUROS));
 	}
 

@@ -1,18 +1,20 @@
 package de.adesso.example.framework.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.Repeatable;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-@Documented
+/**
+ * An implementation for a emulated method is a method within a bean. The bean
+ * is provided by its class. If the method is omitted, the default is, that the
+ * method is queried within the specified class with the same identifier as the
+ * method to be emulated.
+ *
+ * @author Matthias
+ *
+ */
+@Repeatable(ImplementationDefinition.class)
 public @interface Implementation {
 
-	Class<?>[] implementations();
+	Class<?> bean();
 
-	MatchingStrategy[] strategy() default { MatchingStrategy.ByType, MatchingStrategy.FromAppendix,
-			MatchingStrategy.ByName };
+	String method() default "";
 }

@@ -31,9 +31,6 @@ import lombok.extern.log4j.Log4j2;
  *
  * @author Matthias
  *
- * @param <INTERFACE> represents the functional interface which should return
- *                    the final result.
- * @param RETURN_TYPE type of the return value
  */
 @Log4j2
 @Getter(value = AccessLevel.PACKAGE)

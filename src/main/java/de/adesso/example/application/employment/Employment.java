@@ -10,9 +10,9 @@ import de.adesso.example.framework.ApplicationOwner;
 @Service
 public class Employment extends ApplicationOwner {
 
-	public final static UUID ownUuid = UUID.randomUUID();
+	public static final UUID ownUuid = UUID.randomUUID();
 
-	private final static Creditor employeeDiscountCreditor = new Creditor(UUID.randomUUID());
+	private static final Creditor employeeDiscountCreditor = new Creditor(UUID.randomUUID());
 
 	// employee factory methods
 

@@ -3,28 +3,24 @@ package de.adesso.example.framework.core;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.exception.AppendixNotRegisteredException;
+import de.adesso.example.framework.exception.BuilderException;
 import de.adesso.example.framework.exception.UndefinedParameterException;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.ToString;
-import lombok.extern.log4j.Log4j2;
 
 /**
- * The class is responsible to create the appropriate argument.
+ * The class is responsible to create the appropriate argument. This class is
+ * not annotated as service, but the post-processor announces it to the context.
  *
  * @author Matthias
  *
  */
-@Log4j2
 public class ArgumentFactory {
 
 	private final AppendixRegistry appendixRegistry;
@@ -35,117 +31,100 @@ public class ArgumentFactory {
 	}
 
 	/**
-	 * Create an argument based on the identifier of the arguments. The type have to
-	 * assignment compatible.
-	 *
-	 * @param emulatedMethod      the emulated method
-	 * @param beanMethod          the method of the bean
-	 * @param parameterIdentifier the identifier of the parameter
-	 * @return the generated argument
-	 * @throws UndefinedParameterException if no matching could be found
-	 */
-	public Argument createArgumentByName(
-			@NonNull final Method emulatedMethod,
-			@NonNull final Method beanMethod,
-			@NonNull final String parameterIdentifier) {
-		// check possible pairs
-		final ParameterPosition targetCandidate = this.findMatchingParametersByName(emulatedMethod,
-				parameterIdentifier);
-		final ParameterPosition sourceCandidate = this.findMatchingParametersByName(beanMethod, parameterIdentifier);
-
-		final Argument argument = new ArgumentFromMethod(targetCandidate.getParameter().getType(),
-				sourceCandidate.getPosition());
-		return argument;
-	}
-
-	/**
 	 * Create an argument based on the type of the argument. The types have to be
 	 * assignment compatible.
 	 *
-	 * @param emulatedMethod the emulated method
-	 * @param beanMethod     the method of the bean
-	 * @param type           the type of the parameter
+	 * @param emulatedMethod   the emulated method
+	 * @param beanMethod       the method of the bean
+	 * @param paramterPosition the type and position of the parameter
 	 * @return the generated argument
 	 * @throws UndefinedParameterException if no matching could be found
 	 */
-	public Argument createArgumentByType(
+	public @NonNull Argument createArgument(
 			@NonNull final Method emulatedMethod,
 			@NonNull final Method beanMethod,
-			@NonNull final Class<?> type) {
-		// check possible pairs
-		final ParameterPosition targetCandidate = this.findMatchingParametersByType(beanMethod, type);
-		final ParameterPosition sourceCandidate = this.findMatchingParametersByType(emulatedMethod, type);
+			@NonNull final ParameterPosition paramterPosition) {
 
-		final Argument argument = new ArgumentFromMethod(targetCandidate.getParameter().getType(),
-				sourceCandidate.getPosition());
-		return argument;
+		// check parameters of the call
+		final Class<?> beanParameterType = paramterPosition.getParameter().getType();
+		List<ParameterPosition> candidates = ParameterPosition.buildParameterList(emulatedMethod).stream()
+				.filter(emuParam -> beanParameterType.isAssignableFrom(emuParam.getParameter().getType()))
+				.collect(Collectors.toList());
+		if (candidates.isEmpty()) {
+			return this.createAppendixArgument(paramterPosition);
+		}
+
+		if (candidates.size() == 1) {
+			// unique result
+			return this.buildArgumtParameter(paramterPosition, candidates.get(0));
+		} else {
+			// try to match with parameter identifiers
+			candidates = candidates.stream()
+					.filter(emuParam -> paramterPosition.getParameter().getName()
+							.equals(emuParam.getParameter().getName()))
+					.collect(Collectors.toList());
+			if (candidates.size() == 1) {
+				// unique result
+				return this.buildArgumtParameter(paramterPosition, candidates.get(0));
+			}
+			// no unique result achieved, throw exception
+			throw AppendixNotRegisteredException.noParameterMatch(paramterPosition.getParameter());
+		}
 	}
 
-	/**
-	 * Create the argument from types within the appendix. The appendix registry is
-	 * queried for appendix types.
-	 *
-	 * @param emulatedMethod the emulated method
-	 * @param parameterType  the requested type of the parameter
-	 * @return the generated parameter
-	 */
-	public Argument createArgumentFromAppendix(
-			@NonNull final Method beanmMethod,
-			@NonNull final Class<?> parameterType) {
-		final Class<? extends ApplicationAppendix<?>> appendixClass = this.appendixRegistry.lookUp(parameterType);
+	private @NonNull Argument buildArgumtParameter(@NonNull final ParameterPosition beanParamterPosition,
+			final ParameterPosition emulationParameterPosition) {
+		return new ArgumentFromMethod(beanParamterPosition.getParameter().getType(),
+				emulationParameterPosition.getPosition());
+	}
+
+	private @NonNull Argument createAppendixArgument(@NonNull final ParameterPosition parameterPosition) {
+		Class<? extends ApplicationAppendix<?>> appendixClass = null;
+		final Parameter parameter = parameterPosition.getParameter();
+
+		if (List.class.isAssignableFrom(parameter.getType())) {
+			// parameter class is the list, need to extract the base type
+			final String baseTypeName = parameter.getParameterizedType().getTypeName();
+			final Class<?> parameterTypeClass = this.loadTypeClass(baseTypeName);
+			appendixClass = this.lookupAppendix(parameterTypeClass);
+			return new ArgumentListFromAppendix(parameterTypeClass, appendixClass);
+
+		} else if (Set.class.isAssignableFrom(parameter.getType())) {
+			// parameter class is the list, need to extract the base type
+			final String baseTypeName = parameter.getParameterizedType().getTypeName();
+			final Class<?> parameterTypeClass = this.loadTypeClass(baseTypeName);
+			appendixClass = this.lookupAppendix(parameterTypeClass);
+			return new ArgumentSetFromAppendix(parameterTypeClass, appendixClass);
+		}
+
+		// simple type
+		appendixClass = this.lookupAppendix(parameter.getType());
+		return new ArgumentFromAppendix(parameter.getType(), appendixClass);
+	}
+
+	private @NonNull Class<? extends ApplicationAppendix<?>> lookupAppendix(final Class<?> contentClass) {
+		final Class<? extends ApplicationAppendix<?>> appendixClass = this.appendixRegistry.lookUp(contentClass);
 		if (appendixClass == null) {
-			final String message = "no appropriate appendix registered. Cannot retrieve the required type";
-			log.atWarn().log(message);
-			throw new AppendixNotRegisteredException(message);
+			throw AppendixNotRegisteredException.noAppropriateAppendix(contentClass);
 		}
-
-		final Argument argument = new ArgumentFromAppendix(parameterType, appendixClass);
-
-		return argument;
+		return appendixClass;
 	}
 
-	private ParameterPosition findMatchingParametersByName(final Method emulatedMethod,
-			final String parameterIdentifier) {
-		final Parameter[] emulatedParams = emulatedMethod.getParameters();
-		final List<ParameterPosition> relevantParameters = IntStream.range(0, emulatedParams.length)
-				.mapToObj(i -> new ParameterPosition(i, emulatedParams[i]))
-				.filter(pp -> pp.getParameter().getName().equals(parameterIdentifier))
-				.collect(Collectors.toList());
-		if (relevantParameters.size() != 1) {
-			final String message = String.format(
-					"lookup parameters by name, there should be exactly one matching parameter. Found : %d",
-					relevantParameters.size());
-			log.atDebug().log(message);
-			throw new UndefinedParameterException(message);
+	private Class<?> loadTypeClass(final String className) {
+		final int begin = className.indexOf('<');
+		final int end = className.indexOf('>');
+		String name = className;
+		if (begin >= 0 && end >= 0) {
+			name = className.substring(begin + 1, end);
 		}
-
-		return relevantParameters.get(0);
-	}
-
-	private ParameterPosition findMatchingParametersByType(final Method emulatedMethod, final Class<?> type) {
-		final Parameter[] emulatedParams = emulatedMethod.getParameters();
-		final List<ParameterPosition> relevantParameters = IntStream.range(0, emulatedParams.length)
-				.mapToObj(i -> new ParameterPosition(i, emulatedParams[i]))
-				.filter(pp -> pp.getParameter().getType().equals(type))
-				.collect(Collectors.toList());
-		if (relevantParameters.size() != 1) {
-			final String message = String.format(
-					"lookup parameters by type, there should be exactly one matching parameter. Found : %d",
-					relevantParameters.size());
-			log.atDebug().log(message);
-			throw new UndefinedParameterException(message);
+		Class<?> classForName = null;
+		try {
+			classForName = ArgumentFactory.class.getClassLoader().loadClass(name);
+		} catch (final ClassNotFoundException e) {
+			// should never happen, because the type is part of the class variable we
+			// received as parameter.
+			throw BuilderException.classNotLoaded(className, e);
 		}
-
-		return relevantParameters.get(0);
-	}
-
-	@AllArgsConstructor
-	@Getter
-	@EqualsAndHashCode
-	@ToString
-	private static class ParameterPosition {
-
-		private final Integer position;
-		private final Parameter parameter;
+		return classForName;
 	}
 }

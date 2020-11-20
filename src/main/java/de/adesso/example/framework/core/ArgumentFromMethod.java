@@ -38,31 +38,25 @@ public class ArgumentFromMethod extends Argument {
 
 	@Override
 	protected Object prepareArgument(final ApplicationProtocol<?> state, final Object[] args) {
-		return args[this.sourcePosition];
+		final Object parameter = args[this.sourcePosition];
+		this.validateArgument(parameter);
+		return parameter;
 	}
 
 	private void validateSourcePosition() {
 		if (this.sourcePosition > this.getBeanOperation().getMethodImplementation().getMethod()
 				.getParameters().length) {
-			final String message = String.format(
-					"parameter position is greater as the method parameters (%s::%s) available from the describing interface(%s)",
-					this.getBean().getName(),
-					this.getBeanMethodIdentifier(),
-					this.getBeanOperation().getMethodImplementation().getDispatcher().getImplementationInterface()
-							.getName());
-			log.atError().log(message);
-			throw new BuilderException(message);
+			throw BuilderException.sourcePositionOutOfRange(this.getBean(), this.getBeanMethodIdentifier(),
+					this.getBeanOperation().getMethodImplementation().getDispatcher().getImplementationInterface());
 		}
 
 		if (!this.getSourceParameter().getClass().isAssignableFrom(this.getTargetParameter())) {
-			final String message = String.format(
-					"parameter of interface %s::%s cannot be assigned to bean %s::%s.",
-					this.getEmulatedInterface().getName(),
-					this.getEmulatedInterfaceMethod().getName(),
-					this.getBean().getName(),
-					this.getEmulatedInterface().getName());
-			log.atError().log(message);
-			throw new BuilderException(message);
+			throw BuilderException.parameterNotAssignable(
+					this.getEmulatedInterface(),
+					this.getEmulatedInterfaceMethod(),
+					this.getBean(),
+					this.getBeanOperation().getMethodIdentifier(),
+					this.getParameterName());
 		}
 	}
 

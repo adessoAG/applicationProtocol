@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-import de.adesso.example.application.accounting.Accounting;
 import de.adesso.example.application.stock.Article;
 
 class ShoppingCartTest {
@@ -14,7 +13,7 @@ class ShoppingCartTest {
 	@Test
 	void testRemoveEntryArticleOne() {
 		// prepare
-		final ShoppingCart cart = new ShoppingCart(Accounting.getUnknownCustomer());
+		final ShoppingCart cart = new ShoppingCart();
 		final Article article = new Article("the article id");
 		cart.addEntry(article, 1);
 
@@ -28,7 +27,7 @@ class ShoppingCartTest {
 	@Test
 	void testRemoveEntryArticleMore() {
 		// prepare
-		final ShoppingCart cart = new ShoppingCart(Accounting.getUnknownCustomer());
+		final ShoppingCart cart = new ShoppingCart();
 		final Article article = new Article("the article id");
 		cart.addEntry(article, 7);
 
@@ -42,7 +41,7 @@ class ShoppingCartTest {
 	@Test
 	void testRemoveEntryArticleCountLess() {
 		// prepare
-		final ShoppingCart cart = new ShoppingCart(Accounting.getUnknownCustomer());
+		final ShoppingCart cart = new ShoppingCart();
 		final Article article = new Article("the article id");
 		cart.addEntry(article, 7);
 
@@ -58,7 +57,7 @@ class ShoppingCartTest {
 	@Test
 	void testRemoveEntryArticleCountEqual() {
 		// prepare
-		final ShoppingCart cart = new ShoppingCart(Accounting.getUnknownCustomer());
+		final ShoppingCart cart = new ShoppingCart();
 		final Article article = new Article("the article id");
 		cart.addEntry(article, 7);
 
@@ -72,7 +71,7 @@ class ShoppingCartTest {
 	@Test
 	void testRemoveEntryArticleCountNotFound() {
 		// prepare
-		final ShoppingCart cart = new ShoppingCart(Accounting.getUnknownCustomer());
+		final ShoppingCart cart = new ShoppingCart();
 		final Article article = new Article("the article id");
 		cart.addEntry(article, 7);
 
@@ -86,7 +85,7 @@ class ShoppingCartTest {
 	@Test
 	void testAddEntryArticle() {
 		// prepare
-		final ShoppingCart cart = new ShoppingCart(Accounting.getUnknownCustomer());
+		final ShoppingCart cart = new ShoppingCart();
 		final Article article = new Article("the article id");
 
 		// test
@@ -100,7 +99,7 @@ class ShoppingCartTest {
 	@Test
 	void testAddEntryArticleInt() {
 		// prepare
-		final ShoppingCart cart = new ShoppingCart(Accounting.getUnknownCustomer());
+		final ShoppingCart cart = new ShoppingCart();
 		final Article article = new Article("the article id");
 
 		// test

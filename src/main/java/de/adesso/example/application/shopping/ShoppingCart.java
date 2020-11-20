@@ -3,11 +3,15 @@ package de.adesso.example.application.shopping;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
+
+import org.javamoney.moneta.Money;
 
 import de.adesso.example.application.accounting.Customer;
+import de.adesso.example.application.marketing.VoucherApplication;
+import de.adesso.example.application.marketing.VoucherBasket;
 import de.adesso.example.application.stock.Article;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * This class represents the shopping cart which consists of several objects of
@@ -19,13 +23,19 @@ import lombok.Getter;
  */
 public class ShoppingCart {
 
+	/** entries of the shopping cart */
 	private final List<ShoppingCartEntry> entries = new ArrayList<>();
+	/** customer representation who is going to purchase articles */
 	@Getter
-	private final Customer customer;
-
-	public ShoppingCart(final Customer customer) {
-		this.customer = customer;
-	}
+	@Setter
+	private Customer customer;
+	/** vouchers assigned on cart level */
+	@Getter
+	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.APPLICABLE_TO_CART);
+	/** total of the cart */
+	@Getter
+	@Setter
+	private Money total;
 
 	/**
 	 * Remove the shopping cart entry which holds the given article. If this entry
@@ -102,6 +112,15 @@ public class ShoppingCart {
 	}
 
 	/**
+	 * Return all entries of the shopping cart.
+	 *
+	 * @return the list of the entries
+	 */
+	public List<ShoppingCartEntry> getAllEntries() {
+		return this.entries;
+	}
+
+	/**
 	 * Check the shopping cart whether it contains a specific article. Returns true
 	 * if the article is present.
 	 *
@@ -113,13 +132,30 @@ public class ShoppingCart {
 		return !oce.isEmpty();
 	}
 
-	/**
-	 * Returns a stream of shopping cart entries
-	 *
-	 * @return the stream of entries
-	 */
-	public Stream<ShoppingCartEntry> stream() {
-		return this.entries.stream();
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+		return this.toString(sb, 0).toString();
+	}
+
+	public StringBuilder toString(final StringBuilder sb, final int indent) {
+		this.identation(sb, indent)
+				.append(this.getClass().getName()).append("\n");
+		this.identation(sb, indent + 1)
+				.append("total: ").append(this.total.toString()).append("\n");
+		this.identation(sb, indent + 1)
+				.append("cart basket:\n");
+		this.basket.toString(sb, indent + 2);
+		this.identation(sb, indent + 1)
+				.append("entries:\n");
+		this.entries.forEach(e -> e.toString(sb, indent + 2));
+		return sb;
+	}
+
+	private StringBuilder identation(final StringBuilder sb, final int tabs) {
+		for (int i = 0; i < tabs; i++) {
+			sb.append('\t');
+		}
+		return sb;
 	}
 
 	private Optional<Integer> posOfArticle(final Article article) {
@@ -133,5 +169,15 @@ public class ShoppingCart {
 		return this.entries.stream()
 				.filter(a -> a.getArticle().equals(article))
 				.findFirst();
+	}
+
+	public void clearVouchers() {
+		this.basket.clear();
+		this.entries.stream()
+				.forEach(ShoppingCartEntry::clearVouchers);
+	}
+
+	public void splitAll() {
+		this.entries.stream().forEach(ShoppingCartEntry::splitAll);
 	}
 }

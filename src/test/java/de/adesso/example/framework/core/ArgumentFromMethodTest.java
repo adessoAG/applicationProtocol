@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.fail;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.Assert;
 
 import de.adesso.example.framework.ApplicationProtocol;
 
@@ -16,13 +15,13 @@ public class ArgumentFromMethodTest {
 	@Test
 	public void testConstructor() {
 		final Argument argumentProcessor = new ArgumentFromMethod(String.class, 2);
-		Assert.notNull(argumentProcessor, "constructor has to create an object");
+		assertThat(argumentProcessor).isNotNull();
 	}
 
 	@Test
 	public void testConstructorPosition0() {
 		final Argument argumentProcessor = new ArgumentFromMethod(String.class, 0);
-		Assert.notNull(argumentProcessor, "constructor has to create an object");
+		assertThat(argumentProcessor).isNotNull();
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)

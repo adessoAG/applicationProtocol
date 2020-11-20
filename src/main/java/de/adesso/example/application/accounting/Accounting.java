@@ -6,9 +6,9 @@ import de.adesso.example.framework.ApplicationOwner;
 
 public class Accounting extends ApplicationOwner {
 
-	final static UUID id = UUID.randomUUID();
-	final static CustomerPerson unknownCustomer = new CustomerPerson(UUID.randomUUID(), "unknown", "customer");
-	final static Creditor revenueAccount = new Creditor(UUID.randomUUID());
+	static final UUID id = UUID.randomUUID();
+	static final CustomerPerson unknownCustomer = new CustomerPerson(UUID.randomUUID(), "unknown", "customer");
+	static final Creditor revenueAccount = new Creditor(UUID.randomUUID());
 
 	@Override
 	protected UUID getOwnerId() {

@@ -1,5 +1,6 @@
 package de.adesso.example.framework.core;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -12,8 +13,11 @@ import org.springframework.util.Assert;
 
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.CallStrategy;
+import de.adesso.example.framework.annotation.CallingStrategy;
+import de.adesso.example.framework.exception.BeanCallException;
 import de.adesso.example.framework.exception.BuilderException;
 import de.adesso.example.framework.exception.CalculationNotApplicable;
+import de.adesso.example.framework.exception.RequiredParameterException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -74,8 +78,8 @@ public class BeanOperation {
 	 */
 	private final List<Argument> arguments;
 
-	private transient CallStrategy callStrategy;
-	private transient MethodImplementation methodImplementation;
+	private CallingStrategy callStrategy;
+	private MethodImplementation methodImplementation;
 
 	@Builder
 	private BeanOperation(final String methodIdentifier, final Class<?> anInterface, final Class<Object> beanType,
@@ -92,16 +96,16 @@ public class BeanOperation {
 		this.method = method;
 
 		if (method == null) {
-			this.setMethod(this.getDescribingClass());
+			this.setMethodByName(this.getDescribingClass());
 		}
+		this.evaluateMethodAnnotations();
 	}
 
 	/**
 	 * Since it is allowed to use an interface during the instantiation, it is
 	 * necessary to provide the object to work on.
 	 *
-	 * @param methodImplementation
-	 *
+	 * @param methodImplementation reference to the parent
 	 * @param context              application context to load beans
 	 */
 	@SuppressWarnings("unchecked")
@@ -110,34 +114,7 @@ public class BeanOperation {
 
 		// if the implementation is provided, nothing to do.
 		if (this.implementation == null) {
-			// validate information is available
-			if (this.beanType == null && this.anInterface == null) {
-				final String message = String.format("no type given for implementation bean %s", this.methodIdentifier);
-				log.atError().log(message);
-				throw new NullPointerException(message);
-			}
-
-			// determine the type
-			try {
-				if (this.beanType != null) {
-					this.implementation = context.getBean(this.beanType);
-				} else if (this.anInterface != null) {
-					this.implementation = context.getBean(this.anInterface);
-				}
-			} catch (final BeansException e) {
-				// ignore that exception. It might be a POJO.
-				log.atDebug().log("given type is not a valid bean: {}, try classloader",
-						this.beanType != null ? this.beanType.getName() : this.anInterface.getName());
-				try {
-					this.implementation = this.beanType.getDeclaredConstructor().newInstance();
-				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-						| InvocationTargetException | NoSuchMethodException | SecurityException e1) {
-					final String message = String.format(
-							"finally could not provide class, class loader failed to load %s", this.methodIdentifier);
-					log.atError().log(message, e1);
-					throw new BuilderException(message, e1);
-				}
-			}
+			this.implementation = this.defineImplementation(methodImplementation, context);
 		}
 		Assert.notNull(this.implementation, "one of implementation, beanType, anInterface is required");
 		if (this.beanType == null) {
@@ -147,6 +124,65 @@ public class BeanOperation {
 		// provide the target position to the arguments
 		IntStream.range(0, this.arguments.size())
 				.forEach(i -> this.arguments.get(i).init(this, this.method.getParameters()[i], i));
+	}
+
+	private Object defineImplementation(
+			final MethodImplementation methodImplementation,
+			final ApplicationContext context) {
+		Object impl = null;
+
+		// validate information is available
+		if (this.beanType == null && this.anInterface == null) {
+			throw BuilderException.notEnoughInformationAvailable(
+					methodImplementation.getDispatcher().getImplementationInterface(), this.methodIdentifier);
+		}
+
+		// determine the type
+		try {
+			// try to load spring bean
+			impl = this.loadSpringBean(context);
+		} catch (final BeansException e) {
+			// ignore that exception. It might be a POJO.
+			impl = this.loadBeanWithClassloader(methodImplementation);
+		}
+		return impl;
+	}
+
+	private Object loadSpringBean(final ApplicationContext context) {
+		Object impl;
+		// the spring bean is either known by its type or by the interface its
+		// implements
+		if (this.beanType != null) {
+			impl = context.getBean(this.beanType);
+		} else {
+			impl = context.getBean(this.anInterface);
+		}
+		return impl;
+	}
+
+	private Object loadBeanWithClassloader(final MethodImplementation methodImplementation) {
+		Object impl = null;
+
+		log.atDebug().log("given type is not a valid bean: {}, try classloader",
+				this.beanType != null ? this.beanType.getName() : this.anInterface.getName());
+		if (this.beanType == null) {
+			throw BuilderException.missingType(methodImplementation.getDispatcher().getImplementationInterface(),
+					this.methodIdentifier);
+		}
+
+		try {
+			final Constructor<Object> declaredConstructor = this.beanType.getDeclaredConstructor();
+			if (declaredConstructor == null) {
+				// no empty constructor accessible
+				throw BuilderException.missingEmptyConstructor(this.beanType, this.methodIdentifier);
+			}
+			impl = declaredConstructor.newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			throw BuilderException.classNotLoaded(this.beanType, e);
+		}
+
+		return impl;
 	}
 
 	/**
@@ -161,7 +197,16 @@ public class BeanOperation {
 		final Object[] methodArguments;
 		try {
 			methodArguments = this.prepareArguments(state, args);
+		} catch (final RequiredParameterException e) {
+			if (this.callStrategy == CallingStrategy.EAGER) {
+				throw BeanCallException.callFailedMissingParameter(this.implementation.getClass(), this.method,
+						e.getMethod());
+			}
+			return state;
 		} catch (final CalculationNotApplicable e) {
+			if (this.callStrategy == CallingStrategy.EAGER) {
+				throw BeanCallException.callFailedOnStrategy(this.implementation.getClass(), this.method);
+			}
 			return state; // bean has to be called, if required parameters are present
 		}
 
@@ -169,11 +214,15 @@ public class BeanOperation {
 		try {
 			result = (ApplicationProtocol<?>) this.method.invoke(this.implementation, methodArguments);
 
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		} catch (IllegalAccessException | IllegalArgumentException e) {
 			final String message = String.format("could not invoke configured target bean (%s::%s)",
 					this.implementation.getClass().getName(), this.method.getName());
-			log.atError().log(message);
+			log.atError().log(message, e);
 			throw new ClassCastException(message);
+		} catch (final InvocationTargetException e) {
+			final Throwable targetException = e.getTargetException();
+			throw BeanCallException.callFailedWithException(this.implementation.getClass(), this.method,
+					targetException);
 		}
 
 		return result;
@@ -206,20 +255,23 @@ public class BeanOperation {
 		return describingClass;
 	}
 
-	private void setMethod(final Class<?> describingClass) {
+	private void setMethodByName(final Class<?> describingClass) {
 		try {
 			log.atDebug().log("going to extract method {}::{}", describingClass.getName(),
 					this.methodIdentifier);
 			this.method = describingClass.getDeclaredMethod(this.methodIdentifier,
 					this.argumentTypes(this.arguments));
 		} catch (NoSuchMethodException | SecurityException e) {
-			final String message = "could not build bean operation";
-			log.atError().log(message, e);
-			throw new BuilderException(message, e);
+			throw BuilderException.methodNotFound(describingClass, this.methodIdentifier, e);
 		}
+	}
 
+	private void evaluateMethodAnnotations() {
 		// get the annotations from the method
-		this.callStrategy = this.method.getDeclaredAnnotation(CallStrategy.class);
+		final CallStrategy strategyAnnotation = this.method.getDeclaredAnnotation(CallStrategy.class);
+		if (strategyAnnotation != null) {
+			this.callStrategy = strategyAnnotation.strategy();
+		}
 	}
 
 	private Class<?>[] argumentTypes(final List<Argument> arguments) {

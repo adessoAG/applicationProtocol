@@ -23,7 +23,8 @@ public class ArgumentFromAppendix extends Argument {
 
 	@Override
 	protected Object prepareArgument(final ApplicationProtocol<?> state, final Object[] args) {
-		final Optional<ApplicationAppendix<?>> appendix = state.getAppendixOfClass(this.appendixClass);
+		final Optional<ApplicationAppendix<?>> appendixOfClass = state.getAppendixOfClass(this.appendixClass);
+		final Optional<? extends ApplicationAppendix<?>> appendix = appendixOfClass;
 
 		this.validateArgument(appendix);
 
