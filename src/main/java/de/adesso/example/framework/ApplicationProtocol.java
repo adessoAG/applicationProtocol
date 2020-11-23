@@ -12,8 +12,12 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Basic protocol element for the application protocol. Users should extend this
- * class to add their own attributes.
+ * Basic protocol element for the application protocol. The type parameter
+ * allows to add own return values of processing.
+ * <p>
+ * The protocol is prepared for single threaded use. If multi-threaded use is
+ * required,
+ *
  *
  * @author Matthias
  *
