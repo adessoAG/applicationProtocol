@@ -92,7 +92,7 @@ public class VoucherBasketTest {
 			@Override
 			public Money calculateDiscount(final Money price) {
 				// 10% discount
-				return price.multiply(0.9);
+				return price.multiply(0.1);
 			}
 
 		};

@@ -69,7 +69,7 @@ public class ShoppingCartCalculator extends ParallelJoin {
 	 * @return the state to be provided to the next step
 	 */
 	@CallStrategy(strategy = CallingStrategy.EAGER)
-	public ApplicationProtocol<ShoppingCart> init(
+	public ApplicationProtocol<ShoppingCart> initCartProcessing(
 			@Required final ShoppingCart cart,
 			@Required final ApplicationProtocol<ShoppingCart> state) {
 		state.setResult(cart);

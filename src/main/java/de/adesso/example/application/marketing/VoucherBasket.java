@@ -49,6 +49,10 @@ public class VoucherBasket {
 			return false;
 		}
 
+		if (!voucher.getApplicableAt().contains(this.level)) {
+			return false;
+		}
+
 		// all vouchers within the basket are compatible to the new one?
 		return this.vouchers.stream()
 				.allMatch(v -> v.isCompatible(voucher));
