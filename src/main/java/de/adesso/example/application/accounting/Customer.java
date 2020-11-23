@@ -10,6 +10,8 @@ import java.util.UUID;
  */
 public class Customer extends Debtor {
 
+	private static final long serialVersionUID = 26384465296502720L;
+
 	public Customer(final UUID id) {
 		super(id);
 	}

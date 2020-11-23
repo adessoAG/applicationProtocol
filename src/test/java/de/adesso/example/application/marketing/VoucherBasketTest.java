@@ -87,6 +87,8 @@ public class VoucherBasketTest {
 			final int uses, final VoucherApplication application) {
 		return new VoucherDiscount(voucherId, compatibility, uses, application) {
 
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public Money calculateDiscount(final Money price) {
 				// 10% discount

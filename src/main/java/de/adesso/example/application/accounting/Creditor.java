@@ -14,6 +14,8 @@ import de.adesso.example.application.Standard;
  */
 public class Creditor extends Account {
 
+	private static final long serialVersionUID = -4753997495226916881L;
+
 	public Creditor(final UUID id) {
 		super(id, Money.of(0.0, Standard.EUROS));
 	}

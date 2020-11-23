@@ -1,5 +1,6 @@
 package de.adesso.example.application.employment;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import org.javamoney.moneta.Money;
@@ -13,7 +14,9 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class Employee {
+public class Employee implements Serializable {
+
+	private static final long serialVersionUID = 800784862436922847L;
 
 	private final String name;
 	private final String firstName;

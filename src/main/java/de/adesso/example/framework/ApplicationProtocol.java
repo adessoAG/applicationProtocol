@@ -1,5 +1,6 @@
 package de.adesso.example.framework;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,9 @@ import lombok.ToString;
  */
 
 @ToString
-public class ApplicationProtocol<RESULT_TYPE> {
+public class ApplicationProtocol<RESULT_TYPE> implements Serializable {
+
+	private static final long serialVersionUID = 793704284936910537L;
 
 	private final AppendixList data = new AppendixList();
 

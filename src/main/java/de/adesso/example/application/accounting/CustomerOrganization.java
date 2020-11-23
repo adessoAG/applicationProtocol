@@ -11,6 +11,8 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 public class CustomerOrganization extends Customer {
 
+	private static final long serialVersionUID = -589321307021899310L;
+
 	CustomerOrganization(final UUID customerId, final String name) {
 		super(customerId);
 		this.name = name;

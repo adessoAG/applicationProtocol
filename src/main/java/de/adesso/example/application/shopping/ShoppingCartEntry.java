@@ -1,5 +1,6 @@
 package de.adesso.example.application.shopping;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,9 @@ import lombok.Setter;
  */
 @Getter
 @EqualsAndHashCode
-public class ShoppingCartEntry {
+public class ShoppingCartEntry implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private final Article article;
 	@Setter

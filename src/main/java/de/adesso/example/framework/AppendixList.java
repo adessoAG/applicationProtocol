@@ -1,5 +1,6 @@
 package de.adesso.example.framework;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -10,8 +11,9 @@ import java.util.stream.Stream;
 
 import de.adesso.example.framework.exception.TooManyElementsException;
 
-class AppendixList {
+class AppendixList implements Serializable {
 
+	private static final long serialVersionUID = 3547825846436619073L;
 	/**
 	 * List of all appendix values.
 	 */

@@ -1,5 +1,7 @@
 package de.adesso.example.application.accounting;
 
+import java.io.Serializable;
+
 import org.javamoney.moneta.Money;
 
 import lombok.Builder;
@@ -7,7 +9,9 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class AccountingRecord {
+public class AccountingRecord implements Serializable {
+
+	private static final long serialVersionUID = -901694136354843044L;
 
 	private final Account debitor;
 	private final Account creditor;

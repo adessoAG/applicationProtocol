@@ -1,5 +1,6 @@
 package de.adesso.example.application.shopping;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import org.javamoney.moneta.Money;
@@ -21,7 +22,9 @@ import lombok.Setter;
  *
  */
 @Getter
-public class ShoppingCartSubEntry {
+public class ShoppingCartSubEntry implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	/** vouchers assigned to the sub-entry */
 	private final VoucherBasket basket = new VoucherBasket(VoucherApplication.APPLICABLE_TO_SUB_ENTRY);
