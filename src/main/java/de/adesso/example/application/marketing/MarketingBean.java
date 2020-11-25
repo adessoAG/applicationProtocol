@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import de.adesso.example.application.accounting.Account;
 import de.adesso.example.application.accounting.AccountingRecord;
-import de.adesso.example.application.accounting.AccountingRecordAppendix;
 import de.adesso.example.application.accounting.Customer;
 import de.adesso.example.application.shopping.ShoppingCart;
 import de.adesso.example.application.shopping.ShoppingCartEntry;
@@ -47,7 +46,7 @@ public class MarketingBean {
 		state.setResult(newPrice);
 
 		// add article bookkeeping record
-		state.addAppendix(this.articleBookkeepingRecord(customer, state, discount));
+		state.addAppendix(null, this.articleBookkeepingRecord(customer, state, discount));
 
 		return state;
 	}
@@ -103,13 +102,13 @@ public class MarketingBean {
 				.forEach(v -> v.resetTryUse());
 	}
 
-	private AccountingRecordAppendix articleBookkeepingRecord(final Account customer,
+	private AccountingRecord articleBookkeepingRecord(final Account customer,
 			final ApplicationProtocol<Money> state,
 			final Money discount) {
-		return new AccountingRecordAppendix(AccountingRecord.builder()
+		return AccountingRecord.builder()
 				.debitor(Marketing.getMarketingVoucherAccount())
 				.creditor(customer)
 				.value(discount)
-				.build());
+				.build();
 	}
 }

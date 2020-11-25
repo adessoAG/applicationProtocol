@@ -10,30 +10,24 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import de.adesso.example.framework.ApplicationProtocol;
-import de.adesso.example.framework.IntegerTestAppendix;
-import de.adesso.example.framework.StringTestAppendix;
+import de.adesso.example.framework.TestOwner;
 import de.adesso.example.framework.exception.TooManyElementsException;
 
 @RunWith(SpringRunner.class)
 public class ArgumentFromAppendixTest {
 
+	private final TestOwner owner = new TestOwner();
+
 	@Test
 	public void testConstructor() {
-		final ArgumentFromAppendix appendix = new ArgumentFromAppendix(String.class, StringTestAppendix.class);
+		final ArgumentFromAppendix argument = new ArgumentFromAppendix(String.class);
 
-		assertThat(appendix).isNotNull();
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testConstructorTypeIsNull() {
-		new ArgumentFromAppendix(null, StringTestAppendix.class);
-
-		fail("should detect null value for type");
+		assertThat(argument).isNotNull();
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorAttachmentIsNull() {
-		new ArgumentFromAppendix(String.class, null);
+		new ArgumentFromAppendix(null);
 
 		fail("should detect null value for attachmentId");
 	}
@@ -41,13 +35,10 @@ public class ArgumentFromAppendixTest {
 	@Test
 	public void testPrepareArgument() {
 		final String testString = "some string";
-		final StringTestAppendix additionalAppendix = new StringTestAppendix(testString);
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(additionalAppendix);
-		final Object[] args = { "einfacher Teststring", Integer.valueOf(5),
-				state };
-		final Argument argumentProcessor = new ArgumentFromAppendix(String.class,
-				StringTestAppendix.class);
+				.addAppendix(this.owner, testString);
+		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
+		final Argument argumentProcessor = new ArgumentFromAppendix(String.class);
 
 		final String result = (String) argumentProcessor.prepareArgument(state, args);
 
@@ -57,13 +48,10 @@ public class ArgumentFromAppendixTest {
 
 	@Test
 	public void testPrepareArgumentMissingArgument() {
-		final StringTestAppendix additionalAppendix = new StringTestAppendix("some string");
-		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(additionalAppendix);
+		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<>();
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5),
 				state };
-		final Argument argumentProcessor = new ArgumentFromAppendix(String.class,
-				IntegerTestAppendix.class);
+		final Argument argumentProcessor = new ArgumentFromAppendix(String.class);
 
 		final String result = (String) argumentProcessor.prepareArgument(state, args);
 
@@ -74,31 +62,13 @@ public class ArgumentFromAppendixTest {
 	@Test(expected = TooManyElementsException.class)
 	public void testPrepareArgumentTooManyArguments() {
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new StringTestAppendix("some string"))
-				.addAppendix(new StringTestAppendix("other string"));
-		final Object[] args = { "einfacher Teststring", Integer.valueOf(5),
-				state };
-		final Argument argumentProcessor = new ArgumentFromAppendix(String.class,
-				StringTestAppendix.class);
+				.addAppendix(this.owner, "some string")
+				.addAppendix(this.owner, "other string");
+		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
+		final Argument argumentProcessor = new ArgumentFromAppendix(String.class);
 
 		argumentProcessor.prepareArgument(state, args);
 
 		fail("should detect, that there are too many attachments of corresponding id available");
-	}
-
-	@Test
-	public void testPrepareArgumentNoMatches() {
-		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new StringTestAppendix("some string"))
-				.addAppendix(new StringTestAppendix("other string"));
-		final Object[] args = { "einfacher Teststring", Integer.valueOf(5),
-				state };
-		final Argument argumentProcessor = new ArgumentFromAppendix(String.class,
-				IntegerTestAppendix.class);
-
-		final String argument = (String) argumentProcessor.prepareArgument(state, args);
-
-		assertThat(argument)
-				.isNull();
 	}
 }

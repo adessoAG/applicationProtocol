@@ -7,18 +7,18 @@ import lombok.NonNull;
 import lombok.ToString;
 
 @ToString
-public class ArgumentFromAppendix extends Argument {
+public class ArgumentOptionalFromAppendix extends Argument {
 
-	public ArgumentFromAppendix(@NonNull final Class<?> type) {
+	public ArgumentOptionalFromAppendix(@NonNull final Class<?> type) {
 		super(type);
 	}
 
 	@Override
-	protected Object prepareArgument(final ApplicationProtocol<?> state, final Object[] args) {
+	protected Optional<?> prepareArgument(final ApplicationProtocol<?> state, final Object[] args) {
 		final Optional<?> optionalAppendix = state.getAppendixOfClassT(this.getType());
 
 		this.validateArgument(optionalAppendix);
 
-		return optionalAppendix.isEmpty() ? null : optionalAppendix.get();
+		return optionalAppendix;
 	}
 }

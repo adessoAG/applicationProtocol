@@ -15,13 +15,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.ApplicationOwner;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.EmulatedInterface;
 import de.adesso.example.framework.TestConfig;
 import de.adesso.example.framework.exception.UnknownMethodException;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -53,34 +52,32 @@ public class DaisyChainDispatcherFactoryTest {
 		assertThat(resultState.getResult())
 				.isEqualTo(testString + anotherTestString);
 
-		final Optional<ApplicationAppendix<Integer>> optionalA1 = resultState.getAppendixOfClassT(Appendix_A1.class);
+		final Optional<A1> optionalA1 = resultState.getAppendixOfClassT(A1.class);
 		assertThat(optionalA1)
 				.isNotNull()
 				.isNotEmpty();
-		final ApplicationAppendix<?> a1 = optionalA1.get();
+		final A1 a1 = optionalA1.get();
 		assertThat(a1)
-				.isInstanceOf(Appendix_A1.class);
-		final Appendix_A1 appendix_A1 = (Appendix_A1) a1;
-		assertThat(appendix_A1.getContent())
-				.isEqualTo(5);
+				.isInstanceOf(A1.class);
+		assertThat(a1.anInteger)
+				.isEqualTo(testInteger + testInt);
 
-		final Optional<ApplicationAppendix<String>> optionalA2 = resultState.getAppendixOfClassT(Appendix_A2.class);
-		assertThat(optionalA2)
+		final Optional<B1> optionalB1 = resultState.getAppendixOfClassT(B1.class);
+		assertThat(optionalB1)
 				.isNotNull()
 				.isNotEmpty();
-		final ApplicationAppendix<?> a2 = optionalA2.get();
-		assertThat(a2)
-				.isInstanceOf(Appendix_A2.class);
-		final Appendix_A2 appendix_A2 = (Appendix_A2) a2;
-		assertThat(appendix_A2.getContent())
+		final B1 b1 = optionalB1.get();
+		assertThat(b1)
+				.isInstanceOf(B1.class);
+		assertThat(b1.aString)
 				.isEqualTo(anotherTestString);
 
-		final List<ApplicationAppendix<String>> b2List = resultState.getAllAppenixesOfTypeAsListT(Appendix_B2.class);
+		final List<B2> b2List = resultState.getAllAppenixesOfTypeAsListT(B2.class);
 		assertThat(b2List)
 				.isNotNull()
 				.hasSize(2);
-		final ApplicationAppendix<String> appendix_B2 = b2List.get(0);
-		assertThat(appendix_B2.getContent())
+		final B2 appendix_B2 = b2List.get(0);
+		assertThat(appendix_B2.aString)
 				.isEqualTo(anotherTestString);
 	}
 
@@ -134,6 +131,11 @@ public class DaisyChainDispatcherFactoryTest {
 								.argument(new ArgumentFromMethod(String.class, 0))
 								.argument(new ArgumentApplicationProtocol())
 								.build())
+						.beanOperation(BeanOperation.builder()
+								.implementation(new Wrong())
+								.methodIdentifier("operation")
+								.argument(new ArgumentFromMethod(String.class, 0))
+								.build())
 						.build())
 				.build();
 		if (emulated instanceof InitializingBean) {
@@ -155,17 +157,10 @@ public class DaisyChainDispatcherFactoryTest {
 		}
 	}
 
-	@Getter
-	private static class Appendix_A1 extends ApplicationAppendix<Integer> {
+	@AllArgsConstructor
+	private static class A1 {
 
-		public Appendix_A1(final Integer content) {
-			super(content);
-		}
-
-		@Override
-		public UUID getOwner() {
-			return owner1.getOwnerId();
-		}
+		Integer anInteger;
 	}
 
 	private static class TestBean_1 {
@@ -174,7 +169,7 @@ public class DaisyChainDispatcherFactoryTest {
 		public ApplicationProtocol<String> doSomething(final String aString, final int anInt, final Integer anInteger) {
 			final ApplicationProtocol<String> state = new ApplicationProtocol<>();
 			state.setResult(aString);
-			state.addAppendix(new Appendix_A1(5));
+			state.addAppendix(owner1, new A1(Integer.valueOf(anInt + anInteger.intValue())));
 
 			return state;
 		}
@@ -192,30 +187,16 @@ public class DaisyChainDispatcherFactoryTest {
 		}
 	}
 
-	@Getter
-	private static class Appendix_A2 extends ApplicationAppendix<String> {
+	@AllArgsConstructor
+	private static class B1 {
 
-		public Appendix_A2(final String content) {
-			super(content);
-		}
-
-		@Override
-		public UUID getOwner() {
-			return owner2.getOwnerId();
-		}
+		String aString;
 	}
 
-	@Getter
-	public static class Appendix_B2 extends ApplicationAppendix<String> {
+	@AllArgsConstructor
+	private static class B2 {
 
-		public Appendix_B2(final String content) {
-			super(content);
-		}
-
-		@Override
-		public UUID getOwner() {
-			return owner2.getOwnerId();
-		}
+		String aString;
 	}
 
 	public class TestBean_2 {
@@ -223,9 +204,9 @@ public class DaisyChainDispatcherFactoryTest {
 		public ApplicationProtocol<String> anotherAction(final String anotherString,
 				final ApplicationProtocol<String> state) {
 			state.setResult(state.getResult() + anotherString);
-			state.addAppendix(new Appendix_A2(anotherString));
-			state.addAppendix(new Appendix_B2(anotherString));
-			state.addAppendix(new Appendix_B2(anotherString));
+			state.addAppendix(owner2, new B1(anotherString));
+			state.addAppendix(owner2, new B2(anotherString));
+			state.addAppendix(owner2, new B2(anotherString));
 
 			return state;
 		}

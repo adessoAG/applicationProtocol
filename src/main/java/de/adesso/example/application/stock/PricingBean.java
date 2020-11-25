@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import de.adesso.example.application.Standard;
 import de.adesso.example.application.accounting.Accounting;
 import de.adesso.example.application.accounting.AccountingRecord;
-import de.adesso.example.application.accounting.AccountingRecordAppendix;
 import de.adesso.example.application.accounting.Creditor;
 import de.adesso.example.application.accounting.Customer;
 import de.adesso.example.framework.ApplicationProtocol;
@@ -59,11 +58,10 @@ public class PricingBean {
 			final Customer customer) {
 		final Creditor revenueAccount = Accounting.getRevenueAccount();
 
-		return state.addAppendix(new AccountingRecordAppendix(
-				AccountingRecord.builder()
-						.debitor(customer)
-						.creditor(revenueAccount)
-						.value(price)
-						.build()));
+		return state.addAppendix(null, AccountingRecord.builder()
+				.debitor(customer)
+				.creditor(revenueAccount)
+				.value(price)
+				.build());
 	}
 }

@@ -9,16 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
-import de.adesso.example.application.employment.EmployeeAppendix;
 import de.adesso.example.application.employment.Employment;
 import de.adesso.example.application.marketing.Marketing;
 import de.adesso.example.application.marketing.Voucher;
-import de.adesso.example.application.marketing.VoucherAppendix;
 import de.adesso.example.application.marketing.VoucherDiscountAbsolute;
 import de.adesso.example.application.shopping.ShoppingBean;
 import de.adesso.example.application.shopping.ShoppingCart;
 import de.adesso.example.application.stock.Article;
-import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.ApplicationProtocol;
 
 @Service
@@ -57,7 +54,7 @@ public class ClientExample implements CommandLineRunner {
 	private void runCartPricing() {
 		System.out.println("calculate the whole cart -----------------------------");
 		ApplicationProtocol<ShoppingCart> state = new ApplicationProtocol<>();
-		state.addAllAppendixes(this.createCartVouchers());
+		state.addAllAppendixes(null, this.createCartVouchers());
 		final ShoppingCart cart = this.buildShoppingCart();
 		state = this.shoppingBean.priceCart(cart, state);
 		System.out.println("the calculated cart is:-------------------------------");
@@ -68,16 +65,12 @@ public class ClientExample implements CommandLineRunner {
 		this.cashier.encash(cart, state);
 	}
 
-	private Collection<ApplicationAppendix<?>> createCartVouchers() {
-		final List<ApplicationAppendix<?>> vouchers = new ArrayList<>();
-		vouchers.add(new VoucherAppendix(
-				new VoucherDiscountAbsolute("AbsoluteDiscount 123456", Money.of(15.00, Standard.EUROS))));
-		vouchers.add(new VoucherAppendix(
-				new VoucherDiscountAbsolute("AbsoluteDiscount 123457", Money.of(15.00, Standard.EUROS))));
-		vouchers.add(new VoucherAppendix(
-				new VoucherDiscountAbsolute("AbsoluteDiscount 123458", Money.of(15.00, Standard.EUROS))));
-		vouchers.add(new VoucherAppendix(
-				new VoucherDiscountAbsolute("AbsoluteDiscount 123459", Money.of(15.00, Standard.EUROS))));
+	private Collection<Voucher> createCartVouchers() {
+		final List<Voucher> vouchers = new ArrayList<>();
+		vouchers.add(new VoucherDiscountAbsolute("AbsoluteDiscount 123456", Money.of(15.00, Standard.EUROS)));
+		vouchers.add(new VoucherDiscountAbsolute("AbsoluteDiscount 123457", Money.of(15.00, Standard.EUROS)));
+		vouchers.add(new VoucherDiscountAbsolute("AbsoluteDiscount 123458", Money.of(15.00, Standard.EUROS)));
+		vouchers.add(new VoucherDiscountAbsolute("AbsoluteDiscount 123459", Money.of(15.00, Standard.EUROS)));
 		return vouchers;
 	}
 
@@ -107,7 +100,7 @@ public class ClientExample implements CommandLineRunner {
 		System.out.println("calculate the price of a simple product for an employee");
 		article = this.customerEnteredArticle();
 		state = new ApplicationProtocol<>();
-		state.addAppendix(new EmployeeAppendix(this.employment.createEmployee("Müller", "Hans", 1234)));
+		state.addAppendix(null, this.employment.createEmployee("Müller", "Hans", 1234));
 		state = this.shoppingBean.calculatePriceOfArticle(article, state);
 		price = state.getResult();
 		System.out.println(String.format("%s: %s", article.getArticelId(), price));
@@ -119,7 +112,7 @@ public class ClientExample implements CommandLineRunner {
 		article = this.customerEnteredArticle();
 		state = new ApplicationProtocol<>();
 		Voucher tenEuroDiscount = this.marketing.createTenEuroDiscount();
-		state.addAppendix(new VoucherAppendix(tenEuroDiscount));
+		state.addAppendix(null, tenEuroDiscount);
 		state = this.shoppingBean.calculatePriceOfArticle(article, state);
 		price = state.getResult();
 		System.out.println(String.format("%s: %s", article.getArticelId(), price));
@@ -131,8 +124,8 @@ public class ClientExample implements CommandLineRunner {
 		article = this.customerEnteredArticle();
 		state = new ApplicationProtocol<>();
 		tenEuroDiscount = this.marketing.createTenEuroDiscount();
-		state.addAppendix(new VoucherAppendix(tenEuroDiscount));
-		state.addAppendix(new EmployeeAppendix(this.employment.createEmployee("Müller", "Hans", 1234)));
+		state.addAppendix(null, tenEuroDiscount);
+		state.addAppendix(null, this.employment.createEmployee("Müller", "Hans", 1234));
 		state = this.shoppingBean.calculatePriceOfArticle(article, state);
 		price = state.getResult();
 		System.out.println(String.format("%s: %s", article.getArticelId(), price));
