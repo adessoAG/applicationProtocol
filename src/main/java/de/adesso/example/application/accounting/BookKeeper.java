@@ -31,14 +31,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class BookKeeper {
 
-	public void process(final Collection<AccountingRecordAppendix> accountingRecords) {
+	public void process(final Collection<AccountingRecord> accountingRecords) {
 		accountingRecords
 				.stream()
 				.forEach(this::book);
 	}
 
-	public void book(final AccountingRecordAppendix ara) {
-		final AccountingRecord ar = ara.getContent();
+	public void book(final AccountingRecord ar) {
 		ar.getCreditor().amount.subtract(ar.getValue());
 		ar.getDebitor().amount.add(ar.getValue());
 	}

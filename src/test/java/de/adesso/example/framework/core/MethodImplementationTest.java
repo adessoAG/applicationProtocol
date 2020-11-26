@@ -12,11 +12,10 @@ import org.mockito.Mock;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.ApplicationOwner;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.EmulatedInterface;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
 
 @RunWith(SpringRunner.class)
 public class MethodImplementationTest {
@@ -55,34 +54,35 @@ public class MethodImplementationTest {
 		final Object[] args = { testString, testInt, testInteger, anotherTestString };
 		final ApplicationProtocol<String> resultState = implementation.execute(state, args);
 
-		assertThat(resultState)
-				.isNotNull();
 		assertThat(resultState.getResult())
-				.isNotNull()
 				.isEqualTo(testString + anotherTestString);
 
-		final Optional<ApplicationAppendix<Integer>> a1 = resultState.getAppendixOfClassT(Appendix_A1.class);
+		final Optional<A1> optionalA1 = resultState.getAppendixOfClassT(A1.class);
+		assertThat(optionalA1)
+				.isNotNull()
+				.isNotEmpty();
+		final A1 a1 = optionalA1.get();
 		assertThat(a1)
-				.isNotEmpty();
-		final Appendix_A1 appendix_A1 = (Appendix_A1) a1.get();
-		assertThat(appendix_A1.getContent())
-				.isEqualTo(5);
+				.isInstanceOf(A1.class);
+		assertThat(a1.anInteger)
+				.isEqualTo(testInteger + testInt);
 
-		final Optional<ApplicationAppendix<String>> a2 = resultState.getAppendixOfClassT(Appendix_A2.class);
-		assertThat(a2)
+		final Optional<B1> optionalB1 = resultState.getAppendixOfClassT(B1.class);
+		assertThat(optionalB1)
+				.isNotNull()
 				.isNotEmpty();
-		assertThat(a2.get())
-				.isInstanceOf(Appendix_A2.class);
-		final Appendix_A2 appendix_A2 = (Appendix_A2) a2.get();
-		assertThat(appendix_A2.getContent())
+		final B1 b1 = optionalB1.get();
+		assertThat(b1)
+				.isInstanceOf(B1.class);
+		assertThat(b1.aString)
 				.isEqualTo(anotherTestString);
 
-		final List<ApplicationAppendix<String>> b2List = resultState.getAllAppenixesOfTypeAsListT(Appendix_B2.class);
+		final List<B2> b2List = resultState.getAllAppenixesOfTypeAsListT(B2.class);
 		assertThat(b2List)
 				.isNotNull()
 				.hasSize(2);
-		final Appendix_B2 appendix_B2 = (Appendix_B2) b2List.get(0);
-		assertThat(appendix_B2.getContent())
+		final B2 appendix_B2 = b2List.get(0);
+		assertThat(appendix_B2.aString)
 				.isEqualTo(anotherTestString);
 	}
 
@@ -125,17 +125,10 @@ public class MethodImplementationTest {
 		}
 	}
 
-	@Getter
-	private static class Appendix_A1 extends ApplicationAppendix<Integer> {
+	@AllArgsConstructor
+	private static class A1 {
 
-		public Appendix_A1(final Integer content) {
-			super(content);
-		}
-
-		@Override
-		public UUID getOwner() {
-			return owner1.getOwnerId();
-		}
+		Integer anInteger;
 	}
 
 	private static class TestBean_1 {
@@ -144,7 +137,7 @@ public class MethodImplementationTest {
 		public ApplicationProtocol<String> doSomething(final String aString, final int anInt, final Integer anInteger) {
 			final ApplicationProtocol<String> state = new ApplicationProtocol<>();
 			state.setResult(aString);
-			state.addAppendix(new Appendix_A1(5));
+			state.addAppendix(owner1, new A1(Integer.valueOf(anInt + anInteger.intValue())));
 
 			return state;
 		}
@@ -162,41 +155,26 @@ public class MethodImplementationTest {
 		}
 	}
 
-	@Getter
-	private static class Appendix_A2 extends ApplicationAppendix<String> {
+	@AllArgsConstructor
+	private static class B1 {
 
-		public Appendix_A2(final String content) {
-			super(content);
-		}
-
-		@Override
-		public UUID getOwner() {
-			return owner2.getOwnerId();
-		}
+		String aString;
 	}
 
-	@Getter
-	private static class Appendix_B2 extends ApplicationAppendix<String> {
+	@AllArgsConstructor
+	private static class B2 {
 
-		public Appendix_B2(final String content) {
-			super(content);
-		}
-
-		@Override
-		public UUID getOwner() {
-			return owner2.getOwnerId();
-		}
+		String aString;
 	}
 
-	private class TestBean_2 {
+	public class TestBean_2 {
 
-		@SuppressWarnings("unused")
 		public ApplicationProtocol<String> anotherAction(final String anotherString,
 				final ApplicationProtocol<String> state) {
 			state.setResult(state.getResult() + anotherString);
-			state.addAppendix(new Appendix_A2(anotherString));
-			state.addAppendix(new Appendix_B2(anotherString));
-			state.addAppendix(new Appendix_B2(anotherString));
+			state.addAppendix(owner2, new B1(anotherString));
+			state.addAppendix(owner2, new B2(anotherString));
+			state.addAppendix(owner2, new B2(anotherString));
 
 			return state;
 		}

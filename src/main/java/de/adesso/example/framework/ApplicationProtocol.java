@@ -67,63 +67,23 @@ public class ApplicationProtocol<RESULT_TYPE> implements Serializable {
 	 * the type T does not match to your local variable the runtime will throw a
 	 * {@link ClassCastException}.
 	 *
-	 * @param appendixClass the type to be searched within the appendix
-	 * @return an optional containing the probably found element
+	 * @param appendixClass the class of the requested appendix
+	 * @return an optional containing of the requested type
 	 * @throws TooManyElementsException if the list of appendixes contains more than
 	 *                                  one element of type T
 	 */
-	public <T> Optional<ApplicationAppendix<T>> getAppendixOfClassT(
-			final Class<? extends ApplicationAppendix<T>> appendixClass) throws TooManyElementsException {
+	public <T> Optional<T> getAppendixOfClassT(final Class<T> appendixClass) throws TooManyElementsException {
 		return this.data.getAppendixOfTypeT(appendixClass);
 	}
 
 	/**
-	 * Retrieves exactly one appendix of given type. If the list contains more than
-	 * one appendix of this type, a {@link TooManyElementsException} is thrown. If
-	 * the type T does not match to your local variable the runtime will throw a
-	 * {@link ClassCastException}.
-	 *
-	 * @param appendixClass the type to be searched within the appendix
-	 * @return an optional containing the probably found element
-	 * @throws TooManyElementsException if the list of appendixes contains more than
-	 *                                  one element of type T
-	 */
-	public Optional<ApplicationAppendix<?>> getAppendixOfClass(
-			final Class<? extends ApplicationAppendix<?>> appendixClass) throws TooManyElementsException {
-		return this.data.getAppendixOfType(appendixClass);
-	}
-
-	/**
-	 * Retrieves all appendixes. The list may be empty if there is no such element
-	 * in the list.
-	 *
-	 * @return a list of all appendixes of the given type
-	 */
-	public List<ApplicationAppendix<?>> getAllAppenixesAsList() {
-		return this.data.getAllAppenixesAsList();
-	}
-
-	/**
 	 * Retrieves all appendixes of given type. The list may be empty if there is no
 	 * such element in the list.
 	 *
 	 * @param appendixClass class of which the instances should be returned
 	 * @return a list of all appendixes of the given type
 	 */
-	public List<ApplicationAppendix<?>> getAllAppenixesOfTypeAsList(
-			final Class<? extends ApplicationAppendix<?>> appendixClass) {
-		return this.data.getAllAppenixesOfTypeAsList(appendixClass);
-	}
-
-	/**
-	 * Retrieves all appendixes of given type. The list may be empty if there is no
-	 * such element in the list.
-	 *
-	 * @param appendixClass class of which the instances should be returned
-	 * @return a list of all appendixes of the given type
-	 */
-	public <T> List<ApplicationAppendix<T>> getAllAppenixesOfTypeAsListT(
-			final Class<? extends ApplicationAppendix<T>> appendixClass) {
+	public <T> List<T> getAllAppenixesOfTypeAsListT(final Class<T> appendixClass) {
 		return this.data.getAllAppenixesOfTypeAsListT(appendixClass);
 	}
 
@@ -134,31 +94,8 @@ public class ApplicationProtocol<RESULT_TYPE> implements Serializable {
 	 * @param appendixClass class of which the instances should be returned
 	 * @return a set of all instances
 	 */
-	public Set<ApplicationAppendix<?>> getAllAppenixesOfTypeAsSet(
-			final Class<? extends ApplicationAppendix<?>> appendixClass) {
-		return this.data.getAllAppenixesOfTypeAsSet(appendixClass);
-	}
-
-	/**
-	 * Retrieves all appendixes of given type. The list may be empty if there is no
-	 * such element in the list.
-	 *
-	 * @param appendixClass class of which the instances should be returned
-	 * @return a set of all instances
-	 */
-	public <T> Set<ApplicationAppendix<T>> getAllAppenixesOfTypeAsSetT(
-			final Class<? extends ApplicationAppendix<T>> appendixClass) {
+	public <T> Set<T> getAllAppenixesOfTypeAsSetT(final Class<T> appendixClass) {
 		return this.data.getAllAppenixesOfTypeAsSetT(appendixClass);
-	}
-
-	/**
-	 * The class will return a list of all appendixes of the given owner
-	 *
-	 * @param owner the owner of appendixes
-	 * @return the list of appendixes
-	 */
-	public List<ApplicationAppendix<?>> getAllAppendixesOfOwnerAsList(final ApplicationOwner owner) {
-		return this.data.getAllAppendixesOfOwnerAsList(owner);
 	}
 
 	// modifier
@@ -170,8 +107,8 @@ public class ApplicationProtocol<RESULT_TYPE> implements Serializable {
 	 * @param additionalAppendix appendix to be added
 	 * @return the protocol itself to allow fluent handling
 	 */
-	public ApplicationProtocol<RESULT_TYPE> addAppendix(final ApplicationAppendix<?> additionalAppendix) {
-		this.data.addAppendix(additionalAppendix);
+	public <T> ApplicationProtocol<RESULT_TYPE> addAppendix(final ApplicationOwner owner, final T additionalAppendix) {
+		this.data.addAppendix(owner, additionalAppendix);
 
 		return this;
 	}
@@ -182,9 +119,9 @@ public class ApplicationProtocol<RESULT_TYPE> implements Serializable {
 	 * @param additionalAppendixes the appendixes to be added
 	 * @return the protocol itself to allow fluent handling
 	 */
-	public ApplicationProtocol<RESULT_TYPE> addAllAppendixes(
-			final Collection<ApplicationAppendix<?>> additionalAppendixes) {
-		this.data.addAppendix(additionalAppendixes);
+	public ApplicationProtocol<RESULT_TYPE> addAllAppendixes(final ApplicationOwner owner,
+			final Collection<?> additionalAppendixes) {
+		this.data.addAppendix(owner, additionalAppendixes);
 
 		return this;
 	}
@@ -195,14 +132,25 @@ public class ApplicationProtocol<RESULT_TYPE> implements Serializable {
 	 * @param additionalAppendixes the appendixes to be added
 	 * @return the protocol itself to allow fluent handling
 	 */
-	public <T> ApplicationProtocol<RESULT_TYPE> addAllAppendixesT(
-			final Collection<ApplicationAppendix<T>> additionalAppendixes) {
-		additionalAppendixes.stream().forEach(this.data::addAppendix);
+	public <T> ApplicationProtocol<RESULT_TYPE> addAllAppendixesT(final ApplicationOwner owner,
+			final Collection<T> additionalAppendixes) {
+		this.data.addAppendix(owner, additionalAppendixes);
 
 		return this;
 	}
 
-	public <T> void removeAll(final Class<? extends ApplicationAppendix<T>> appendixType) {
-		this.data.removeAll(appendixType);
+	public <T> void removeAll(final ApplicationOwner owner, final Class<T> appendixType) {
+		this.data.removeAll(owner, appendixType);
+	}
+
+	/**
+	 * Transfer all appendixes from the other protocol to the own list. The
+	 * appendixes are removed from the other protocol. The owner information remains
+	 * unchanged.
+	 *
+	 * @param otherProtocol the protocol to hand over its appendixes
+	 */
+	public void transfertAppendixes(final ApplicationProtocol<?> otherProtocol) {
+		this.data.transfer(otherProtocol.data);
 	}
 }

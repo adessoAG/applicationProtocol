@@ -29,9 +29,7 @@ import org.springframework.stereotype.Service;
 
 import de.adesso.example.application.Standard;
 import de.adesso.example.application.accounting.AccountingRecord;
-import de.adesso.example.application.accounting.AccountingRecordAppendix;
 import de.adesso.example.application.accounting.Customer;
-import de.adesso.example.application.accounting.CustomerAppendix;
 import de.adesso.example.application.stock.Article;
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.annotation.CallStrategy;
@@ -48,8 +46,8 @@ public class EmployeeShoppingBean {
 
 		final Customer customer = employee.getEmployeeCustomer();
 		// remove existing customer appendixes
-		state.removeAll(CustomerAppendix.class);
-		state.addAppendix(new CustomerAppendix(customer));
+		state.removeAll(null, Customer.class);
+		state.addAppendix(null, customer);
 
 		return state;
 	}
@@ -65,12 +63,12 @@ public class EmployeeShoppingBean {
 		final Money discount = price.multiply(Standard.employeeDiscount).divide(100.0);
 		state.setResult(price.subtract(discount));
 
-		state.addAppendix(new EmployeeBenefitAppendix(new EmployeeBenefit(employee, discount)));
-		state.addAppendix(new AccountingRecordAppendix(AccountingRecord.builder()
+		state.addAppendix(null, new EmployeeBenefit(employee, discount));
+		state.addAppendix(null, AccountingRecord.builder()
 				.debitor(Employment.getEmployeeDiscountCreditor())
 				.creditor(customer)
 				.value(discount)
-				.build()));
+				.build());
 
 		return state;
 	}

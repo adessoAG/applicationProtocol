@@ -3,34 +3,25 @@ package de.adesso.example.framework.core;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.ApplicationProtocol;
-import de.adesso.example.framework.StringTestAppendix;
-import de.adesso.example.framework.exception.AppendixNotRegisteredException;
+import de.adesso.example.framework.TestConfig;
 
 @RunWith(SpringRunner.class)
+@SpringBootTest(classes = { TestConfig.class })
 public class ArgumentFactoryTest {
 
+	@Autowired
 	private ArgumentFactory factory;
-
-	@Before
-	public void setup() {
-		final List<Class<? extends ApplicationAppendix<?>>> appendixClasses = new ArrayList<>();
-		appendixClasses.add(StringTestAppendix.class);
-		final AppendixRegistry appendixRegistry = new AppendixRegistryImpl(appendixClasses);
-		this.factory = new ArgumentFactory(appendixRegistry);
-	}
 
 	@Test
 	public void testCreateArgumentUniqueType() throws NoSuchMethodException, SecurityException {
@@ -110,15 +101,6 @@ public class ArgumentFactoryTest {
 				.isEqualTo(String.class);
 	}
 
-	@Test(expected = AppendixNotRegisteredException.class)
-	public void testCreateArgumentNoMatch() throws NoSuchMethodException, SecurityException {
-		final Method emulatedMethod = ToBeEmulated_OtherType.class.getMethod("operation", UUID.class,
-				ApplicationProtocol.class);
-		final Method beanMethod = Bean_OtherParameterType.class.getMethod("doSomething", BigDecimal.class);
-		final List<ParameterPosition> parameterList = ParameterPosition.buildParameterList(beanMethod);
-		this.factory.createArgument(emulatedMethod, beanMethod, parameterList.get(0));
-	}
-
 	@Test
 	public void testCreateArgumentList() throws NoSuchMethodException, SecurityException {
 		final Method emulatedMethod = ToBeEmulated_OtherType.class.getMethod("operation", UUID.class,
@@ -177,17 +159,6 @@ public class ArgumentFactoryTest {
 		public ApplicationProtocol<String> doSomething(final String aString) {
 			final ApplicationProtocol<String> result = new ApplicationProtocol<>();
 			result.setResult(aString);
-
-			return result;
-		}
-	}
-
-	private static class Bean_OtherParameterType {
-
-		@SuppressWarnings("unused")
-		public ApplicationProtocol<String> doSomething(final BigDecimal aString) {
-			final ApplicationProtocol<String> result = new ApplicationProtocol<>();
-			result.setResult("blubber");
 
 			return result;
 		}

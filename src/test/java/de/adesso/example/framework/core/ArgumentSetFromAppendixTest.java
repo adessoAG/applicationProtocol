@@ -12,16 +12,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import de.adesso.example.framework.ApplicationProtocol;
 import de.adesso.example.framework.Other;
-import de.adesso.example.framework.OtherTestAppendix;
-import de.adesso.example.framework.StringTestAppendix;
+import de.adesso.example.framework.TestOwner;
 
 @RunWith(SpringRunner.class)
 public class ArgumentSetFromAppendixTest {
 
+	private final TestOwner owner = new TestOwner();
+
 	@Test
 	public void testConstructor() {
-		final ArgumentSetFromAppendix result = new ArgumentSetFromAppendix(String.class,
-				StringTestAppendix.class);
+		final ArgumentSetFromAppendix result = new ArgumentSetFromAppendix(String.class);
 
 		assertThat(result).isNotNull();
 	}
@@ -29,29 +29,21 @@ public class ArgumentSetFromAppendixTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorTypeIsNull() {
 
-		new ArgumentSetFromAppendix(null, StringTestAppendix.class);
+		new ArgumentSetFromAppendix(null);
 
 		fail("should detect null value for type");
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testConstructorAttachmentIsNull() {
-		new ArgumentSetFromAppendix(String.class, null);
-
-		fail("should detect null value for attachmentId");
 	}
 
 	@Test
 	public void testPrepareArgumentToSet() {
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new OtherTestAppendix(new Other("some string", 5)))
-				.addAppendix(new OtherTestAppendix(new Other("the last string", 7)));
+				.addAppendix(this.owner, new Other("some string", 5))
+				.addAppendix(this.owner, new Other("the last string", 7));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
-		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class,
-				OtherTestAppendix.class);
+		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(Other.class);
 
 		@SuppressWarnings("unchecked")
-		final Set<StringTestAppendix> result = (Set<StringTestAppendix>) argumentProcessor
+		final Set<Other> result = (Set<Other>) argumentProcessor
 				.prepareArgument(state, args);
 
 		assertThat(result)
@@ -63,39 +55,17 @@ public class ArgumentSetFromAppendixTest {
 	@Test
 	public void testPrepareArgumentToSetEmpty() {
 		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new OtherTestAppendix(new Other("some string", 3)))
-				.addAppendix(new OtherTestAppendix(new Other("the last string", 11)));
+				.addAppendix(this.owner, new Other("some string", 5))
+				.addAppendix(this.owner, new Other("the last string", 7));
 		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
-		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class,
-				StringTestAppendix.class);
+		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(Integer.class);
 
 		@SuppressWarnings("unchecked")
-		final Set<StringTestAppendix> result = (Set<StringTestAppendix>) argumentProcessor
+		final Set<Integer> result = (Set<Integer>) argumentProcessor
 				.prepareArgument(state, args);
 
 		assertThat(result)
 				.isNotNull()
 				.hasSize(0);
-	}
-
-	@Test
-	public void testPrepareArgumentToSetDifferentAppendixes() {
-		final ApplicationProtocol<BigDecimal> state = new ApplicationProtocol<BigDecimal>()
-				.addAppendix(new OtherTestAppendix(new Other("some string", 7)))
-				.addAppendix(new StringTestAppendix("another string"))
-				.addAppendix(new StringTestAppendix("thrid string"))
-				.addAppendix(new OtherTestAppendix(new Other("the last string", 5)));
-		final Object[] args = { "einfacher Teststring", Integer.valueOf(5), state };
-		final ArgumentSetFromAppendix argumentProcessor = new ArgumentSetFromAppendix(String.class,
-				StringTestAppendix.class);
-
-		@SuppressWarnings("unchecked")
-		final Set<StringTestAppendix> result = (Set<StringTestAppendix>) argumentProcessor
-				.prepareArgument(state, args);
-
-		assertThat(result)
-				.isNotNull()
-				.hasOnlyElementsOfType(String.class)
-				.hasSize(2);
 	}
 }

@@ -25,28 +25,24 @@
 package de.adesso.example.framework.core;
 
 import java.security.SecureRandom;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
-import de.adesso.example.framework.ApplicationAppendix;
-import de.adesso.example.framework.annotation.Appendix;
 import de.adesso.example.framework.annotation.Emulated;
 import de.adesso.example.framework.exception.BuilderException;
 import lombok.extern.log4j.Log4j2;
@@ -78,10 +74,7 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 	// TODO get the basePackage from Spring
 	private static final String BASE_PACKAGE = "de.adesso.example";
 
-	private List<Class<? extends ApplicationAppendix<?>>> appendixClasses = null;
 	private ApplicationContext applicationContext;
-	private ArgumentFactory argumentFactorySingelton = null;
-	private AppendixRegistry appendixRegistrySingelton;
 
 	@Override
 	public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) {
@@ -90,7 +83,6 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 
 	@Override
 	public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) {
-		this.prepareAppendixes();
 		this.prepareEmulatedInterfaces(registry);
 	}
 
@@ -107,62 +99,12 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 		return HIGHEST_PRECEDENCE;
 	}
 
-	@Bean
-	public AppendixRegistry appendixRegistry() {
-		if (this.appendixRegistrySingelton == null) {
-			this.appendixRegistrySingelton = new AppendixRegistryImpl(this.appendixClasses);
-		}
-		return this.appendixRegistrySingelton;
-	}
-
-	@Bean
-	public ArgumentFactory argumentFactory() {
-		if (this.argumentFactorySingelton == null) {
-			this.argumentFactorySingelton = new ArgumentFactory(this.appendixRegistry());
-		}
-		return this.argumentFactorySingelton;
-	}
-
 	private ClassLoader getClassLoader() {
 		ClassLoader classLoader = this.applicationContext.getClassLoader();
 		if (classLoader == null) {
 			classLoader = ApplicationBeanDefinitionRegistryPostProcessor.class.getClassLoader();
 		}
 		return classLoader;
-	}
-
-	private void prepareAppendixes() {
-		/** register all appendixes to be able to initialize the AppendixRegistry */
-		this.appendixClasses = this.findAppendixClasses(BASE_PACKAGE).stream()
-				.map(this::getClassFromClassName)
-				.collect(Collectors.toList());
-		log.atInfo().log("found the following appendix classes: {}", this.appendixClasses.toString());
-	}
-
-	@SuppressWarnings("unchecked")
-	private Class<? extends ApplicationAppendix<Object>> getClassFromClassName(final BeanDefinition beanDefinition) {
-		Class<?> clazz;
-
-		// load the class
-		final String className = this.beanName(beanDefinition);
-		try {
-			clazz = this.getClassLoader().loadClass(className);
-		} catch (final ClassNotFoundException e) {
-			final String message = String.format("could not load class %s", className);
-			log.atError().log(message);
-			throw new RuntimeException(message, e);
-		}
-
-		this.validateAppendixClass(clazz);
-
-		return (Class<? extends ApplicationAppendix<Object>>) clazz;
-	}
-
-	private void validateAppendixClass(final Class<?> beanClass) {
-		if (!ApplicationAppendix.class.isAssignableFrom(beanClass)) {
-			// wrong implementation of class
-			throw BuilderException.appendixConventionBroken(beanClass);
-		}
 	}
 
 	private final Random random = new SecureRandom();
@@ -218,8 +160,8 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 
 	private ConstructorArgumentValues buildFactoryConstructorArguments(final Class<Object> emulatedInterface) {
 		final ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
-		constructorArgumentValues.addGenericArgumentValue(this.argumentFactory(), "ArgumentFactory");
-		constructorArgumentValues.addGenericArgumentValue(emulatedInterface, "Class");
+		constructorArgumentValues.addIndexedArgumentValue(0, new RuntimeBeanReference(ArgumentFactory.class));
+		constructorArgumentValues.addIndexedArgumentValue(1, emulatedInterface, "Class");
 
 		return constructorArgumentValues;
 	}
@@ -243,20 +185,6 @@ public class ApplicationBeanDefinitionRegistryPostProcessor
 		// Don't pull default filters (@Component, etc.):
 		final ClassPathScanningCandidateComponentProvider provider = new ApplicationClassPathEmulationInterfaceProvider();
 		provider.addIncludeFilter(new AnnotationTypeFilter(Emulated.class));
-		return provider;
-	}
-
-	private Set<BeanDefinition> findAppendixClasses(final String scanPackage) {
-		final ClassPathScanningCandidateComponentProvider provider = this.createAppendixClassScanner();
-		final Set<BeanDefinition> annotatedInterfaces = provider.findCandidateComponents(scanPackage);
-
-		return annotatedInterfaces;
-	}
-
-	private ClassPathScanningCandidateComponentProvider createAppendixClassScanner() {
-		// Don't pull default filters (@Component, etc.):
-		final ClassPathScanningCandidateComponentProvider provider = new ApplicationClassPathAppendixProvider();
-		provider.addIncludeFilter(new AnnotationTypeFilter(Appendix.class));
 		return provider;
 	}
 

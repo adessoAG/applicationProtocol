@@ -27,12 +27,12 @@ package de.adesso.example.framework.core;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import de.adesso.example.framework.ApplicationAppendix;
 import de.adesso.example.framework.exception.AppendixNotRegisteredException;
 import de.adesso.example.framework.exception.BuilderException;
 import de.adesso.example.framework.exception.UndefinedParameterException;
@@ -45,14 +45,8 @@ import lombok.NonNull;
  * @author Matthias
  *
  */
+@Service
 public class ArgumentFactory {
-
-	private final AppendixRegistry appendixRegistry;
-
-	@Autowired
-	public ArgumentFactory(final AppendixRegistry appendixRegistry) {
-		this.appendixRegistry = appendixRegistry;
-	}
 
 	/**
 	 * Create an argument based on the type of the argument. The types have to be
@@ -103,35 +97,32 @@ public class ArgumentFactory {
 	}
 
 	private @NonNull Argument createAppendixArgument(@NonNull final ParameterPosition parameterPosition) {
-		Class<? extends ApplicationAppendix<?>> appendixClass = null;
 		final Parameter parameter = parameterPosition.getParameter();
 
 		if (List.class.isAssignableFrom(parameter.getType())) {
 			// parameter class is the list, need to extract the base type
 			final String baseTypeName = parameter.getParameterizedType().getTypeName();
 			final Class<?> parameterTypeClass = this.loadTypeClass(baseTypeName);
-			appendixClass = this.lookupAppendix(parameterTypeClass);
-			return new ArgumentListFromAppendix(parameterTypeClass, appendixClass);
+
+			return new ArgumentListFromAppendix(parameterTypeClass);
 
 		} else if (Set.class.isAssignableFrom(parameter.getType())) {
 			// parameter class is the list, need to extract the base type
 			final String baseTypeName = parameter.getParameterizedType().getTypeName();
 			final Class<?> parameterTypeClass = this.loadTypeClass(baseTypeName);
-			appendixClass = this.lookupAppendix(parameterTypeClass);
-			return new ArgumentSetFromAppendix(parameterTypeClass, appendixClass);
+
+			return new ArgumentSetFromAppendix(parameterTypeClass);
+
+		} else if (Optional.class.isAssignableFrom(parameter.getType())) {
+			// parameter class is the list, need to extract the base type
+			final String baseTypeName = parameter.getParameterizedType().getTypeName();
+			final Class<?> parameterTypeClass = this.loadTypeClass(baseTypeName);
+
+			return new ArgumentOptionalFromAppendix(parameterTypeClass);
 		}
 
 		// simple type
-		appendixClass = this.lookupAppendix(parameter.getType());
-		return new ArgumentFromAppendix(parameter.getType(), appendixClass);
-	}
-
-	private @NonNull Class<? extends ApplicationAppendix<?>> lookupAppendix(final Class<?> contentClass) {
-		final Class<? extends ApplicationAppendix<?>> appendixClass = this.appendixRegistry.lookUp(contentClass);
-		if (appendixClass == null) {
-			throw AppendixNotRegisteredException.noAppropriateAppendix(contentClass);
-		}
-		return appendixClass;
+		return new ArgumentFromAppendix(parameter.getType());
 	}
 
 	private Class<?> loadTypeClass(final String className) {

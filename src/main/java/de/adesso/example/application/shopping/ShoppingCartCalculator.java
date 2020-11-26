@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 
 import de.adesso.example.application.PriceCalculatorAnnotated;
 import de.adesso.example.application.Standard;
-import de.adesso.example.application.accounting.AccountingRecordAppendix;
+import de.adesso.example.application.accounting.AccountingRecord;
 import de.adesso.example.application.accounting.Customer;
 import de.adesso.example.application.marketing.Voucher;
 import de.adesso.example.framework.ApplicationProtocol;
@@ -140,7 +140,7 @@ public class ShoppingCartCalculator extends ParallelJoin {
 	 * @param state the current state of the processing
 	 */
 	private void clearState(final ApplicationProtocol<ShoppingCart> state, final ShoppingCart cart) {
-		state.removeAll(AccountingRecordAppendix.class);
+		state.removeAll(null, AccountingRecord.class);
 		cart.setTotal(Standard.zeroEuros);
 	}
 
@@ -156,7 +156,7 @@ public class ShoppingCartCalculator extends ParallelJoin {
 			final ApplicationProtocol<ShoppingCart> state,
 			final ShoppingCart cart) {
 		cart.setTotal(cart.getTotal().add(singleResult.getResult()));
-		state.addAllAppendixes(singleResult.getAllAppenixesAsList());
+		state.transfertAppendixes(singleResult);
 		return state;
 	}
 
