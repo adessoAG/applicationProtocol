@@ -1,9 +1,9 @@
 package de.adesso.example;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -25,7 +25,7 @@ import de.adesso.example.framework.core.DaisyChainDispatcherFactory;
 import de.adesso.example.framework.core.MethodImplementation;
 import lombok.extern.log4j.Log4j2;
 
-@Configuration
+@SpringBootConfiguration
 @EnableAsync
 @Log4j2
 public class ApplicationConfig {

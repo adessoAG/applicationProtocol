@@ -57,9 +57,8 @@ dependencies {
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-tomcat', version: '2.3.4.RELEASE'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-autoconfigure', version: '2.3.4.RELEASE'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '2.3.4.RELEASE'
-	
-	//compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.3.4.RELEASE'
-	//compile group: 'org.springframework', name: 'spring', version: '5.2.9.RELEASE', ext: 'pom'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.3.4.RELEASE'
+	implementation group: 'com.h2database', name: 'h2', version: '1.4.200'
 	
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     api 'org.apache.commons:commons-math3:3.6.1'

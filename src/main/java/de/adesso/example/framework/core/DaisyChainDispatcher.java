@@ -87,6 +87,7 @@ public class DaisyChainDispatcher implements InvocationHandler {
 		this.standardMethods.add("afterPropertiesSet");
 		this.standardMethods.add("toString");
 		this.standardMethods.add("setApplicationContext");
+		this.standardMethods.add("hashCode");
 	}
 
 	private boolean isStandardMethod(final Method method) {
@@ -103,6 +104,8 @@ public class DaisyChainDispatcher implements InvocationHandler {
 
 		} else if (method.getName().equals("afterPropertiesSet")) {
 			this.afterPropertiesSet();
+		} else if (method.getName().equals("hashCode")) {
+			return this.hashCode();
 		}
 
 		// no standard implementation, return nothing
@@ -129,5 +132,10 @@ public class DaisyChainDispatcher implements InvocationHandler {
 	private void afterPropertiesSet() throws Exception {
 		this.emulateMethods.values().stream()
 				.forEach(m -> m.init(this, this.applicationContext));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.implementationInterface.getName().hashCode();
 	}
 }
